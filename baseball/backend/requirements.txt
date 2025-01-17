@@ -1,0 +1,10 @@
+pybaseball==2.2.3
+requests==2.31.0
+pandas==2.1.4
+numpy==1.26.2
+python-dotenv==1.0.0
+supabase==2.0.3
+pytest==7.4.3
+black==23.12.1
+isort==5.13.2
+flake8==6.1.0 

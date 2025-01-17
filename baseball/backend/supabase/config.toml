@@ -1,0 +1,25 @@
+# Supabase Configuration File
+
+[auth]
+# disable_signup = true
+# site_url = "http://localhost:3000"
+
+[api]
+# port = 54321
+# schemas = ["public", "storage"]
+# extra_search_path = ["public", "extensions"]
+# max_rows = 1000
+
+[db]
+# port = 5432
+# major_version = 15
+
+[studio]
+# port = 54323
+
+# Enable debugging
+# debug = true
+
+[storage]
+# file size limit (in bytes)
+# file_size_limit = "50MiB" 
