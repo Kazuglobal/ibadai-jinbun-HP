@@ -1,0 +1,18 @@
+{
+  "name": "株式会社創電工業",
+  "short_name": "創電工業",
+  "description": "青森県八戸市の電気設備工事・設計施工。1987年創業、地域密着の実績と信頼。",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0c1c2d",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
