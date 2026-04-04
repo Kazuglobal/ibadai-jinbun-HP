@@ -1,0 +1,70 @@
+<section class="bg-slate-50 min-h-screen overflow-hidden">
+
+  <!-- Page Header -->
+  <div class="bg-white py-16 md:py-20 text-center border-b border-slate-100">
+    <div class="container mx-auto px-4">
+      <p appGsapAnimate [animation]="'fadeUp'"
+        class="text-emerald-600 text-sm font-bold tracking-[0.3em] uppercase mb-4">
+        Legal
+      </p>
+      <h1 appGsapAnimate [animation]="'fadeUp'" [delay]="0.1"
+        class="text-3xl md:text-4xl lg:text-5xl font-black text-[#1e3a5f] tracking-wide"
+        style="font-family: 'Noto Serif JP', serif;">
+        プライバシーポリシー
+      </h1>
+      <p appGsapAnimate [animation]="'fadeUp'" [delay]="0.2"
+        class="mt-4 text-slate-500 text-sm">
+        最終更新: {{ lastUpdated }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Content -->
+  <div class="container mx-auto px-4 py-16 md:py-24 max-w-4xl">
+
+    <!-- Intro -->
+    <div appGsapAnimate [animation]="'fadeUp'"
+      class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 md:p-10 mb-10">
+      <p class="text-slate-700 leading-relaxed text-base md:text-lg">
+        株式会社創電工業（以下「当社」）は、お客様の個人情報の保護を重要な責務と認識し、
+        個人情報の保護に関する法律（個人情報保護法）およびその他関連法令を遵守し、
+        以下のとおり個人情報を適切に取り扱います。
+      </p>
+    </div>
+
+    <!-- Sections -->
+    @for (section of sections; track section.title; let i = $index) {
+    <div appGsapAnimate [animation]="'fadeUp'" [delay]="i * 0.05"
+      class="bg-white rounded-2xl shadow-sm border border-slate-100 p-8 md:p-10 mb-6">
+      <div class="flex items-start gap-4 mb-5">
+        <div class="w-1 h-full min-h-[1.5rem] bg-emerald-500 rounded-full flex-shrink-0 mt-1"></div>
+        <h2 class="text-lg md:text-xl font-black text-[#1e3a5f]"
+          style="font-family: 'Noto Serif JP', serif;">
+          {{ section.title }}
+        </h2>
+      </div>
+      <div class="pl-5">
+        @for (line of section.content.split('\n'); track $index) {
+          @if (line === '') {
+            <br>
+          } @else {
+            <p class="text-slate-600 leading-relaxed text-sm md:text-base mb-1">{{ line }}</p>
+          }
+        }
+      </div>
+    </div>
+    }
+
+    <!-- Back to Home -->
+    <div appGsapAnimate [animation]="'fadeUp'" class="mt-14 text-center">
+      <a routerLink="/"
+        class="inline-flex items-center gap-3 bg-gradient-to-r from-emerald-500 to-teal-500 text-white px-8 py-3.5 rounded font-black uppercase tracking-widest text-sm hover:shadow-lg hover:shadow-emerald-500/25 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+        </svg>
+        トップページに戻る
+      </a>
+    </div>
+
+  </div>
+</section>
