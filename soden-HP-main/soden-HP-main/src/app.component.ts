@@ -294,6 +294,11 @@ export class AppComponent {
     if (pathname !== '/' && pathname !== '') {
       const pathNames: Record<string, string> = {
         '/company': '会社概要',
+        '/services': '事業内容',
+        '/cases': '施工事例',
+        '/news': 'お知らせ',
+        '/faq': 'よくある質問',
+        '/access': 'アクセス',
         '/recruit': '採用情報',
         '/privacy-policy': 'プライバシーポリシー'
       };
@@ -310,7 +315,7 @@ export class AppComponent {
 
   private buildFaqSchema(url: string): unknown[] {
     const pathname = new URL(url).pathname;
-    if (pathname !== '/' && pathname !== '') {
+    if (pathname !== '/' && pathname !== '' && pathname !== '/faq') {
       return [];
     }
     return [

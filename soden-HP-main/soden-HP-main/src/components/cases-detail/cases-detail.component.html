@@ -1,0 +1,90 @@
+<!-- Hero Header -->
+<section class="bg-white py-16 md:py-24 border-b border-slate-100">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <p class="text-sm font-black tracking-[0.3em] text-emerald-600 uppercase mb-4" appGsapAnimate="fadeUp">Works</p>
+    <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-6" style="font-family: 'Noto Serif JP', serif" appGsapAnimate="fadeUp">
+      施工事例
+    </h1>
+    <p class="text-slate-600 text-lg max-w-2xl mx-auto leading-relaxed" appGsapAnimate="fadeUp">
+      創電工業がこれまでに手がけた施工事例をご紹介します。<br class="hidden md:block">
+      電気設備から太陽光発電、消防設備まで幅広い実績があります。
+    </p>
+  </div>
+</section>
+
+<!-- Category Filter -->
+<section class="bg-slate-50 py-6 border-b border-slate-100">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-wrap gap-2 justify-center">
+      @for (category of categories; track category) {
+        <button
+          (click)="selectCategory(category)"
+          [class]="selectedCategory === category
+            ? 'px-5 py-2 rounded-full text-sm font-bold bg-emerald-600 text-white transition-colors'
+            : 'px-5 py-2 rounded-full text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition-colors'">
+          {{ category }}
+        </button>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- Cases Grid -->
+<section class="bg-white py-16 md:py-24">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      @for (caseItem of filteredCases; track caseItem.title) {
+        <article class="bg-white rounded-2xl shadow-lg shadow-slate-200/60 border border-slate-100 overflow-hidden group" appGsapAnimate="fadeUp">
+          <!-- Image -->
+          <div class="relative h-56 overflow-hidden">
+            <img [src]="caseItem.image" [alt]="caseItem.imageAlt"
+                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                 loading="lazy">
+            <div class="absolute top-4 left-4">
+              <span class="text-xs font-bold tracking-wide text-white bg-emerald-600 px-3 py-1 rounded-full">
+                {{ caseItem.category }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="p-6">
+            <div class="flex items-center gap-2 mb-3">
+              <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+              </svg>
+              <span class="text-sm text-slate-500">{{ caseItem.location }}</span>
+            </div>
+            <h2 class="text-lg font-bold text-slate-900 mb-3 group-hover:text-emerald-700 transition-colors">
+              {{ caseItem.title }}
+            </h2>
+            <p class="text-sm text-slate-600 leading-relaxed mb-4">{{ caseItem.description }}</p>
+            <div class="flex flex-wrap gap-2">
+              @for (scope of caseItem.scope; track scope) {
+                <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">{{ scope }}</span>
+              }
+            </div>
+          </div>
+        </article>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="bg-[#0c1c2d] py-20 md:py-28">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center" appGsapAnimate="fadeUp">
+    <h2 class="text-2xl sm:text-3xl font-black text-white mb-6" style="font-family: 'Noto Serif JP', serif">
+      お見積り・ご相談は無料です
+    </h2>
+    <p class="text-slate-300 mb-8 text-lg">電気に関するお困りごと、何でもお気軽にご相談ください。</p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a href="tel:0178-25-2172" class="inline-flex items-center justify-center px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-full transition-colors">
+        0178-25-2172
+      </a>
+      <a routerLink="/" fragment="contact" class="inline-flex items-center justify-center px-8 py-4 border-2 border-white/30 hover:border-white text-white font-bold rounded-full transition-colors">
+        お問い合わせフォーム
+      </a>
+    </div>
+  </div>
+</section>

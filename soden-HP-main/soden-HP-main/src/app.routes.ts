@@ -3,6 +3,11 @@ import { HomeComponent } from './components/home/home.component';
 import { CompanyDetailsComponent } from './components/company-details/company-details.component';
 import { RecruitDetailsComponent } from './components/recruit-details/recruit-details.component';
 import { PrivacyPolicyComponent } from './components/privacy-policy/privacy-policy.component';
+import { ServicesComponent } from './components/services/services.component';
+import { FaqComponent } from './components/faq/faq.component';
+import { AccessComponent } from './components/access/access.component';
+import { CasesDetailComponent } from './components/cases-detail/cases-detail.component';
+import { NewsDetailComponent } from './components/news-detail/news-detail.component';
 
 export const routes: Routes = [
   {
@@ -25,6 +30,61 @@ export const routes: Routes = [
       keywords: '創電工業 会社概要,企業情報,沿革,所在地,電気工事会社,電気設備,八戸市,青森県,創電工業,総合電気工事',
       image: '/images/companyinfo.jpg',
       imageAlt: '株式会社創電工業の会社情報'
+    }
+  },
+  {
+    path: 'services',
+    component: ServicesComponent,
+    data: {
+      title: '事業内容 | 株式会社創電工業（電気設備・太陽光発電・消防設備）',
+      description: '創電工業の事業内容。電気設備工事・電気通信工事・消防設備工事・空調設備工事・太陽光発電設備・物流システムの設計から施工・保守管理までワンストップ対応。青森県八戸市を拠点に東北全域で実績。',
+      keywords: '電気設備工事,電気通信工事,消防設備工事,空調設備,太陽光発電,物流システム,設計施工,保守管理,八戸市,青森県,創電工業 事業内容',
+      image: '/images/contact/contact1.png',
+      imageAlt: '創電工業の事業内容 - 電気設備工事'
+    }
+  },
+  {
+    path: 'cases',
+    component: CasesDetailComponent,
+    data: {
+      title: '施工事例 | 株式会社創電工業（電気工事の実績紹介）',
+      description: '創電工業の施工事例・実績紹介。商業施設・工場・公共施設の電気設備工事、太陽光発電設備設置、消防設備改修、通信設備構築、物流システム電気工事など幅広い施工実績をご紹介します。',
+      keywords: '施工事例,電気工事 実績,太陽光発電 施工,消防設備 改修,八戸 電気工事 事例,創電工業 実績',
+      image: '/images/contact/contact1.png',
+      imageAlt: '創電工業の施工事例'
+    }
+  },
+  {
+    path: 'news',
+    component: NewsDetailComponent,
+    data: {
+      title: 'お知らせ | 株式会社創電工業',
+      description: '株式会社創電工業の最新情報・お知らせ。施工実績報告、採用情報、SDGsへの取り組み、会社の最新ニュースをお届けします。',
+      keywords: '創電工業 お知らせ,ニュース,最新情報,施工実績,採用情報',
+      image: '/images/companyinfo.jpg',
+      imageAlt: '創電工業のお知らせ'
+    }
+  },
+  {
+    path: 'faq',
+    component: FaqComponent,
+    data: {
+      title: 'よくある質問（FAQ） | 株式会社創電工業',
+      description: '創電工業へのよくある質問と回答。電気設備工事のサービス内容、対応エリア、太陽光発電の導入費用、採用情報、見積り・相談についてお答えします。',
+      keywords: '創電工業 FAQ,よくある質問,電気工事 質問,太陽光発電 費用,八戸 電気工事 相談,採用 未経験',
+      image: '/images/companyinfo.jpg',
+      imageAlt: '創電工業 よくある質問'
+    }
+  },
+  {
+    path: 'access',
+    component: AccessComponent,
+    data: {
+      title: 'アクセス・所在地 | 株式会社創電工業（青森県八戸市）',
+      description: '株式会社創電工業へのアクセス情報。青森県八戸市大字大久保字小久保平19-7。八戸ICより車で約15分。来客用駐車場完備。地図・交通案内・営業時間のご案内。',
+      keywords: '創電工業 アクセス,所在地,八戸市 電気工事,地図,交通案内,駐車場,営業時間',
+      image: '/images/companyinfo.jpg',
+      imageAlt: '創電工業のアクセス情報'
     }
   },
   {

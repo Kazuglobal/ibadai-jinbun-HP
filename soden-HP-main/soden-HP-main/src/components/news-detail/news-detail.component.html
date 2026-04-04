@@ -1,0 +1,66 @@
+<!-- Hero Header -->
+<section class="bg-white py-16 md:py-24 border-b border-slate-100">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <p class="text-sm font-black tracking-[0.3em] text-emerald-600 uppercase mb-4" appGsapAnimate="fadeUp">News</p>
+    <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-6" style="font-family: 'Noto Serif JP', serif" appGsapAnimate="fadeUp">
+      お知らせ
+    </h1>
+    <p class="text-slate-600 text-lg max-w-2xl mx-auto leading-relaxed" appGsapAnimate="fadeUp">
+      創電工業の最新情報をお届けします。
+    </p>
+  </div>
+</section>
+
+<!-- Category Filter -->
+<section class="bg-slate-50 py-6 border-b border-slate-100">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex flex-wrap gap-2 justify-center">
+      @for (category of categories; track category) {
+        <button
+          (click)="selectCategory(category)"
+          [class]="selectedCategory === category
+            ? 'px-5 py-2 rounded-full text-sm font-bold bg-emerald-600 text-white transition-colors'
+            : 'px-5 py-2 rounded-full text-sm font-bold bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 transition-colors'">
+          {{ category }}
+        </button>
+      }
+    </div>
+  </div>
+</section>
+
+<!-- News List -->
+<section class="bg-white py-16 md:py-24">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
+    @for (news of filteredNews; track news.title) {
+      <article class="py-8 border-b border-slate-100" appGsapAnimate="fadeUp">
+        <div class="flex items-center gap-3 mb-3">
+          <time class="text-sm text-slate-400 font-mono">{{ news.date }}</time>
+          <span class="text-[10px] font-bold tracking-wide text-white px-2.5 py-0.5 rounded-full"
+                [class]="getCategoryColor(news.category)">
+            {{ news.category }}
+          </span>
+        </div>
+        <h2 class="text-lg font-bold text-slate-900 mb-3">{{ news.title }}</h2>
+        <p class="text-slate-600 leading-relaxed">{{ news.content }}</p>
+      </article>
+    }
+
+    @if (filteredNews.length === 0) {
+      <div class="text-center py-16">
+        <p class="text-slate-400">該当するお知らせはありません。</p>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Back to Top -->
+<section class="bg-slate-50 py-12">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <a routerLink="/" class="inline-flex items-center gap-2 text-slate-600 hover:text-emerald-600 transition-colors font-bold">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+      </svg>
+      トップページに戻る
+    </a>
+  </div>
+</section>

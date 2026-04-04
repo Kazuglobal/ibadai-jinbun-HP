@@ -1,0 +1,80 @@
+<!-- Hero Header -->
+<section class="bg-white py-16 md:py-24 border-b border-slate-100">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <p class="text-sm font-black tracking-[0.3em] text-emerald-600 uppercase mb-4" appGsapAnimate="fadeUp">Services</p>
+    <h1 class="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-6" style="font-family: 'Noto Serif JP', serif" appGsapAnimate="fadeUp">
+      事業内容
+    </h1>
+    <p class="text-slate-600 text-lg max-w-2xl mx-auto leading-relaxed" appGsapAnimate="fadeUp">
+      電気設備工事を中心に、通信・消防・空調・太陽光発電・物流システムまで。<br class="hidden md:block">
+      設計から施工・保守管理までワンストップで対応いたします。
+    </p>
+  </div>
+</section>
+
+<!-- Services List -->
+@for (service of services; track service.number; let i = $index) {
+  <section class="py-16 md:py-24" [class]="isEven(i) ? 'bg-white' : 'bg-slate-50'">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex flex-col gap-12 items-center" [class]="isEven(i) ? 'lg:flex-row' : 'lg:flex-row-reverse'">
+        <!-- Image -->
+        <div class="w-full lg:w-[45%] relative group overflow-hidden rounded-2xl h-[300px] lg:h-[400px] shadow-2xl shadow-slate-200/60" appGsapAnimate="fadeUp">
+          <img [src]="service.image" [alt]="service.imageAlt"
+               class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+               loading="lazy">
+          <div class="absolute top-6 left-6">
+            <div class="w-16 h-16 bg-slate-900 flex items-center justify-center">
+              <span class="text-white text-xl font-black">{{ service.number }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Content -->
+        <div class="w-full lg:w-[55%]" appGsapAnimate="fadeUp">
+          <div class="flex items-center gap-4 mb-6">
+            <div class="w-12 h-[2px] bg-emerald-500"></div>
+            <span class="text-sm font-bold tracking-widest text-emerald-600 uppercase">Service {{ service.number }}</span>
+          </div>
+          <h2 class="text-2xl sm:text-3xl font-black text-slate-900 mb-6" style="font-family: 'Noto Serif JP', serif">
+            {{ service.title }}
+          </h2>
+          <p class="text-slate-600 leading-relaxed mb-8">
+            {{ service.description }}
+          </p>
+          <ul class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            @for (detail of service.details; track detail) {
+              <li class="flex items-start gap-3 text-slate-700">
+                <svg class="w-5 h-5 text-emerald-500 mt-0.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-sm leading-relaxed">{{ detail }}</span>
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+}
+
+<!-- CTA Section -->
+<section class="bg-[#0c1c2d] py-20 md:py-28">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 text-center" appGsapAnimate="fadeUp">
+    <h2 class="text-2xl sm:text-3xl font-black text-white mb-6" style="font-family: 'Noto Serif JP', serif">
+      お気軽にお問い合わせください
+    </h2>
+    <p class="text-slate-300 mb-4 text-lg">お見積り・ご相談は無料です</p>
+    <p class="text-white text-3xl sm:text-4xl font-bold mb-8">
+      <a href="tel:0178-25-2172" class="hover:text-emerald-400 transition-colors">0178-25-2172</a>
+    </p>
+    <p class="text-slate-400 text-sm mb-10">受付時間 8:00〜18:00（日・祝日除く）</p>
+    <div class="flex flex-col sm:flex-row gap-4 justify-center">
+      <a routerLink="/" fragment="contact" class="inline-flex items-center justify-center px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-full transition-colors">
+        お問い合わせフォーム
+      </a>
+      <a routerLink="/recruit" class="inline-flex items-center justify-center px-8 py-4 border-2 border-white/30 hover:border-white text-white font-bold rounded-full transition-colors">
+        採用情報はこちら
+      </a>
+    </div>
+  </div>
+</section>
