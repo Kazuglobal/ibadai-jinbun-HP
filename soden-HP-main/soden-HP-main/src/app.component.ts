@@ -277,11 +277,95 @@ export class AppComponent {
             itemListElement: this.buildBreadcrumbs(data.url, data.title)
           }
         },
+        ...this.buildRouteSpecificSchema(data.url),
         ...this.buildFaqSchema(data.url)
       ]
     };
 
     this.upsertJsonLd('structured-data', structuredData);
+  }
+
+  private buildRouteSpecificSchema(url: string): unknown[] {
+    const pathname = new URL(url).pathname;
+    const baseUrl = new URL('/', url).toString().replace(/\/$/, '');
+    const organizationId = `${baseUrl}/#organization`;
+
+    switch (pathname) {
+      case '/services':
+        return [
+          {
+            '@type': 'Service',
+            '@id': `${url}#service-page`,
+            name: '電気設備・電気通信・消防設備・太陽光発電の設計施工サービス',
+            serviceType: [
+              '電気設備工事',
+              '電気通信工事',
+              '消防設備工事',
+              '空調設備工事',
+              '太陽光発電設備工事',
+              '物流システム電気工事',
+              '保守管理'
+            ],
+            provider: { '@id': organizationId },
+            areaServed: [
+              { '@type': 'City', name: '八戸市' },
+              { '@type': 'AdministrativeArea', name: '青森県' },
+              { '@type': 'AdministrativeArea', name: '東北地方' }
+            ],
+            availableChannel: {
+              '@type': 'ServiceChannel',
+              serviceUrl: `${baseUrl}/contact`,
+              servicePhone: '+81-178-25-2172'
+            }
+          }
+        ];
+      case '/cases':
+        return [
+          {
+            '@type': 'CollectionPage',
+            '@id': `${url}#collection`,
+            name: '株式会社創電工業の施工事例',
+            description: '八戸市・青森県を中心に手がけた電気設備工事、消防設備工事、太陽光発電設備、通信設備、物流システム工事の施工実績一覧。',
+            isPartOf: { '@id': `${baseUrl}/#website` },
+            about: { '@id': organizationId }
+          }
+        ];
+      case '/recruit':
+        return [
+          {
+            '@type': 'AboutPage',
+            '@id': `${url}#recruit`,
+            name: '株式会社創電工業の採用情報',
+            description: '八戸市を拠点に青森県内の電気設備工事・電気通信工事・消防設備工事を支える人材採用ページ。未経験者歓迎、資格取得支援あり。',
+            about: { '@id': organizationId }
+          }
+        ];
+      case '/contact':
+        return [
+          {
+            '@type': 'ContactPage',
+            '@id': `${url}#contact-page`,
+            name: '株式会社創電工業へのお問い合わせ',
+            description: '八戸市・青森県の電気設備工事、電気通信工事、消防設備、太陽光発電、採用に関するお問い合わせ窓口。',
+            about: { '@id': organizationId },
+            mainEntity: {
+              '@type': 'Organization',
+              '@id': organizationId,
+              contactPoint: [
+                {
+                  '@type': 'ContactPoint',
+                  telephone: '+81-178-25-2172',
+                  contactType: 'customer service',
+                  areaServed: ['八戸市', '青森県', '東北地方'],
+                  availableLanguage: ['Japanese']
+                }
+              ]
+            }
+          }
+        ];
+      default:
+        return [];
+    }
   }
 
   private buildBreadcrumbs(url: string, title: string): unknown[] {

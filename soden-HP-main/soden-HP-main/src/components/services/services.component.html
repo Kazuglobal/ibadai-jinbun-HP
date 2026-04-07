@@ -12,6 +12,31 @@
   </div>
 </section>
 
+<section class="bg-slate-50 py-12 md:py-16 border-b border-slate-100">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-5xl" appGsapAnimate="fadeUp">
+    <div class="grid gap-6 lg:grid-cols-3">
+      <div class="bg-white rounded-2xl p-6 shadow-lg shadow-slate-200/50 border border-slate-100">
+        <h2 class="text-lg font-black text-slate-900 mb-3" style="font-family: 'Noto Serif JP', serif">対応エリア</h2>
+        <p class="text-sm leading-relaxed text-slate-600">
+          八戸市を拠点に、青森県内の工場・商業施設・公共施設・事業所まで幅広く対応。案件内容に応じて東北エリアの施工相談も承っています。
+        </p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 shadow-lg shadow-slate-200/50 border border-slate-100">
+        <h2 class="text-lg font-black text-slate-900 mb-3" style="font-family: 'Noto Serif JP', serif">相談内容</h2>
+        <p class="text-sm leading-relaxed text-slate-600">
+          電気設備工事、電気通信工事、消防設備、空調設備、太陽光発電、物流システムまで、設計・施工・更新・保守管理を一括でご相談いただけます。
+        </p>
+      </div>
+      <div class="bg-white rounded-2xl p-6 shadow-lg shadow-slate-200/50 border border-slate-100">
+        <h2 class="text-lg font-black text-slate-900 mb-3" style="font-family: 'Noto Serif JP', serif">創電工業の強み</h2>
+        <p class="text-sm leading-relaxed text-slate-600">
+          地域インフラを支えてきた実績をもとに、八戸市・青森県で長く運用できる設備計画と、施工後のアフターフォローまで丁寧に対応します。
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- Services List -->
 @for (service of services; track service.number; let i = $index) {
   <section class="py-16 md:py-24" [class]="isEven(i) ? 'bg-white' : 'bg-slate-50'">
@@ -56,6 +81,22 @@
     </div>
   </section>
 }
+
+<section class="bg-white py-16 md:py-20 border-t border-slate-100">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-4xl" appGsapAnimate="fadeUp">
+    <div class="rounded-3xl border border-emerald-100 bg-emerald-50/60 p-8 md:p-10">
+      <h2 class="text-2xl font-black text-slate-900 mb-4" style="font-family: 'Noto Serif JP', serif">
+        八戸市・青森県で電気設備工事会社をお探しの方へ
+      </h2>
+      <p class="text-slate-600 leading-relaxed mb-4">
+        新設工事だけでなく、老朽化した設備の更新、消防設備の見直し、太陽光発電の導入検討、既存設備の保守対応まで、用途に合わせたご提案を行っています。
+      </p>
+      <p class="text-slate-600 leading-relaxed">
+        工場や事業所の計画段階から相談したい場合も、急ぎの改修や保守相談をしたい場合も、八戸市を拠点に現場状況に合わせてスピーディに対応します。
+      </p>
+    </div>
+  </div>
+</section>
 
 <!-- CTA Section -->
 <section class="bg-[#0c1c2d] py-20 md:py-28">

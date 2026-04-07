@@ -98,6 +98,21 @@
       </button>
     </div>
 
+    <div class="max-w-5xl mx-auto mb-16 grid gap-6 md:grid-cols-2" appGsapAnimate [animation]="'fadeUp'" [delay]="0.65">
+      <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-slate-100">
+        <h3 class="text-lg font-black text-slate-800 mb-3" style="font-family: 'Noto Serif JP', serif;">ご相談いただける内容</h3>
+        <p class="text-sm leading-relaxed text-slate-600">
+          八戸市・青森県での電気設備工事、電気通信工事、消防設備、空調設備、太陽光発電、設備更新、保守対応、採用に関するお問い合わせを受け付けています。
+        </p>
+      </div>
+      <div class="bg-white/90 backdrop-blur-sm rounded-2xl p-6 shadow-lg border border-slate-100">
+        <h3 class="text-lg font-black text-slate-800 mb-3" style="font-family: 'Noto Serif JP', serif;">対応エリアと初回相談</h3>
+        <p class="text-sm leading-relaxed text-slate-600">
+          八戸市を拠点に青森県内の案件へ対応しており、内容に応じて近隣エリアのご相談も承ります。現地確認や概算見積のご相談もお気軽にお問い合わせください。
+        </p>
+      </div>
+    </div>
+
     <!-- Form Section (Collapsible) -->
     <div *ngIf="showForm" class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8 sm:p-12 animate-fade-in">
       <div class="flex justify-between items-center mb-8">
