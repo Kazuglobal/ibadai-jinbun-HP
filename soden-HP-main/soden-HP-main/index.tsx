@@ -1,19 +1,9 @@
 
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { provideRouter, withInMemoryScrolling, withRouterConfig } from '@angular/router';
 
 import { AppComponent } from './src/app.component';
-import { routes } from './src/app.routes';
+import { appConfig } from './src/app.config';
 
-bootstrapApplication(AppComponent, {
-  providers: [
-    provideZonelessChangeDetection(),
-    provideRouter(routes,
-      withInMemoryScrolling({ anchorScrolling: 'enabled', scrollPositionRestoration: 'enabled' }),
-      withRouterConfig({ onSameUrlNavigation: 'reload' })
-    )
-  ],
-}).catch((err) => console.error(err));
+bootstrapApplication(AppComponent, appConfig).catch((err) => console.error(err));
 
 // AI Studio always uses an `index.tsx` file for all project types.

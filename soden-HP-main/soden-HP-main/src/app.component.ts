@@ -6,6 +6,8 @@ import { HeaderComponent } from './components/header/header.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { CustomCursorComponent } from './components/custom-cursor/custom-cursor.component';
 
+const SITE_ORIGIN = 'https://soudenkougyou.com';
+
 @Component({
   selector: 'app-root',
   standalone: true,
@@ -25,6 +27,8 @@ export class AppComponent {
     private meta: Meta,
     @Inject(DOCUMENT) private document: Document
   ) {
+    this.applyMeta(this.getRouteData());
+
     this.router.events.subscribe((event) => {
       if (!(event instanceof NavigationEnd)) {
         return;
@@ -65,7 +69,7 @@ export class AppComponent {
     const image = data.image ?? '/images/companyinfo.jpg';
     const imageAlt = data.imageAlt ?? '株式会社創電工業のチーム';
     const canonicalUrl = this.getCanonicalUrl();
-    const resolvedImage = this.resolveUrl(image);
+    const resolvedImage = this.resolveUrl(image, canonicalUrl);
 
     this.title.setTitle(title);
     this.meta.updateTag({ name: 'description', content: description });
@@ -100,22 +104,23 @@ export class AppComponent {
   }
 
   private getCanonicalUrl(): string | undefined {
-    if (typeof window === 'undefined') {
-      return undefined;
-    }
-
-    const url = new URL(window.location.href);
+    const currentPath = this.router.url || this.document.location?.pathname || '/';
+    const url = new URL(currentPath, SITE_ORIGIN);
     url.hash = '';
     url.search = '';
     return url.toString();
   }
 
-  private resolveUrl(path: string): string {
-    if (typeof window === 'undefined') {
+  private resolveUrl(path: string, canonicalUrl?: string): string {
+    if (/^https?:\/\//.test(path)) {
       return path;
     }
 
-    return new URL(path, window.location.origin).toString();
+    if (!canonicalUrl) {
+      return path;
+    }
+
+    return new URL(path, canonicalUrl).toString();
   }
 
   private updateCanonicalLinks(canonicalUrl: string) {

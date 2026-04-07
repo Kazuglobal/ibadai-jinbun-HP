@@ -14,9 +14,12 @@
           "options": {
             "outputPath": {
               "base": "./dist",
-              "browser": "."
+              "browser": ".",
+              "server": "server"
             },
             "browser": "index.tsx",
+            "server": "main.server.ts",
+            "outputMode": "static",
             "tsConfig": "tsconfig.json",
             "assets": [
               {
