@@ -8,6 +8,7 @@ import { FaqComponent } from './components/faq/faq.component';
 import { AccessComponent } from './components/access/access.component';
 import { CasesDetailComponent } from './components/cases-detail/cases-detail.component';
 import { NewsDetailComponent } from './components/news-detail/news-detail.component';
+import { ContactComponent } from './components/contact/contact.component';
 
 export const routes: Routes = [
   {
@@ -96,6 +97,17 @@ export const routes: Routes = [
       keywords: '創電工業 採用,求人,電気工事士 求人 八戸,施工管理 求人 青森,未経験歓迎,電気工事 採用,八戸市 求人',
       image: '/images/recruit_hero_bright.jpg',
       imageAlt: '株式会社創電工業の採用情報・職場風景'
+    }
+  },
+  {
+    path: 'contact',
+    component: ContactComponent,
+    data: {
+      title: 'お問い合わせ | 株式会社創電工業',
+      description: '株式会社創電工業へのお問い合わせページです。電気設備工事、電気通信工事、消防設備、空調設備、太陽光発電、採用に関するご相談を受け付けています。',
+      keywords: '創電工業 お問い合わせ,電気工事 相談,見積もり,採用 問い合わせ,八戸市 電気工事',
+      image: '/images/companyinfo.jpg',
+      imageAlt: '株式会社創電工業へのお問い合わせ'
     }
   },
   {

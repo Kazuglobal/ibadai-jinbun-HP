@@ -300,6 +300,7 @@ export class AppComponent {
         '/faq': 'よくある質問',
         '/access': 'アクセス',
         '/recruit': '採用情報',
+        '/contact': 'お問い合わせ',
         '/privacy-policy': 'プライバシーポリシー'
       };
       items.push({
