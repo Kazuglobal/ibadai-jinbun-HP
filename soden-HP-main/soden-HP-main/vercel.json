@@ -3,10 +3,6 @@
   "outputDirectory": "dist",
   "installCommand": "npm ci",
   "framework": null,
-  "prerender": {
-    "enabled": true,
-    "expiration": 86400
-  },
   "rewrites": [
     { "source": "/((?!images|logo.png|robots.txt|sitemap.xml|.*\\.[^/]+$).*)", "destination": "/index.html" }
   ],
