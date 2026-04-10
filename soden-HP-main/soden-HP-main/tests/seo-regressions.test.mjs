@@ -23,6 +23,16 @@ function run() {
     !indexHtml.includes('"@type": "BreadcrumbList"'),
     'index.html should not contain a static BreadcrumbList definition'
   );
+  assert.match(
+    indexHtml,
+    /<link rel="icon" type="image\/png" sizes="32x32" href="\/favicon-32\.png" \/>/,
+    'index.html should define a dedicated 32x32 browser favicon asset'
+  );
+  assert.match(
+    indexHtml,
+    /<link rel="icon" type="image\/png" sizes="16x16" href="\/favicon-16\.png" \/>/,
+    'index.html should define a dedicated 16x16 browser favicon asset'
+  );
 
   const routes = read('src/app.routes.ts');
   const sitemap = read('public/sitemap.xml');
