@@ -7,6 +7,7 @@
     "dev": "npx ng serve",
     "build": "npx ng build",
     "preview": "npx ng serve --configuration=production",
+    "test:seo": "node tests/seo-regressions.test.mjs",
     "optimize-images": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
