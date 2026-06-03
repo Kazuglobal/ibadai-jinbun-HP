@@ -1,0 +1,6 @@
+{
+  "name": "茨城大学 文理・人文学部同窓会",
+  "description": "茨城大学 文理・人文学部同窓会公式HPのデザイン再現。洗練されたメニュー、優美なタイポグラフィ、伝統と先進性を融合させたメインビジュアル、そして調和のとれたフッターエリアを完全再現しています。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
