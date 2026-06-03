@@ -100,7 +100,10 @@ export default function NetworkArchive() {
                   <motion.div
                     key={item.id}
                     whileHover={{ y: -4 }}
-                    className="flex flex-col text-left"
+                    onClick={() => {
+                      window.dispatchEvent(new CustomEvent('open-newsletter'));
+                    }}
+                    className="flex flex-col text-left cursor-pointer group/card"
                   >
                     {/* Cover Photo booklet element with custom Japanese printed text overlays to match booklet */}
                     <div className="relative aspect-[1/1.4] w-full rounded-xl overflow-hidden shadow-sm border border-stone-200/40 bg-stone-150 relative">

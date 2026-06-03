@@ -12,6 +12,7 @@ import Reconnection from './components/Reconnection';
 import Footer from './components/Footer';
 import ChatAssistant from './components/ChatAssistant';
 import MobileBottomNav from './components/MobileBottomNav';
+import NewsletterModal from './components/NewsletterModal';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, X } from 'lucide-react';
 
@@ -162,6 +163,9 @@ export default function App() {
 
       {/* Styled Mobile Bottom Navigation Bar */}
       <MobileBottomNav currentView={currentView} onNavigate={handleNavigate} />
+
+      {/* Pop-up modal newsletter helper */}
+      <NewsletterModal />
     </div>
   );
 }

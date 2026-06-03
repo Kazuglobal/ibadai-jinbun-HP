@@ -193,6 +193,21 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
               <span className="absolute bottom-[-2px] left-3 right-3 h-[2px] bg-[#CD9535] opacity-0 group-hover:opacity-100 transform scale-x-0 group-hover:scale-x-100 transition-all duration-300" />
             </button>
 
+            {/* Newsletter Popup Link */}
+            <button
+              onClick={() => {
+                setAboutDropdownOpen(false);
+                window.dispatchEvent(new CustomEvent('open-newsletter'));
+              }}
+              className="relative py-2 px-3 text-[#CD9535] hover:text-[#00204A] text-xs font-bold font-sans tracking-widest transition-colors duration-200 group focus:outline-none cursor-pointer flex items-center gap-1.5"
+            >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#CD9535]"></span>
+              </span>
+              <span>最新会報 (No.42)</span>
+            </button>
+
           </nav>
 
           {/* Golden division dash */}
@@ -358,6 +373,26 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
                     お問い合わせ
                   </span>
                   <ArrowRight className="w-4 h-4 text-stone-300" />
+                </button>
+
+                {/* Mobile tray manual newsletter toggle */}
+                <button
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    setTimeout(() => {
+                      window.dispatchEvent(new CustomEvent('open-newsletter'));
+                    }, 200);
+                  }}
+                  className="flex items-center justify-between py-2.5 text-left w-full group border-b border-amber-100 bg-amber-500/5 px-2.5 rounded-lg"
+                >
+                  <span className="text-sm font-bold text-[#CD9535] flex items-center gap-2">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[#CD9535]"></span>
+                    </span>
+                    最新会報 (No.42) 読込
+                  </span>
+                  <ArrowRight className="w-4 h-4 text-[#CD9535]" />
                 </button>
               </nav>
 
