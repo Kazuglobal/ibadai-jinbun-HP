@@ -6,3 +6,11 @@
   --font-serif: "Noto Serif JP", serif;
   --font-cursive: "Caveat", cursive;
 }
+
+@media (min-width: 1024px) {
+  #home-hero-section > .hidden > .mx-auto {
+    max-width: 80rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}

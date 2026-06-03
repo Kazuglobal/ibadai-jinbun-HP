@@ -6,3 +6,5 @@ coverage/
 *.log
 .env*
 !.env.example
+.playwright-mcp/
+hero-option-c-*.png
