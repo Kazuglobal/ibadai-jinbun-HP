@@ -88,13 +88,13 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
         {/* =========================================================================
             MIDDLE/RIGHT COLUMN: NAVIGATION LINK DIRECTORIES (Desktop hidden on mobile)
             ========================================================================= */}
-        <div className="hidden xl:flex items-center gap-6">
-          <nav className="flex items-center gap-2 pr-2" id="desktop-routing-nav">
+        <div className="hidden xl:flex items-center gap-4 min-w-0">
+          <nav className="flex items-center gap-0.5 pr-1 whitespace-nowrap" id="desktop-routing-nav">
             
             {/* Home link */}
             <button
               onClick={() => handleItemClick('home')}
-              className={`relative py-2 px-3 text-xs font-bold font-sans tracking-widest transition-colors duration-200 group focus:outline-none cursor-pointer ${
+              className={`relative py-2 px-2 text-[11px] font-bold font-sans tracking-wider whitespace-nowrap transition-colors duration-200 group focus:outline-none cursor-pointer ${
                 currentView === 'home' ? 'text-[#00204A]' : 'text-stone-600 hover:text-[#00204A]'
               }`}
             >
@@ -112,7 +112,7 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
             >
               <button
                 onClick={() => handleItemClick('about')}
-                className={`relative py-2 px-3 text-xs font-bold font-sans tracking-widest transition-colors duration-200 flex items-center gap-1 group focus:outline-none cursor-pointer ${
+                className={`relative py-2 px-2 text-[11px] font-bold font-sans tracking-wider whitespace-nowrap transition-colors duration-200 flex items-center gap-1 group focus:outline-none cursor-pointer ${
                   currentView === 'about' ? 'text-[#00204A]' : 'text-stone-600 hover:text-[#00204A]'
                 }`}
               >
@@ -131,13 +131,13 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.98 }}
                     transition={{ duration: 0.2 }}
-                    className="absolute left-0 mt-1 w-64 bg-white border border-stone-200/80 rounded-xl shadow-xl overflow-hidden py-2 z-50 border-t-2 border-t-[#CD9535]"
+                    className="absolute left-0 mt-1 w-72 bg-white border border-stone-200/80 rounded-xl shadow-xl overflow-hidden py-2 z-50 border-t-2 border-t-[#CD9535]"
                   >
                     {aboutSubItems.map((sub, idx) => (
                       <button
                         key={idx}
                         onClick={() => handleItemClick('about', sub.hash)}
-                        className="w-full text-left px-4 py-3 text-[12px] font-bold text-stone-600 hover:text-[#00204A] hover:bg-stone-50 transition-all flex items-center justify-between group cursor-pointer"
+                        className="w-full text-left px-4 py-3 text-[12px] font-bold text-stone-600 hover:text-[#00204A] hover:bg-stone-50 transition-all flex items-center justify-between gap-3 whitespace-nowrap group cursor-pointer"
                       >
                         <span>{sub.name}</span>
                         <ArrowRight className="w-3.5 h-3.5 text-stone-300 group-hover:text-[#CD9535] group-hover:translate-x-1 transition-all" />
@@ -151,7 +151,7 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
             {/* News link */}
             <button
               onClick={() => handleItemClick('home', '#news')}
-              className="relative py-2 px-3 text-stone-600 hover:text-[#00204A] text-xs font-bold font-sans tracking-widest transition-colors duration-200 group focus:outline-none cursor-pointer"
+              className="relative py-2 px-2 text-stone-600 hover:text-[#00204A] text-[11px] font-bold font-sans tracking-wider whitespace-nowrap transition-colors duration-200 group focus:outline-none cursor-pointer"
             >
               <span>お知らせ</span>
               <span className="absolute bottom-[-2px] left-3 right-3 h-[2px] bg-[#CD9535] opacity-0 group-hover:opacity-100 transform scale-x-0 group-hover:scale-x-100 transition-all duration-300" />
@@ -160,7 +160,7 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
             {/* Events link */}
             <button
               onClick={() => handleItemClick('home', '#events-section')}
-              className="relative py-2 px-3 text-stone-600 hover:text-[#00204A] text-xs font-bold font-sans tracking-widest transition-colors duration-200 group focus:outline-none cursor-pointer"
+              className="relative py-2 px-2 text-stone-600 hover:text-[#00204A] text-[11px] font-bold font-sans tracking-wider whitespace-nowrap transition-colors duration-200 group focus:outline-none cursor-pointer"
             >
               <span>イベント・総会</span>
               <span className="absolute bottom-[-2px] left-3 right-3 h-[2px] bg-[#CD9535] opacity-0 group-hover:opacity-100 transform scale-x-0 group-hover:scale-x-100 transition-all duration-300" />
@@ -169,7 +169,7 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
             {/* Stories link */}
             <button
               onClick={() => handleItemClick('home', '#stories-section')}
-              className="relative py-2 px-3 text-stone-600 hover:text-[#00204A] text-xs font-bold font-sans tracking-widest transition-colors duration-200 group focus:outline-none cursor-pointer"
+              className="relative py-2 px-2 text-stone-600 hover:text-[#00204A] text-[11px] font-bold font-sans tracking-wider whitespace-nowrap transition-colors duration-200 group focus:outline-none cursor-pointer"
             >
               <span>卒業生ストーリー</span>
               <span className="absolute bottom-[-2px] left-3 right-3 h-[2px] bg-[#CD9535] opacity-0 group-hover:opacity-100 transform scale-x-0 group-hover:scale-x-100 transition-all duration-300" />
@@ -178,7 +178,7 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
             {/* Archive link */}
             <button
               onClick={() => handleItemClick('home', '#network-archive')}
-              className="relative py-2 px-3 text-stone-600 hover:text-[#00204A] text-xs font-bold font-sans tracking-widest transition-colors duration-200 group focus:outline-none cursor-pointer"
+              className="relative py-2 px-2 text-stone-600 hover:text-[#00204A] text-[11px] font-bold font-sans tracking-wider whitespace-nowrap transition-colors duration-200 group focus:outline-none cursor-pointer"
             >
               <span>会報アーカイブ</span>
               <span className="absolute bottom-[-2px] left-3 right-3 h-[2px] bg-[#CD9535] opacity-0 group-hover:opacity-100 transform scale-x-0 group-hover:scale-x-100 transition-all duration-300" />
@@ -187,7 +187,7 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
             {/* Contact link */}
             <button
               onClick={() => handleItemClick('home', '#site-footer')}
-              className="relative py-2 px-3 text-stone-600 hover:text-[#00204A] text-xs font-bold font-sans tracking-widest transition-colors duration-200 group focus:outline-none cursor-pointer"
+              className="relative py-2 px-2 text-stone-600 hover:text-[#00204A] text-[11px] font-bold font-sans tracking-wider whitespace-nowrap transition-colors duration-200 group focus:outline-none cursor-pointer"
             >
               <span>お問い合わせ</span>
               <span className="absolute bottom-[-2px] left-3 right-3 h-[2px] bg-[#CD9535] opacity-0 group-hover:opacity-100 transform scale-x-0 group-hover:scale-x-100 transition-all duration-300" />
@@ -199,7 +199,7 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
                 setAboutDropdownOpen(false);
                 window.dispatchEvent(new CustomEvent('open-newsletter'));
               }}
-              className="relative py-2 px-3 text-[#CD9535] hover:text-[#00204A] text-xs font-bold font-sans tracking-widest transition-colors duration-200 group focus:outline-none cursor-pointer flex items-center gap-1.5"
+              className="relative py-2 px-2 text-[#CD9535] hover:text-[#00204A] text-[11px] font-bold font-sans tracking-wider whitespace-nowrap transition-colors duration-200 group focus:outline-none cursor-pointer flex items-center gap-1.5"
             >
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
@@ -216,7 +216,7 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
           {/* Prominent Address update CTA Button */}
           <button
             onClick={() => handleItemClick('home', '#update-section')}
-            className="inline-flex items-center justify-center gap-2 bg-[#00204A] hover:bg-[#CD9535] text-white hover:text-white text-xs font-bold py-3 px-6 rounded-full transition-all duration-300 shadow-md tracking-wider cursor-pointer border-none focus:outline-none"
+            className="inline-flex items-center justify-center gap-2 bg-[#00204A] hover:bg-[#CD9535] text-white hover:text-white text-[11px] font-bold py-3 px-4 rounded-full transition-all duration-300 shadow-md tracking-wider whitespace-nowrap cursor-pointer border-none focus:outline-none"
           >
             <span>住所変更手続き</span>
             <ArrowRight className="w-3.5 h-3.5" />
@@ -413,4 +413,3 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
     </header>
   );
 }
-
