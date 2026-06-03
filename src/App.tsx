@@ -14,11 +14,9 @@ import ChatAssistant from './components/ChatAssistant';
 import MobileBottomNav from './components/MobileBottomNav';
 import NewsletterModal from './components/NewsletterModal';
 import { motion, AnimatePresence } from 'motion/react';
-import { Sparkles, X } from 'lucide-react';
 
 export default function App() {
   // Demo interactive state
-  const [showDemoBanner, setShowDemoBanner] = useState(true);
   const [currentView, setCurrentView] = useState<'home' | 'about'>('home');
   const [selectedTopic, setSelectedTopic] = useState<string>('');
   const [isRegModalOpen, setIsRegModalOpen] = useState<boolean>(false);
@@ -80,31 +78,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#FAF9F5] text-[#00204A] font-sans antialiased text-base selection:bg-amber-600 selection:text-white pb-20 sm:pb-0">
-      {/* Top Welcome micro Notification bar */}
-      <AnimatePresence>
-        {showDemoBanner && (
-          <motion.div 
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="bg-[#CD9535] text-stone-900 text-xs font-semibold py-2 px-4 flex items-center justify-between gap-2 overflow-hidden z-50 relative select-none"
-            id="demo-banner-alert"
-          >
-            <div className="mx-auto flex items-center gap-1.5 py-0.5">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>「茨城大学 文理・人文学部同窓会」デザイン再現デモ：メニューとフッターを含め、ディテールにこだわって再現いたしました。</span>
-            </div>
-            <button 
-              onClick={() => setShowDemoBanner(false)} 
-              className="text-stone-900/70 hover:text-stone-900 p-1 focus:outline-none focus:ring-1 focus:ring-stone-900 rounded transition-all cursor-pointer"
-              aria-label="Dismiss Alert"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Header section (Menu) - now with currentView and navigate callback */}
       <Header currentView={currentView} onNavigate={handleNavigate} />
 

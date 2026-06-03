@@ -139,24 +139,6 @@ export default function NewsletterModal({ onClose }: NewsletterModalProps) {
                   忙しいあなたに、最高の読書体験を。すべての貴重な情報をパッと直感的に楽しめるよう、イラスト図解と要点を凝縮した新感覚のデジタル会報へ蘇らせました。
                 </p>
               </div>
-
-              {/* Graphical Wireframe Abstract layout: simulated print alignment */}
-              <div className="hidden md:block bg-stone-900/40 border border-stone-800 rounded p-3 my-4 text-[10px] font-mono text-stone-500 overflow-hidden relative">
-                <div className="flex justify-between border-b border-stone-800 pb-1.5 mb-1.5 font-bold text-[8px] tracking-wider text-stone-400">
-                  <span>PRINT WIREFRAME</span>
-                  <span>424 / 962MM</span>
-                </div>
-                <div className="space-y-1 opacity-60">
-                  <div className="h-1.5 bg-stone-800 w-full rounded" />
-                  <div className="h-4 bg-[#CD9535]/20 border border-[#CD9535]/35 rounded flex items-center justify-center font-bold text-[#CD9535] text-[7.5px] tracking-wider">
-                    COLUMN 01 HEADER
-                  </div>
-                </div>
-              </div>
-
-              <div className="relative z-10 text-stone-500 text-[9px] font-mono tracking-widest text-left pt-4 md:pt-0">
-                PUBLISHED BY UNIVERSITY ALUMNI
-              </div>
             </div>
 
             {/* COLUMN 2: DIGITAL READER STAGE (Stark Minimalist Japanese Layout Container) */}
@@ -638,19 +620,7 @@ export default function NewsletterModal({ onClose }: NewsletterModalProps) {
                 </div>
               )}
 
-              {/* Bottom Footer block: Stark monochrome styling */}
-              <div className="mt-4 pt-3 pb-1 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-3 flex-shrink-0">
-                <span className="text-[10px] sm:text-[10.5px] text-stone-400 font-mono tracking-wider text-center sm:text-left">
-                  * This notification will prioritize your choices and not reappear.
-                </span>
-                
-                <button
-                  onClick={handleClose}
-                  className="bg-stone-950 text-white hover:bg-[#CD9535] hover:text-stone-900 transition-all text-xs font-mono font-bold tracking-widest py-2 px-5 rounded-none cursor-pointer select-none"
-                >
-                  DISMISS
-                </button>
-              </div>
+
 
             </div>
 

@@ -125,12 +125,12 @@ export default function Events({ onSelectEvent }: EventsProps) {
               key={item.id}
               whileHover={{ y: -4 }}
               transition={{ duration: 0.3 }}
-              className="bg-[#FAF9F5] rounded-2xl overflow-hidden shadow-md border border-amber-900/10 text-left p-4.5 sm:p-5 flex flex-col justify-between flex-shrink-0 w-[245px] xs:w-[275px] md:w-auto snap-start"
+              className="bg-[#FAF9F5] rounded-2xl overflow-hidden shadow-md border border-amber-900/10 text-left p-5 sm:p-6 flex flex-col justify-between flex-shrink-0 w-[290px] xs:w-[320px] md:w-auto snap-start group"
             >
               <div>
                 
                 {/* 1. Header Row inside the card: Big number and Title with sub-year */}
-                <div className="flex items-start justify-between gap-2.5 mb-4">
+                <div className="flex items-start justify-between gap-2.5 mb-4 px-0.5">
                   <div className="flex flex-col items-start gap-2">
                     <div className="text-[38px] sm:text-[44px] font-serif font-bold text-[#CD9535] leading-none select-none">
                       {item.id}
@@ -154,37 +154,32 @@ export default function Events({ onSelectEvent }: EventsProps) {
                   </div>
                 </div>
  
-                {/* 2. Middle Row inside the card: Binder Calendar Piece left, Image right */}
-                <div className="flex items-stretch justify-between gap-4 mb-4">
+                {/* 2. Middle Row inside the card: Beautiful Wide Banner Image with Overlaid Calendar Binder */}
+                <div className="relative h-[130px] sm:h-[155px] w-full rounded-xl overflow-hidden shadow-xs border border-black/5 mb-4 select-none">
+                  <img 
+                    src={item.image} 
+                    alt={item.title}
+                    className="w-full h-full object-cover filter brightness-[0.95] group-hover:scale-[1.05] transition-transform duration-500"
+                    referrerPolicy="no-referrer"
+                  />
                   
-                  {/* Calendar Binder element (recreating binder look with two top metal wire rings) */}
-                  <div className="relative w-[34%] aspect-[1/1] sm:w-[74px] sm:h-[74px] bg-white border border-[#CD9535]/80 rounded-[6px] flex flex-col justify-between items-center py-1.5 shadow-xs">
+                  {/* Calendar Binder element elegantly overlaid over the image */}
+                  <div className="absolute bottom-2.5 left-2.5 w-[64px] h-[64px] sm:w-[70px] sm:h-[70px] bg-white border border-[#CD9535]/80 rounded-[6px] flex flex-col justify-between items-center py-1 shadow-md z-10">
                     
-                    {/* Metal binder ring loops (absolute vector elements) */}
-                    <span className="absolute top-[-4px] left-[23%] w-[3px] h-[8px] bg-amber-50 border border-[#CD9535] rounded-full z-10" />
-                    <span className="absolute top-[-4px] right-[23%] w-[3px] h-[8px] bg-amber-50 border border-[#CD9535] rounded-full z-10" />
+                    {/* Metal binder rings */}
+                    <span className="absolute top-[-4px] left-[23%] w-[3px] h-[8px] bg-amber-50 border border-[#CD9535] rounded-full z-20" />
+                    <span className="absolute top-[-4px] right-[23%] w-[3px] h-[8px] bg-amber-50 border border-[#CD9535] rounded-full z-20" />
                     
-                    <div className="text-[8px] sm:text-[9px] text-stone-400 font-sans tracking-wider font-semibold">
+                    <div className="text-[8px] sm:text-[9.5px] text-[#CD9535] font-sans tracking-wider font-bold">
                       {item.dateYear}
                     </div>
-                    <div className="text-[15px] sm:text-[17px] font-serif font-bold text-[#00204A] leading-none my-0.5 tracking-tighter">
+                    <div className="text-[14px] sm:text-[16.5px] font-serif font-black text-[#00204A] leading-none my-0.5 tracking-tighter">
                       {item.dateDay}
                     </div>
-                    <div className="text-[8px] sm:text-[9px] text-stone-400 font-sans tracking-wider font-semibold">
+                    <div className="text-[8px] sm:text-[9.5px] text-stone-500 font-sans tracking-wider font-extrabold">
                       {item.dateWeek}
                     </div>
                   </div>
- 
-                  {/* Thumbnail Image with rounded corners and high quality ratio */}
-                  <div className="flex-1 h-[62px] sm:h-[74px] rounded-[8px] overflow-hidden shadow-xs border border-black/5">
-                    <img 
-                      src={item.image} 
-                      alt={item.title}
-                      className="w-full h-full object-cover filter brightness-[0.97]"
-                      referrerPolicy="no-referrer"
-                    />
-                  </div>
- 
                 </div>
  
                 {/* 3. Detail rows styled precisely with vertical separator columns */}
