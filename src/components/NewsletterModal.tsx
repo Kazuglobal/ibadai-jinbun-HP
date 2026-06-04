@@ -47,6 +47,17 @@ export default function NewsletterModal({ onClose }: NewsletterModalProps) {
     };
   }, []);
 
+  useEffect(() => {
+    const handleOpenChat = () => {
+      setIsOpen(false);
+    };
+
+    window.addEventListener('open-alumni-chat', handleOpenChat);
+    return () => {
+      window.removeEventListener('open-alumni-chat', handleOpenChat);
+    };
+  }, []);
+
   const handleClose = () => {
     setIsOpen(false);
     if (onClose) onClose();

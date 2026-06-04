@@ -20,6 +20,7 @@ export default function App() {
   const [currentView, setCurrentView] = useState<'home' | 'about'>('home');
   const [selectedTopic, setSelectedTopic] = useState<string>('');
   const [isRegModalOpen, setIsRegModalOpen] = useState<boolean>(false);
+  const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
 
   const handleSelectTopic = (title: string) => {
     setSelectedTopic(title);
@@ -45,6 +46,11 @@ export default function App() {
     } else {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  };
+
+  const handleOpenChat = () => {
+    window.dispatchEvent(new CustomEvent('open-alumni-chat'));
+    setIsChatOpen(true);
   };
 
   // Synchronize on backward/forward browser events or hash loaded initially
@@ -132,10 +138,10 @@ export default function App() {
       </AnimatePresence>
 
       {/* Persistent floating AI Chat Assistant */}
-      <ChatAssistant />
+      <ChatAssistant isOpen={isChatOpen} onOpenChange={setIsChatOpen} />
 
       {/* Styled Mobile Bottom Navigation Bar */}
-      <MobileBottomNav currentView={currentView} onNavigate={handleNavigate} />
+      <MobileBottomNav currentView={currentView} onNavigate={handleNavigate} onOpenChat={handleOpenChat} />
 
       {/* Pop-up modal newsletter helper */}
       <NewsletterModal />
