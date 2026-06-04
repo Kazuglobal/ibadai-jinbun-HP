@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -21,6 +21,10 @@ export default function App() {
   const [selectedTopic, setSelectedTopic] = useState<string>('');
   const [isRegModalOpen, setIsRegModalOpen] = useState<boolean>(false);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
+  const [isHomeIntroComplete, setIsHomeIntroComplete] = useState(false);
+  const handleHomeIntroComplete = useCallback(() => {
+    setIsHomeIntroComplete(true);
+  }, []);
 
   const handleSelectTopic = (title: string) => {
     setSelectedTopic(title);
@@ -98,7 +102,7 @@ export default function App() {
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.35, ease: 'easeOut' }}
             >
-              <Hero />
+              <Hero onIntroComplete={handleHomeIntroComplete} />
               <News onSelectNews={handleSelectTopic} />
               <Events onSelectEvent={handleSelectTopic} />
               <Stories />
@@ -144,7 +148,7 @@ export default function App() {
       <MobileBottomNav currentView={currentView} onNavigate={handleNavigate} onOpenChat={handleOpenChat} />
 
       {/* Pop-up modal newsletter helper */}
-      <NewsletterModal />
+      <NewsletterModal autoOpenReady={isHomeIntroComplete} />
     </div>
   );
 }

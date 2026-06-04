@@ -13,26 +13,29 @@ import {
 } from 'lucide-react';
 
 interface NewsletterModalProps {
+  autoOpenReady?: boolean;
   onClose?: () => void;
 }
 
-export default function NewsletterModal({ onClose }: NewsletterModalProps) {
+export default function NewsletterModal({ autoOpenReady = true, onClose }: NewsletterModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'select' | 'magazine' | 'pdf'>('select');
   const [pdfPage, setPdfPage] = useState(1);
   const [selectedArticle, setSelectedArticle] = useState<number | null>(null);
 
   useEffect(() => {
+    if (!autoOpenReady) return;
+
     // Show automatically on page mount (and on every reload/refresh)
     // We store a flag on window context so it only auto-opens once per reload session (and won't pop up again when user toggles currentView between Home and About)
     if (!(window as any).__hasShownNewsletterThisSession) {
       const timer = setTimeout(() => {
         setIsOpen(true);
         (window as any).__hasShownNewsletterThisSession = true;
-      }, 700);
+      }, 250);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [autoOpenReady]);
 
   useEffect(() => {
     // Enable manual trigger from any part of the app
