@@ -7,9 +7,9 @@ const actions = [
   { label: 'ARCHIVE', href: '#archive', primary: false },
 ];
 
-function Photo({ image, className }: { image: HeroVisualImage; className: string }) {
+function Photo({ image, className, animate = false }: { image: HeroVisualImage; className: string; animate?: boolean }) {
   return (
-    <figure className={`overflow-hidden bg-stone-200 ${className}`}>
+    <figure className={`overflow-hidden bg-stone-200 ${className}`} data-gsap={animate ? 'hero-photo' : undefined}>
       <img src={image.src} alt={image.alt} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
     </figure>
   );
@@ -17,7 +17,7 @@ function Photo({ image, className }: { image: HeroVisualImage; className: string
 
 function HeroActions({ mobile = false }: { mobile?: boolean }) {
   return (
-    <div className={mobile ? 'grid gap-2.5' : 'flex items-center gap-4'}>
+    <div className={mobile ? 'grid gap-2.5' : 'flex items-center gap-4'} data-gsap="hero-actions">
       {actions.map((action) => (
         <a
           key={action.href}
@@ -35,10 +35,10 @@ function HeroActions({ mobile = false }: { mobile?: boolean }) {
 function DesktopImageGrid() {
   return (
     <div className="relative min-h-[560px]">
-      <Photo image={heroVisualImages.campus} className="absolute left-0 top-0 h-[54%] w-[58%]" />
-      <Photo image={heroVisualImages.graduation} className="absolute right-[10%] top-[7%] h-[48%] w-[29%] rounded-t-full" />
-      <Photo image={heroVisualImages.archive} className="absolute bottom-[12%] left-0 h-[28%] w-[40%]" />
-      <Photo image={heroVisualImages.alumni} className="absolute bottom-[12%] left-[42%] h-[28%] w-[40%]" />
+      <Photo image={heroVisualImages.campus} className="absolute left-0 top-0 h-[54%] w-[58%]" animate />
+      <Photo image={heroVisualImages.graduation} className="absolute right-[10%] top-[7%] h-[48%] w-[29%] rounded-t-full" animate />
+      <Photo image={heroVisualImages.archive} className="absolute bottom-[12%] left-0 h-[28%] w-[40%]" animate />
+      <Photo image={heroVisualImages.alumni} className="absolute bottom-[12%] left-[42%] h-[28%] w-[40%]" animate />
       <div className="absolute bottom-[12%] left-[80%] h-7 w-7 bg-[#00204A]" aria-hidden="true" />
       <div className="absolute right-[4%] top-[8%] h-[17%] w-px bg-[#CD9535]" aria-hidden="true" />
       <div className="absolute right-[4%] top-[55%] h-[13%] w-px bg-[#CD9535]" aria-hidden="true" />
@@ -56,17 +56,17 @@ function DesktopHero() {
     <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
       <div className="grid min-h-[560px] grid-cols-[42%_58%] overflow-hidden bg-transparent">
         <div className="relative py-10 pr-10">
-          <div className="mt-4 flex items-center gap-5">
+          <div className="mt-4 flex items-center gap-5" data-gsap="hero-eyebrow">
             <span className="h-9 w-px bg-[#CD9535]" />
             <p className="font-serif text-[15px] tracking-[0.12em] text-[#00204A]">学びの記憶と人のつながりを、未来へ</p>
           </div>
-          <h1 className="mt-7 max-w-[430px] font-serif text-[46px] font-bold leading-[1.28] text-[#00204A]">
+          <h1 className="mt-7 max-w-[430px] font-serif text-[46px] font-bold leading-[1.28] text-[#00204A]" data-gsap="hero-title">
             知のつながりを、
             <br />
             未来へひらく。
           </h1>
-          <div className="mt-5 h-px w-20 bg-[#CD9535]" aria-hidden="true" />
-          <p className="mt-6 whitespace-pre-line font-serif text-[15px] font-semibold leading-[1.8] tracking-[0.12em] text-[#00204A]">
+          <div className="mt-5 h-px w-20 bg-[#CD9535]" aria-hidden="true" data-gsap="hero-rule" />
+          <p className="mt-6 whitespace-pre-line font-serif text-[15px] font-semibold leading-[1.8] tracking-[0.12em] text-[#00204A]" data-gsap="hero-copy">
             卒業生・在学生・教職員をつなぐ{'\n'}同窓会プラットフォーム
           </p>
           <div className="mt-8">
@@ -87,10 +87,10 @@ function DesktopHero() {
 function MobileHero() {
   return (
     <div className="mx-auto max-w-[430px] border-y border-[#D8D2C5] bg-[#FBFAF6]">
-      <Photo image={heroVisualImages.campus} className="h-[206px] w-full" />
+      <Photo image={heroVisualImages.campus} className="h-[206px] w-full" animate />
       <div className="grid grid-cols-2">
-        <Photo image={heroVisualImages.archive} className="h-[86px] w-full" />
-        <Photo image={heroVisualImages.alumni} className="h-[86px] w-full" />
+        <Photo image={heroVisualImages.archive} className="h-[86px] w-full" animate />
+        <Photo image={heroVisualImages.alumni} className="h-[86px] w-full" animate />
       </div>
       <div className="flex h-9 items-center justify-center gap-5 bg-[#00204A] text-white">
         <span className="h-px w-12 bg-[#CD9535]" />
@@ -98,14 +98,14 @@ function MobileHero() {
         <span className="h-px w-12 bg-[#CD9535]" />
       </div>
       <div className="px-6 pb-10 pt-7">
-        <p className="font-serif text-[13px] font-semibold leading-relaxed tracking-[0.11em] text-[#00204A]">学びの記憶と人のつながりを、未来へ</p>
-        <h1 className="mt-4 font-serif text-[32px] font-bold leading-[1.35] text-[#00204A]">
+        <p className="font-serif text-[13px] font-semibold leading-relaxed tracking-[0.11em] text-[#00204A]" data-gsap="hero-eyebrow">学びの記憶と人のつながりを、未来へ</p>
+        <h1 className="mt-4 font-serif text-[32px] font-bold leading-[1.35] text-[#00204A]" data-gsap="hero-title">
           知のつながりを、
           <br />
           未来へひらく。
         </h1>
-        <div className="mt-4 h-px w-16 bg-[#CD9535]" aria-hidden="true" />
-        <p className="mt-4 font-serif text-[12px] font-semibold leading-[1.9] tracking-[0.12em] text-[#00204A]">
+        <div className="mt-4 h-px w-16 bg-[#CD9535]" aria-hidden="true" data-gsap="hero-rule" />
+        <p className="mt-4 font-serif text-[12px] font-semibold leading-[1.9] tracking-[0.12em] text-[#00204A]" data-gsap="hero-copy">
           卒業生・在学生・教職員をつなぐ
           <br />
           同窓会プラットフォーム
@@ -120,7 +120,7 @@ function MobileHero() {
 
 export default function Hero() {
   return (
-    <section className="relative overflow-hidden bg-[#FAF9F5] pb-14 pt-4 lg:pb-12 lg:pt-0" id="home-hero-section">
+    <section className="relative overflow-hidden bg-[#FAF9F5] pb-14 pt-4 lg:pb-12 lg:pt-0" id="home-hero-section" data-gsap="hero-section">
       <div className="hidden lg:block">
         <DesktopHero />
       </div>
