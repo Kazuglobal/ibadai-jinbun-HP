@@ -1,33 +1,256 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { 
-  X, 
-  BookOpen, 
-  ArrowRight, 
-  ChevronLeft, 
-  ChevronRight, 
-  ExternalLink,
-  Laptop,
+import React, { useEffect, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import {
+  ArrowRight,
+  BookOpen,
+  CalendarDays,
+  ChevronRight,
+  FileText,
+  Landmark,
+  Mail,
+  MapPin,
+  Menu,
   Phone,
-  FileDown
+  ReceiptText,
+  ScrollText,
+  X,
 } from 'lucide-react';
+
+import activityImage from '../data/newsletter43/activity.jpg';
+import hasuiImage from '../data/newsletter43/hasui.jpg';
+import homeworkImage from '../data/newsletter43/homework.jpg';
+import jumpRopeImage from '../data/newsletter43/jump-rope.jpg';
+import lunchImage from '../data/newsletter43/lunch.jpg';
 
 interface NewsletterModalProps {
   autoOpenReady?: boolean;
   onClose?: () => void;
 }
 
+type Article = {
+  id: string;
+  label: string;
+  title: string;
+  author?: string;
+  lead?: string;
+  paragraphs: string[];
+};
+
+type FinanceRow = {
+  item: string;
+  current: string;
+  previous?: string;
+  note?: string;
+};
+
+const tocItems = [
+  { id: 'cover', label: '巻頭', title: '茨城大学 半世紀の想い出' },
+  { id: 'greeting', label: '挨拶', title: '同窓会の皆様へ' },
+  { id: 'iop', label: '学生', title: 'ひたちなか市における子どもの居場所づくり' },
+  { id: 'meeting', label: '総会', title: '第18回総会の開催について' },
+  { id: 'board', label: '記録', title: '第40回理事会議事要録' },
+  { id: 'activities', label: '事業', title: '令和7年度事業報告・令和8年度事業計画' },
+  { id: 'finance', label: '会計', title: '決算報告・予算案' },
+  { id: 'editor', label: '後記', title: '編集後記' },
+];
+
+const articles: Article[] = [
+  {
+    id: 'cover',
+    label: '巻頭言',
+    title: '茨城大学 半世紀の想い出',
+    author: '茨城大学文理・人文学部同窓会 理事　木戸 之都子（人文・文10回卒）',
+    lead:
+      '入学から50年。学生運動の名残、人文図書室の歩み、古文書整理、そして同窓会名簿づくりまで、茨城大学と歩んだ半世紀の記録です。',
+    paragraphs: [
+      '私が茨城大学人文学部文学科に入学したのは1976年のことでした。卒業後は人文学部に就職し、2023年に定年退職しましたが、その後も非常勤講師やアルバイト等で現在も茨城大学と関わっています。今年は入学してからちょうど50年目になり、光陰矢の如し、とはよくいったもので、過去の出来事や記憶が懐かしく思い出され、感慨深いです。',
+      '入学当時の最初の記憶は1年生の授業の始まる直前にいきなり教室にやってきて教卓で演説していく上級生や廊下に散乱するビラやキャンパス内の立て看など、学生運動の名残りを感じたことでした。人文学部文学科の1年生は60名で、同じ専攻だけでなく専攻を超えた繋がりが強かったように感じます。',
+      '卒業後の1981年、人文学部助手として人文図書室に職を得て、人文図書室分室という1スパンの狭いスペースが私の部屋になりました。当時、人文図書室運営委員長だった東敏雄教授の「学部独自の図書室を充実させていく」という理念の元、それまで社会系と文系に分かれていた人文図書室が1984年増築された人文B棟に新たな人文図書室として統合新設されました。',
+      '人文系の専門的参考図書を収集し、人文学部の教員・学生への支援サービスを積極的に行った結果、人文図書室の蔵書数は図書約20,000冊、雑誌約1,000誌になり、パソコン20台等を所有し、学生の文献情報検索の技術向上のためにガイダンスも実施してきました。',
+      'また、1983年度以降の卒業論文の情報を収集し、データベース化して閲覧に供しています。しかし、残念ながら当初の職員3名が1名までに減少し、予算の縮小等もあり、2021年に人文図書室は廃止されました。ただし、その機能は大幅に縮小して2022年、2スパンの学部共同資料室に姿をかえました。',
+      '図書館所蔵古文書の関わりも茨城大学の大事な思い出です。当時、人文図書室運営委員だった河内八郎教授からのお誘いで図書館所蔵の郷土資料の整備に関わり、古文書のくずし字に触れるきっかけになりました。現在もボランティアで図書館所蔵の近世村方文書の史料整理にささやかながら関わっています。',
+      '1982年に設立された文理・人文学部同窓会には設立準備段階から加わり、私の担当は同窓会名簿作成でした。同窓会名簿は今年の発行で10冊目になりますが、2003年に個人情報保護法が制定されてから卒業生の住所や勤務先を把握するのがとくに困難になり、試行錯誤を繰り返しながら発行を重ねた記憶があります。',
+      '同窓会費が入学時に徴収する方式になってから現在の同窓会加入率は95％になっていると聞きます。設立当初は同窓会への理解がなかなか得られず、加入率も30％と伸び悩んでいて、現在と比べると隔世の感があります。',
+      '今後も文理・人文学部同窓会が学部や大学との連携を密接にとりながら、茨城大学の発展に寄与するとともに同窓生同士の交流を活発に行っていくことを期待しています。',
+    ],
+  },
+  {
+    id: 'greeting',
+    label: '学部長挨拶',
+    title: '同窓会の皆様へ',
+    author: '同窓会名誉会長・人文社会科学部長　蓮井 誠一郎',
+    lead:
+      '新学部長就任に際し、学部教育の現在と未来、テクノロジー時代における「カレッジ」の再構築について語ります。',
+    paragraphs: [
+      '同窓会の皆様には、様々なご支援、ご協力、お気遣いを日頃より賜っております。学部を代表しまして、御礼申し上げます。',
+      '今春、人文社会科学部長・学野長・研究科長に就任いたしました。責任の重さを感じながら、学部の新しい姿を構想しつつ、社会の期待に応えられるように改革を着実に進めるために準備を重ねております。',
+      '私の専門は国際政治学と平和学で、環境問題と安全保障との関連を軸に研究してきました。急激な変化をふまえて、新しい適応力のあるライフスタイルや価値観をもった市民をどう育成して世に送り出すべきか、議論し考える日々です。',
+      '対面授業が増え、大学も賑わいを取り戻しています。他方で、より優秀な人物を惹きつけるためには、魅力的な職場・学び場作りが不可欠です。教職員や学生の多様性に基づき、生活上のバランスを確保することが重要です。',
+      '大学院では来年度から文部科学省に採択された「ダイバーシティ地域共創プログラム」の学位プログラム化を行います。',
+      '地方国立大学の厳しい大学財政事情から、教員の減少傾向は続いており、総合人文社会系学部としての強みをどう活かし弱みをカバーしていくかが課題となっております。',
+      '急速に発達したオンライン会議の技術は、資料のペーパレス化、教員や学生の居場所に捕らわれない自由な授業実施を可能にしました。他方で、同じ空気を共有する対面の機会は減少し、人間関係は変化しています。',
+      '私は学部長就任後の最初の教授会にて、「学部（カレッジ）の再構築」を掲げました。テクノロジーを活用しながら、豊かな心のやりとりをいかに追求するかを考えるべきと信じています。',
+      '当学部には「市民共創教育研究センター」があり、学部教員がメンバーです。このような場を活かして、多種多様な交流をつくり、これからの学部について議論して参りたいと存じます。',
+      '最後になりましたが同窓生の皆様のご発展を祈念しつつ、学部への引き続きのご支援ならびにご協力をお願いするとともに、私たちをお見守りくださいますようお願い申し上げます。',
+    ],
+  },
+  {
+    id: 'iop',
+    label: '学生寄稿',
+    title: 'ひたちなか市における子どもの居場所づくり',
+    author: '茨城大学人文社会科学部4年　中塩 紗矢香',
+    lead:
+      '不登校児童・生徒を支える地域の現場で、学校外の「第三の居場所」が果たす役割を学んだiOP活動報告です。',
+    paragraphs: [
+      '私は将来教員を志しており、今回のiOPを通じて、学校という枠組みの外側から子どもたちの実態を見つめたいと考え、NPO法人「ただいま」での活動を決めました。',
+      '近年増加する不登校児童・生徒がどのような思いを抱え、学校以外の「第三の居場所」がどう機能しているのかを当事者の目線で理解し、教員としての土台を築くことを目標に、現場での実践を通じて学びを深めました。',
+      '2024年9月から現在に至るまで、ひたちなか市のフリースクール「ふらっと」や放課後の居場所「てらこや」にて週1回のスタッフ業務を行いました。',
+      '主な役割は子どもたちの遊び相手や見守り、環境整備でしたが、学校提出用の活動報告書の執筆補助など、地域と学校を繋ぐ実務にも携わりました。',
+      '活動を通じて、一人ひとりの特性に応じた「個別最適な支援」の重要性を痛感しました。不登校の背景には発達特性への無理解や家庭環境など多様な要因が潜んでおり、画一的な対応は通用しないということを学びました。',
+      '表面的な行動の裏にある「見えない背景」を多角的に想像し、試行錯誤しながら寄り添う中で、子どもが社会との繋がりを再構築していく姿を目の当たりにしたことは大きな成果であったと感じております。',
+      'この経験を糧に、将来は学校の中だけで完結せず、地域の活動とも密に連携しながら、多様な特性を持つ子どもたち一人ひとりに寄り添える教員を目指します。',
+      '大学内では学べない地域の実情に触れることができ、実りの多いiOP活動となりました。',
+    ],
+  },
+];
+
+const meetingDetails = [
+  ['日時', '令和8年7月18日（土）午後1時30分から3時30分まで（受付は午後1時から）'],
+  ['場所', 'つくば市吾妻1-1364-1　ホテル日航つくば（TXつくば駅下車5分）'],
+  ['議題', '決算・事業報告、予算・事業計画、その他'],
+  ['講演会', '講師　茨城大学 学長　佐川 泰弘 氏'],
+  ['懇親会', '総会、講演会終了後、午後3時30分まで（会費 5,000円）'],
+  ['連絡先', 'Tel: 029-228-8546 / 090-3100-5814（鈴木）　E-mail: ibadai.bj.dousou@gmail.com'],
+];
+
+const boardMinutes = [
+  '第40回理事会は令和7年7月19日（土）13:30から16:20まで、水戸京成ホテルで開催され、40名が出席しました。',
+  '大和田一雄会長の挨拶、原口名誉会長による学部の現況を含む挨拶の後、会長が議長となり、書記と議事録署名人が委嘱されました。',
+  '令和6年度事業活動報告並びに決算報告について、監査報告を受けたうえで原案のとおり承認されました。',
+  '令和7年度事業計画並びに予算について、「イバダイ・サステナ・パートナーズ（略称：イバサス）」への参加を含めて説明があり、原案のとおり承認されました。',
+  '「イバサス」の創設に伴う学生個人情報等の共同利用に関する覚書締結を受け、個人情報保護方針の改正が承認されました。',
+  '校歌斉唱、閉会宣言の後、石井宏典人文社会科学部教授による「都市で故郷を編む　沖縄・シマからの移動と回帰」の講演が行われました。',
+  '理事会終了後は懇親会が行われ、盛会裏に散会となりました。',
+];
+
+const activityReports = [
+  {
+    title: '令和7年度事業報告',
+    rows: [
+      ['第40回理事会', '令和7年7月19日', '水戸市内の京成ホテルで開催'],
+      ['役員会・幹事会', '令和7年7月8日 / 令和8年3月5日', '役員会と幹事会を合同開催'],
+      ['母校及び学生支援事業ならびに組織活動', '通期事業', '地域連携事業講座、茨城の魅力を探求し発信する高校生コンテスト、大学基金、同窓会連合会、イバサス、ホームカミングデー、学部後援会等と連携'],
+      ['会報第42号発行', '令和7年6月', '会員ならびに大学等関係先に配布（送付部数7,500部）'],
+      ['会員拡充活動', '通期事業', '新入学生への入会勧誘を大学と連携して実施。ホームページを随時更新し、内容充実を図った'],
+    ],
+  },
+  {
+    title: '令和8年度事業計画（案）',
+    rows: [
+      ['第18回総会・第41回理事会', '令和8年7月18日', 'つくば市内のホテル日航つくばで開催予定'],
+      ['役員会・幹事会', '令和8年6月26日 / 12月18日 / 令和9年3月12日', '必要に応じ開催。役員会と幹事会を合同開催'],
+      ['母校及び学生支援事業ならびに組織活動', '通期事業', '地域連携事業講座、いば探協賛、大学基金、第9回学生懸賞論文、同窓会連合会、イバサス、学部後援会、ホームカミングデー、シンポジウム等への支援'],
+      ['会報第43号発行', '令和8年6月', '会報のデジタル化を図る。紙媒体配布希望会員及び大学等関係先には配布（送付部数800部）'],
+      ['会員拡充活動', '通期事業', '新入学生への入会勧誘を大学と連携して実施し、ホームページの内容充実に努める'],
+    ],
+  },
+];
+
+const financeTables: { title: string; rows: FinanceRow[] }[] = [
+  {
+    title: '令和7年度 一般会計決算報告',
+    rows: [
+      { item: '収入合計', current: '18,508,700円', previous: '予算 18,463,000円' },
+      { item: '入会金', current: '3,810,000円', previous: '予算 3,800,000円', note: '入学生375名 他6名' },
+      { item: '会費', current: '201,000円', previous: '予算 170,000円', note: '理事会、役員会参加者' },
+      { item: '預金利息', current: '8,977円', previous: '予算 4,277円' },
+      { item: '支出小計', current: '3,753,961円', previous: '予算 4,104,000円' },
+      { item: '次期繰越金', current: '14,754,739円', previous: '予算 14,359,000円' },
+      { item: '現金・預貯金残高', current: '14,754,739円', note: '常陽銀行、ゆうちょ銀行各口座合計' },
+    ],
+  },
+  {
+    title: '令和7年度 学生表彰特別会計決算報告',
+    rows: [
+      { item: '収入合計', current: '52,652円', previous: '予算 52,600円' },
+      { item: '預金利息', current: '93円', previous: '予算 41円' },
+      { item: '支出合計', current: '0円', previous: '予算 0円' },
+      { item: '次期繰越金', current: '52,652円', previous: '予算 52,600円' },
+      { item: '現金・預貯金残高', current: '52,652円', note: '常陽銀行普通預金36,150円、ゆうちょ銀行通常貯金16,502円' },
+    ],
+  },
+  {
+    title: '令和8年度 一般会計予算（案）',
+    rows: [
+      { item: '収入合計', current: '18,519,000円', previous: '7年度予算 18,463,000円' },
+      { item: '入会金', current: '3,600,000円', previous: '7年度予算 3,800,000円', note: '@10,000円×360名を見込む' },
+      { item: '大学支援事業費', current: '350,000円', previous: '7年度予算 800,000円' },
+      { item: '学生支援事業費', current: '570,000円', previous: '7年度予算 260,000円', note: '学生懸賞論文拠出金・いば探事業協賛金等' },
+      { item: '支出小計', current: '3,744,000円', previous: '7年度予算 4,104,000円' },
+      { item: '次期繰越金', current: '14,775,000円', previous: '7年度予算 14,359,000円' },
+    ],
+  },
+  {
+    title: '令和8年度 学生表彰特別会計予算（案）',
+    rows: [
+      { item: '収入合計', current: '819,000円', previous: '7年度予算 52,600円' },
+      { item: '同窓会拠出金', current: '382,000円', previous: '7年度予算 0円', note: '総費用を後援会と同窓会で折半' },
+      { item: '後援会負担金', current: '382,000円', previous: '7年度予算 0円' },
+      { item: '入賞者賞金', current: '330,000円', previous: '7年度予算 0円', note: '最優秀賞金10万円ほか' },
+      { item: '入選論文集印刷費', current: '300,000円', previous: '7年度予算 0円', note: '120部' },
+      { item: '次期繰越金', current: '3,000円', previous: '7年度予算 52,600円' },
+    ],
+  },
+];
+
+const editorParagraphs = [
+  '今年度は、第18回総会開催の年です。7月18日（土）につくば市吾妻の「ホテル日航つくば」で開催することといたしました。立地的には、TXつくば駅から徒歩3分の場所にあります。東京方面からは大変便利なところです。',
+  '会報の5ページに詳細は記載してありますので、会員の皆様方におかれましては、是非ご出席下さいますようお願い申し上げます。出席していただける場合には、出席申込をメール等によりましてご連絡いただけると助かります。',
+  '今年に入りまして、第4代会長の野口芳男氏、文理学部政経学科第1回生で元人文学部教授の村松司叙氏、元人文学部教授で金沢大学名誉教授の中島史雄氏がそれぞれお亡くなりになりました。御三方には生前大変お世話になりました。紙面をお借りして、衷心よりご冥福をお祈り申し上げます。',
+  '会報も今回発行の第43号から、デジタル化を図りました。一部の方には紙媒体でお送りいたしましたが、会員の皆様方には、ハガキでQRコードをお送りいたしましたので、スマートフォン等でご覧いただけるようになりました。',
+  '郵送料が値上げされたことがきっかけですが、現役の学生を始めとする若い会員の方々に気軽に読んでいただけるように考え、変更しました。',
+  'ご意見、ご要望等がございましたらご遠慮なく事務局までお申しつけ下さい。また、ホームページにつきましても、随時更新しておりますが、こちらへのご意見等もお寄せください。会員の皆様、今後とも、更なるご支援、ご協力をいただけますようお願い申しあげます。（A・S）',
+];
+
+function scrollToSection(id: string) {
+  document.getElementById(`magazine43-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function ArticleBlock({ article, children }: { article: Article; children?: React.ReactNode }) {
+  return (
+    <article id={`magazine43-${article.id}`} className="scroll-mt-6 border-t border-stone-200 pt-12">
+      <div className="mb-6 flex items-center gap-3">
+        <span className="rounded-full bg-[#00204A] px-3 py-1 text-[10px] font-bold tracking-[0.18em] text-white">
+          {article.label}
+        </span>
+        <span className="h-px flex-1 bg-stone-200" />
+      </div>
+      <h2 className="font-serif text-3xl font-black leading-tight tracking-wide text-[#00204A] md:text-5xl">
+        {article.title}
+      </h2>
+      {article.author && <p className="mt-3 text-sm font-bold leading-relaxed text-stone-500">{article.author}</p>}
+      {article.lead && (
+        <p className="mt-6 border-l-4 border-[#CD9535] bg-[#FAF7EF] px-5 py-4 text-sm font-semibold leading-8 text-stone-700">
+          {article.lead}
+        </p>
+      )}
+      <div className="mt-8 space-y-5 text-[15px] leading-9 tracking-wide text-stone-700">
+        {article.paragraphs.map((paragraph) => (
+          <p key={paragraph}>{paragraph}</p>
+        ))}
+      </div>
+      {children}
+    </article>
+  );
+}
+
 export default function NewsletterModal({ autoOpenReady = true, onClose }: NewsletterModalProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'select' | 'magazine' | 'pdf'>('select');
-  const [pdfPage, setPdfPage] = useState(1);
-  const [selectedArticle, setSelectedArticle] = useState<number | null>(null);
+  const [isTocOpen, setIsTocOpen] = useState(false);
 
   useEffect(() => {
     if (!autoOpenReady) return;
 
-    // Show automatically on page mount (and on every reload/refresh)
-    // We store a flag on window context so it only auto-opens once per reload session (and won't pop up again when user toggles currentView between Home and About)
     if (!(window as any).__hasShownNewsletterThisSession) {
       const timer = setTimeout(() => {
         setIsOpen(true);
@@ -38,606 +261,350 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
   }, [autoOpenReady]);
 
   useEffect(() => {
-    // Enable manual trigger from any part of the app
-    const handleOpenNewsletter = () => {
-      setIsOpen(true);
-      setActiveTab('select');
-      setSelectedArticle(null);
-    };
+    const handleOpenNewsletter = () => setIsOpen(true);
     window.addEventListener('open-newsletter', handleOpenNewsletter);
-    return () => {
-      window.removeEventListener('open-newsletter', handleOpenNewsletter);
-    };
+    return () => window.removeEventListener('open-newsletter', handleOpenNewsletter);
   }, []);
 
   useEffect(() => {
-    const handleOpenChat = () => {
-      setIsOpen(false);
-    };
-
+    const handleOpenChat = () => setIsOpen(false);
     window.addEventListener('open-alumni-chat', handleOpenChat);
-    return () => {
-      window.removeEventListener('open-alumni-chat', handleOpenChat);
-    };
+    return () => window.removeEventListener('open-alumni-chat', handleOpenChat);
   }, []);
 
   const handleClose = () => {
     setIsOpen(false);
-    if (onClose) onClose();
+    onClose?.();
   };
-
-  const articles = [
-    {
-      id: 1,
-      category: '🔥 巻頭スペシャル対談',
-      title: '未来を拓く、OBと大学を結ぶ知の旅。阿部准教授と語る「これからの頼れるつながり」',
-      writer: '阿部 准教授 × 同窓会代表幹事による「ここだけの本音トーク」',
-      bulletPoints: [
-        '大人にこそ必要な「一生モノの最高のサードプレイス」を創る！',
-        '先輩から後輩へ！社会の荒波をサバイバルするためのリアルな智恵のバトンリレー。'
-      ],
-      outline: '「大学と私たちのこれから」をワクワクする未来地図と共に。大人になって学ぶ楽しさや、世代を超えて仲間と巡り会うストーリーを胸が熱くなる本音で語ります。'
-    },
-    {
-      id: 2,
-      category: '🏆 受賞記念ドキュメント',
-      title: '「大好きな私たちの街をずっと守りたい！」現役3年生が挑んだ、地方公共交通の未来予想図',
-      writer: '人文社会科学部 3年（第11回学生懸賞論文 最優秀賞）',
-      bulletPoints: [
-        '机の上の空論じゃない！何度も現地に通い、地域の生の声から生まれた泥臭い現場力。',
-        'プロも驚いた！本気で自治体に採用させたい「今日から動くリアルな移動プラン」。'
-      ],
-      outline: 'ひとりの学生の熱い「街への想い」に審査員長も思わず唸った。地域の未来をおもしろく塗り替える、ドラマのような挑戦の一部始終を図解でサクッとご覧ください。'
-    },
-    {
-      id: 3,
-      category: '🚀 カリキュラム超解説',
-      title: '教室に「伝説の先輩たち」が大集結！ここでしか聴けないガチ起業・キャリア講義レポート',
-      writer: '人文社会科学部・特別地域連携プログラム 講師陣',
-      bulletPoints: [
-        '第一線の現場を駆ける起業家から若手実務家まで、各界の先輩たちが教壇へ降臨。',
-        '教科書には絶対に載っていない、生々しい「仕事の裏側と楽しさ」に震える。'
-      ],
-      outline: '今まさにキャンバスで巻き起こっている熱いエネルギーを感じてみませんか？社会で即戦力になり「自分の力で稼ぎ、楽しむ」ヒントがぎゅっと詰まった超人気講義の最前線。'
-    }
-  ];
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6" id="editorial-newsletter-modal">
-          {/* Backdrop with elegant clay tone fade */}
-          <motion.div 
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[#0b111d]/80 p-2 backdrop-blur-sm sm:p-5">
+          <motion.button
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="absolute inset-0 bg-[#0F1115]/90 backdrop-blur-sm"
+            className="absolute inset-0 cursor-default"
+            aria-label="会報を閉じる"
           />
 
-          {/* Modal Container: Stark Brutalist / Swiss Grid Editorial */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.98, y: 15 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.98, y: 15 }}
-            transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-            className="relative bg-[#FCFAF7] text-[#1A1A1A] w-[95vw] md:w-full max-w-3xl shadow-[0_30px_100px_rgba(0,0,0,0.5)] border border-[#CD9535]/15 md:border-stone-800/20 overflow-hidden flex flex-col md:flex-row h-auto max-h-[88vh] md:max-h-[550px] md:h-[520px]"
+            initial={{ opacity: 0, y: 18, scale: 0.985 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 18, scale: 0.985 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="relative flex h-[94vh] w-full max-w-6xl overflow-hidden rounded-[10px] bg-[#FFFDF8] text-[#00204A] shadow-[0_32px_120px_rgba(0,0,0,0.45)]"
+            id="editorial-newsletter-modal"
           >
-            
-            {/* COLUMN 1: EDITORIAL JACKET COVER (Stark Bauhaus & Swiss Modernism) */}
-            <div className="hidden md:flex bg-[#1C1C1C] text-[#F3EFE9] p-5 md:p-6 flex-col justify-between md:w-48 md:border-r border-stone-800 flex-shrink-0 relative">
-              {/* Asymmetric layout designators */}
-              <div className="absolute top-0 right-0 h-full w-[1px] bg-stone-800/45 left-10 pointer-events-none" />
-              
-              <div className="relative z-10 text-left">
-                {/* Micro editorial metadata header */}
-                <div className="flex items-center gap-2 mb-4 md:mb-6 text-[10px] font-mono tracking-[0.25em] text-[#CD9535] uppercase font-bold">
-                  <span>No. 42 / SPRING ISSUE</span>
+            <aside className="hidden w-[290px] flex-shrink-0 border-r border-stone-200 bg-[#F5F3EC] p-7 lg:block">
+              <div className="sticky top-0">
+                <div className="mb-8">
+                  <p className="text-[11px] font-bold tracking-[0.28em] text-[#CD9535]">ALUMNI MAGAZINE</p>
+                  <h2 className="mt-3 font-serif text-4xl font-black leading-none text-[#00204A]">第43号</h2>
+                  <p className="mt-3 text-xs font-semibold leading-6 text-stone-500">2026年6月発行 / WEBマガジン版</p>
                 </div>
 
-                <div className="space-y-1">
-                  <p className="text-[10px] font-mono text-stone-400 tracking-widest uppercase font-semibold">
-                    IBARAKI UNIV. HUM-REUNION
-                  </p>
-                  <h2 className="text-2xl sm:text-3xl font-serif font-black tracking-tight leading-none text-white mt-1.5">
-                    同窓会報
-                  </h2>
-                  <div className="text-[36px] font-mono font-extrabold leading-none text-[#CD9535] mt-0.5 tracking-tighter">
-                    VOL.42
-                  </div>
-                </div>
-
-                <div className="h-[1px] bg-stone-800 my-4" />
-
-                <p className="text-stone-400 text-[11px] leading-relaxed tracking-wide font-sans">
-                  忙しいあなたに、最高の読書体験を。すべての貴重な情報をパッと直感的に楽しめるよう、イラスト図解と要点を凝縮した新感覚のデジタル会報へ蘇らせました。
-                </p>
+                <nav className="space-y-2" aria-label="会報第43号 目次">
+                  {tocItems.map((item) => (
+                    <button
+                      key={item.id}
+                      onClick={() => scrollToSection(item.id)}
+                      className="group flex w-full items-center gap-3 rounded-[6px] border border-transparent px-3 py-3 text-left transition hover:border-[#CD9535]/30 hover:bg-white"
+                    >
+                      <span className="w-11 text-[10px] font-black tracking-widest text-[#CD9535]">{item.label}</span>
+                      <span className="flex-1 text-xs font-bold leading-5 text-stone-700 group-hover:text-[#00204A]">
+                        {item.title}
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-stone-300" />
+                    </button>
+                  ))}
+                </nav>
               </div>
-            </div>
+            </aside>
 
-            {/* COLUMN 2: DIGITAL READER STAGE (Stark Minimalist Japanese Layout Container) */}
-            <div className="flex-1 p-4 sm:p-5 md:p-6 flex flex-col justify-between overflow-y-auto">
-              
-              {/* Dynamic Navbar: Flat, Crisp Tabs */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2.5 mb-3.5 border-b border-stone-200 flex-shrink-0">
-                <div className="flex flex-col gap-1 text-left w-full sm:w-auto">
-                  {/* Mobile-only micro header */}
-                  <div className="md:hidden flex items-center gap-1.5 text-[9px] font-mono tracking-widest text-[#CD9535] uppercase font-bold mb-1">
-                    <span>同窓会報 VOL.42</span>
-                    <span className="text-stone-300">/</span>
-                    <span className="text-stone-400 font-medium">ALUMNI BULLETIN</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {activeTab !== 'select' && (
-                      <button 
+            <div className="flex min-w-0 flex-1 flex-col">
+              <div className="flex items-center justify-between border-b border-stone-200 bg-white/90 px-4 py-3 backdrop-blur md:px-7">
+                <button
+                  onClick={() => setIsTocOpen((value) => !value)}
+                  className="inline-flex items-center gap-2 rounded-full border border-stone-200 px-3 py-2 text-[11px] font-bold tracking-widest text-[#00204A] lg:hidden"
+                >
+                  <Menu className="h-4 w-4" />
+                  目次
+                </button>
+                <div className="hidden items-center gap-2 text-[11px] font-bold tracking-[0.2em] text-stone-400 md:flex">
+                  <BookOpen className="h-4 w-4 text-[#CD9535]" />
+                  IBARAKI UNIVERSITY LIBERAL ARTS & HUMANITIES ALUMNI
+                </div>
+                <button
+                  onClick={handleClose}
+                  className="inline-flex items-center gap-2 rounded-full bg-[#00204A] px-4 py-2 text-xs font-bold text-white transition hover:bg-[#CD9535]"
+                >
+                  閉じる
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {isTocOpen && (
+                <div className="border-b border-stone-200 bg-[#F5F3EC] p-4 lg:hidden">
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    {tocItems.map((item) => (
+                      <button
+                        key={item.id}
                         onClick={() => {
-                          setActiveTab('select');
-                          setSelectedArticle(null);
+                          scrollToSection(item.id);
+                          setIsTocOpen(false);
                         }}
-                        className="text-[10px] font-sans font-bold tracking-wider text-[#1A1A1A] hover:bg-[#1A1A1A] hover:text-[#FCFAF7] transition-all bg-white border border-stone-800 px-2 py-1 shadow-xs cursor-pointer inline-flex items-center gap-0.5 uppercase"
+                        className="rounded-[6px] bg-white px-3 py-3 text-left text-xs font-bold text-[#00204A]"
                       >
-                        <ChevronLeft className="w-3 h-3" />
-                        BACK
+                        <span className="mr-2 text-[#CD9535]">{item.label}</span>
+                        {item.title}
                       </button>
-                    )}
-                    <div className="text-[10px] sm:text-[11px] font-mono font-bold tracking-[0.15em] text-stone-500 uppercase">
-                      {activeTab === 'select' && 'Select Reading Format'}
-                      {activeTab === 'magazine' && 'Web Magazine Fast summary'}
-                      {activeTab === 'pdf' && 'Print Layout Digital Replica'}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2">
-                  <button 
-                    onClick={handleClose}
-                    className="group text-[10px] font-mono tracking-widest text-[#888888] hover:text-[#1A1A1A] border border-stone-200 hover:border-stone-800 px-3 py-1.5 transition-all flex items-center gap-1 cursor-pointer"
-                    aria-label="閉じる"
-                  >
-                    <span>CLOSE</span>
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-
-              {/* TAB 1: METHOD CHOOSE VIEW (Clean interactive architectural wireframe with zero reading burden) */}
-              {activeTab === 'select' && (
-                <div className="flex-grow flex flex-col justify-center py-1 text-left">
-                  <div className="mb-4">
-                    <h3 className="text-lg sm:text-xl font-serif font-black tracking-tight text-[#1A1A1A] leading-snug">
-                      開いた瞬間、心が躍る。新しい「会報スタイル」をあなたへ。
-                    </h3>
-                    <p className="text-stone-600 text-[11px] sm:text-[11.5px] mt-1 font-sans leading-relaxed">
-                      文字がびっしりの退屈な冊子はもうおしまい。15秒で楽しさが伝わる「ビジュアル図解」と「本物そっくりPDF」、お好きな方法で今すぐ体験してください！
-                    </p>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" id="editorial-options">
-                    
-                    {/* OPTION A: WEB MAGAZINE CARDS STYLE */}
-                    <div 
-                      onClick={() => setActiveTab('magazine')}
-                      className="group bg-white border border-stone-200 hover:border-stone-900 p-3.5 sm:p-4.5 cursor-pointer transition-all hover:shadow-[0_12px_35px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 flex flex-col justify-between"
-                    >
-                      <div>
-                        {/* Wireframe simulated tag */}
-                        <div className="flex justify-between items-center mb-3">
-                          <span className="text-[9px] font-mono font-bold tracking-widest bg-stone-900 text-[#FCFAF7] px-2 py-0.5 leading-normal uppercase">
-                            WEB DIGEST
-                          </span>
-                          <span className="text-[#CD9535] text-[10px] font-mono font-bold flex items-center gap-1">
-                            <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-                            15-SEC SPEED
-                          </span>
-                        </div>
-
-                        <h4 className="font-serif font-black text-stone-900 text-sm mb-1 group-hover:text-[#CD9535] transition-colors leading-snug">
-                          サクッと弾ける！新感覚のWeb要点マガジン
-                        </h4>
-                        
-                        <p className="text-stone-500 text-[10.5px] leading-relaxed mb-3">
-                          図解と最高の書き出しだけで構成されたスマホ特化型。驚くほどスラスラ読めて、エッセンスがパッと頭に入ります。
-                        </p>
-
-                        {/* HIGHLY SCHEMATIC GRAPHICAL WIREFRAME WITH ZERO COGNITIVE BURDEN */}
-                        <div className="hidden sm:block bg-[#FAF9F6] border border-stone-200/80 p-2.5 select-none space-y-2 rounded-sm font-sans">
-                          <div className="flex justify-between items-center text-[8px] font-mono text-stone-400 font-bold">
-                            <span>SUMMARY PLOT WIREFRAME</span>
-                            <div className="flex gap-1 items-center">
-                              <Laptop className="w-2.5 h-2.5" />
-                              <Phone className="w-2.5 h-2.5 text-[#CD9535]" />
-                            </div>
-                          </div>
-                          
-                          {/* Simulated Interactive Mobile Content Blocks */}
-                          <div className="space-y-1">
-                            <div className="border border-stone-200/60 bg-white p-1 text-[8px] flex items-center justify-between">
-                              <div className="flex items-center gap-1 w-full">
-                                <span className="bg-[#CD9535] text-white font-mono text-[7px] w-3 h-3 flex items-center justify-center font-bold">1</span>
-                                <div className="h-1.5 bg-stone-200 w-1/3 rounded-xs" />
-                              </div>
-                              <span className="text-[6px] font-mono text-stone-400">85%</span>
-                            </div>
-                            <div className="border border-stone-200/60 bg-white p-1 text-[8px] flex items-center justify-between">
-                              <div className="flex items-center gap-1 w-full">
-                                <span className="bg-[#1C1C1C] text-white font-mono text-[7px] w-3 h-3 flex items-center justify-center font-bold">2</span>
-                                <div className="h-1.5 bg-stone-200 w-1/2 rounded-xs" />
-                              </div>
-                              <span className="text-[6px] font-mono text-[#CD9535] font-bold">DIAG</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 flex items-center justify-between text-[11px] font-mono font-bold tracking-widest text-[#CD9535] border-t border-stone-100 pt-2 group-hover:text-stone-900 transition-colors">
-                        <span>START READING WEB</span>
-                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                      </div>
-                    </div>
-
-                    {/* OPTION B: PDF REPLICA BOOK STYLE */}
-                    <div 
-                      onClick={() => setActiveTab('pdf')}
-                      className="group bg-white border border-stone-200 hover:border-stone-900 p-3.5 sm:p-4.5 cursor-pointer transition-all hover:shadow-[0_12px_35px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 flex flex-col justify-between"
-                    >
-                      <div>
-                        {/* Wireframe simulated tag */}
-                        <div className="flex justify-between items-start mb-3">
-                          <span className="text-[9px] font-mono font-bold tracking-widest bg-[#CD9535] text-[#FCFAF7] px-2 py-0.5 leading-normal uppercase">
-                            PDF EDITION
-                          </span>
-                          <span className="text-stone-400 text-[10px] font-mono tracking-wider font-semibold">
-                            冊子レイアウト
-                          </span>
-                        </div>
-
-                        <h4 className="font-serif font-black text-stone-900 text-sm mb-1 group-hover:text-[#CD9535] transition-colors leading-snug">
-                          本をめくるワクワク。美デザインのデジタル冊子
-                        </h4>
-                        
-                        <p className="text-stone-500 text-[10.5px] leading-relaxed mb-3">
-                          慣れ親しんだ紙の良さをそのままに、ペラペラとめくる楽しさ。まるで本を手元で広げるような没入感をお届けします。
-                        </p>
-
-                        {/* HIGHLY SCHEMATIC PRINT LAYOUT WIREFRAME FOR PRINT */}
-                        <div className="hidden sm:block bg-[#FAF9F6] border border-stone-200/80 p-2.5 select-none space-y-2 rounded-sm font-sans">
-                          <div className="flex justify-between items-center text-[8px] font-mono text-stone-400 font-bold">
-                            <span>PRINT LAYOUT DECK</span>
-                            <div className="flex gap-1 items-center">
-                              <BookOpen className="w-2.5 h-2.5 text-[#CD9535]" />
-                            </div>
-                          </div>
-                          
-                          {/* Beautiful miniature pages side by side */}
-                          <div className="grid grid-cols-2 gap-2">
-                            <div className="border border-stone-300 bg-white p-1 h-8 flex flex-col justify-between shadow-xs">
-                              <div className="w-2/3 h-1 bg-[#CD9535]/40 rounded-xs" />
-                              <div className="space-y-0.5">
-                                <div className="w-full h-1 bg-stone-200 rounded-xs" />
-                              </div>
-                            </div>
-                            <div className="border-y border-r border-[#CD9535]/30 bg-white p-1 h-8 flex flex-col justify-between shadow-xs border-l-[1.5px] border-stone-400">
-                              <div className="w-full h-1 bg-stone-200" />
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-4 flex items-center justify-between text-[11px] font-mono font-bold tracking-widest text-[#CD9535] border-t border-stone-100 pt-2 group-hover:text-stone-900 transition-colors">
-                        <span>OPEN PDF REPLICA</span>
-                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                      </div>
-                    </div>
-
+                    ))}
                   </div>
                 </div>
               )}
 
-              {/* TAB 2: WEB MAGAZINE SUMMARY SLIDESHOW (Strict Minimal layout) */}
-              {activeTab === 'magazine' && (
-                <div className="flex-grow flex flex-col justify-between py-1 text-left">
-                  
-                  {selectedArticle === null ? (
-                    <div>
-                      <div className="mb-4">
-                        <span className="text-[9px] font-mono font-bold text-[#CD9535] tracking-[0.25em] block uppercase">
-                          No.42 WEB EDITION SPECS / 大切なエッセンス
-                        </span>
-                        <h4 className="text-base sm:text-lg font-serif font-black text-stone-900 leading-tight mt-1">
-                          気になる記事をタップ！胸が高鳴るストーリーが待っています
-                        </h4>
+              <main className="overflow-y-auto">
+                <section
+                  id="magazine43-cover"
+                  className="relative overflow-hidden bg-[#F5F3EC] px-5 py-14 md:px-10 lg:px-14 lg:py-20"
+                >
+                  <div className="absolute right-8 top-8 hidden text-[120px] font-black leading-none text-white/70 md:block">
+                    43
+                  </div>
+                  <div className="relative max-w-4xl">
+                    <p className="mb-5 inline-flex rounded-full bg-white px-4 py-2 text-[11px] font-black tracking-[0.24em] text-[#CD9535]">
+                      同窓会報 第43号 / 2026年6月
+                    </p>
+                    <h1 className="font-serif text-4xl font-black leading-tight tracking-wide text-[#00204A] md:text-6xl">
+                      茨城大学文理・人文学部同窓会
+                      <br />
+                      WEBマガジン
+                    </h1>
+                    <p className="mt-6 max-w-2xl text-base font-semibold leading-8 text-stone-600">
+                      半世紀の記憶、新学部長の挨拶、学生の地域実践、総会案内、理事会記録、事業・会計報告まで。第43号の内容を、スマートフォンでも読みやすい縦長記事として再編集しました。
+                    </p>
+                    <div className="mt-8 grid gap-3 sm:grid-cols-3">
+                      {[
+                        ['発行', '茨城大学文理・人文学部同窓会'],
+                        ['所在地', '〒310-8512 水戸市文京2-1-1'],
+                        ['連絡先', '029-228-8546 / ibadai.bj.dousou@gmail.com'],
+                      ].map(([label, value]) => (
+                        <div key={label} className="rounded-[8px] border border-stone-200 bg-white p-4">
+                          <p className="text-[10px] font-black tracking-widest text-[#CD9535]">{label}</p>
+                          <p className="mt-2 text-xs font-bold leading-5 text-stone-700">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </section>
+
+                <div className="mx-auto max-w-4xl px-5 py-12 md:px-10">
+                  <section className="mb-12 rounded-[8px] border border-stone-200 bg-white p-6">
+                    <h2 className="mb-5 font-serif text-2xl font-black text-[#00204A]">目次</h2>
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {tocItems.map((item) => (
+                        <button
+                          key={item.id}
+                          onClick={() => scrollToSection(item.id)}
+                          className="group flex items-center gap-4 rounded-[6px] border border-stone-200 p-4 text-left transition hover:border-[#CD9535] hover:bg-[#FAF7EF]"
+                        >
+                          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#00204A] text-[10px] font-black tracking-widest text-white">
+                            {item.label}
+                          </span>
+                          <span className="flex-1 text-sm font-bold leading-6 text-stone-700 group-hover:text-[#00204A]">
+                            {item.title}
+                          </span>
+                          <ArrowRight className="h-4 w-4 text-[#CD9535]" />
+                        </button>
+                      ))}
+                    </div>
+                  </section>
+
+                  <ArticleBlock article={articles[0]}>
+                    <div className="mt-8 grid gap-3 rounded-[8px] bg-[#00204A] p-5 text-white sm:grid-cols-2">
+                      <div className="flex gap-3">
+                        <CalendarDays className="mt-1 h-5 w-5 flex-shrink-0 text-[#CD9535]" />
+                        <p className="text-sm font-bold leading-7">第18回総会開催：2026年7月18日（土）</p>
                       </div>
-
-                      <div className="space-y-3.5 max-h-[220px] overflow-y-auto pr-1">
-                        {articles.map((art) => (
-                          <div 
-                            key={art.id}
-                            onClick={() => setSelectedArticle(art.id)}
-                            className="bg-white border border-stone-200 hover:border-stone-800 p-4 rounded-none cursor-pointer transition-all flex items-start gap-4 group"
-                          >
-                            <span className="w-9 h-9 border border-stone-200 text-stone-800 flex items-center justify-center font-mono font-extrabold text-[13px] flex-shrink-0 group-hover:bg-stone-950 group-hover:text-[#FCFAF7] group-hover:border-stone-950 transition-all duration-300">
-                              0{art.id}
-                            </span>
-                            
-                            <div className="flex-1 text-left">
-                              <span className="text-[9px] font-mono tracking-widest text-[#CD9535] block font-bold mb-0.5">
-                                {art.category}
-                              </span>
-                              
-                              <h5 className="font-sans font-bold text-stone-800 text-[13.5px] sm:text-sm group-hover:text-[#CD9535] transition-colors leading-snug">
-                                {art.title}
-                              </h5>
-                              <p className="text-[11px] text-stone-400 font-medium">
-                                {art.writer}
-                              </p>
-                            </div>
-
-                            <ChevronRight className="w-4.5 h-4.5 text-stone-300 self-center group-hover:text-stone-950 transition-colors" />
-                          </div>
-                        ))}
+                      <div className="flex gap-3">
+                        <Landmark className="mt-1 h-5 w-5 flex-shrink-0 text-[#CD9535]" />
+                        <p className="text-sm font-bold leading-7">ホームカミングデー2026：2026年10月10日（土）開催</p>
                       </div>
                     </div>
-                  ) : (
-                    // Beautiful Editorial Spec Details Layout (Unbelievably simple, ultra-graphic, zero-reading burden)
-                    <motion.div 
-                      key="selected-art-view"
-                      initial={{ opacity: 0, x: 8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="bg-white border border-stone-200 p-6 text-left flex-grow flex flex-col justify-between"
-                    >
-                      <div>
-                        {/* Header metadata */}
-                        <div className="flex items-center justify-between border-b border-stone-200 pb-2.5 mb-4">
-                          <span className="text-[9.5px] font-mono font-black text-[#CD9535] tracking-widest uppercase">
-                            {articles.find(a => a.id === selectedArticle)?.category}
-                          </span>
-                          <button 
-                            onClick={() => setSelectedArticle(null)}
-                            className="text-[10px] font-mono font-bold text-stone-500 hover:text-stone-950 hover:underline tracking-wider"
-                          >
-                            ← INDEX / 戻る
-                          </button>
+                  </ArticleBlock>
+
+                  <ArticleBlock article={articles[1]}>
+                    <figure className="mt-8 overflow-hidden rounded-[8px] border border-stone-200 bg-white">
+                      <img src={hasuiImage} alt="蓮井誠一郎 学部長" className="h-[320px] w-full object-cover object-top" />
+                      <figcaption className="px-4 py-3 text-xs font-bold text-stone-500">
+                        蓮井誠一郎 人文社会科学部長
+                      </figcaption>
+                    </figure>
+                  </ArticleBlock>
+
+                  <ArticleBlock article={articles[2]}>
+                    <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                      {[
+                        [homeworkImage, 'てらこやで宿題をする様子'],
+                        [jumpRopeImage, 'てらこやで大縄跳びをする様子'],
+                        [lunchImage, '「ふらっと」でのお昼ご飯の様子'],
+                        [activityImage, '「ふらっと」での活動の様子'],
+                      ].map(([src, caption]) => (
+                        <figure key={caption} className="overflow-hidden rounded-[8px] border border-stone-200 bg-white">
+                          <img src={src} alt={caption} className="h-56 w-full object-cover" />
+                          <figcaption className="px-4 py-3 text-xs font-bold text-stone-500">{caption}</figcaption>
+                        </figure>
+                      ))}
+                    </div>
+                  </ArticleBlock>
+
+                  <section id="magazine43-meeting" className="scroll-mt-6 border-t border-stone-200 pt-12">
+                    <div className="mb-6 flex items-center gap-3">
+                      <span className="rounded-full bg-[#00204A] px-3 py-1 text-[10px] font-bold tracking-[0.18em] text-white">
+                        総会
+                      </span>
+                      <span className="h-px flex-1 bg-stone-200" />
+                    </div>
+                    <h2 className="font-serif text-3xl font-black text-[#00204A] md:text-5xl">第18回総会の開催について</h2>
+                    <p className="mt-6 text-[15px] leading-9 text-stone-700">
+                      会則第9条により、第18回総会を下記のとおり開催します。今年度は開催場所がつくば市内に変わりました。総会終了後には講演会と懇親会を予定しています。
+                    </p>
+                    <div className="mt-8 overflow-hidden rounded-[8px] border border-stone-200">
+                      {meetingDetails.map(([label, value]) => (
+                        <div key={label} className="grid border-b border-stone-200 last:border-b-0 md:grid-cols-[150px_1fr]">
+                          <div className="bg-[#F5F3EC] px-4 py-3 text-xs font-black tracking-widest text-[#CD9535]">
+                            {label}
+                          </div>
+                          <div className="px-4 py-3 text-sm font-semibold leading-7 text-stone-700">{value}</div>
                         </div>
+                      ))}
+                    </div>
+                  </section>
 
-                        <h4 className="text-base sm:text-lg font-serif font-black text-[#1A1A1A] leading-snug mb-1">
-                          {articles.find(a => a.id === selectedArticle)?.title}
-                        </h4>
-                        
-                        <p className="text-[11px] text-stone-400 font-mono font-bold tracking-wide mb-5">
-                          {articles.find(a => a.id === selectedArticle)?.writer}
-                        </p>
-
-                        {/* Interactive schematic diagram representation with a beautiful dot blueprint style and zero-cognitive load */}
-                        <div className="p-5 bg-[#FCFAF7] border-l-4 border-[#CD9535] border-y border-r border-stone-200/80 mb-4 select-none relative overflow-hidden bg-[radial-gradient(#EFECE6_1px,transparent_1px)] [background-size:16px_16px]">
-                          <span className="text-[9px] font-mono font-bold tracking-widest text-[#CD9535] block mb-3 uppercase flex items-center gap-1.5">
-                            <span className="h-1.5 w-1.5 rounded-full bg-[#CD9535] animate-ping" />
-                            ◆ 15秒で頭に入る構造プロット ◆
+                  <section id="magazine43-board" className="scroll-mt-6 border-t border-stone-200 pt-12">
+                    <div className="mb-6 flex items-center gap-3">
+                      <span className="rounded-full bg-[#00204A] px-3 py-1 text-[10px] font-bold tracking-[0.18em] text-white">
+                        記録
+                      </span>
+                      <span className="h-px flex-1 bg-stone-200" />
+                    </div>
+                    <h2 className="font-serif text-3xl font-black text-[#00204A] md:text-5xl">第40回理事会議事要録</h2>
+                    <div className="mt-8 space-y-4">
+                      {boardMinutes.map((minute, index) => (
+                        <div key={minute} className="flex gap-4 rounded-[8px] border border-stone-200 bg-white p-4">
+                          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#CD9535] text-xs font-black text-white">
+                            {index + 1}
                           </span>
-                          
-                          <div className="space-y-3.5 relative z-10">
-                            {articles.find(a => a.id === selectedArticle)?.bulletPoints.map((pt, idx) => (
-                              <div key={idx} className="flex items-start gap-2.5">
-                                <span className="bg-[#CD9535] text-stone-900 rounded-none font-mono w-4.5 h-4.5 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
-                                  0{idx + 1}
-                                </span>
-                                <p className="text-stone-850 text-xs font-bold leading-relaxed font-sans">
-                                  {pt}
-                                </p>
+                          <p className="text-sm font-semibold leading-7 text-stone-700">{minute}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </section>
+
+                  <section id="magazine43-activities" className="scroll-mt-6 border-t border-stone-200 pt-12">
+                    <div className="mb-6 flex items-center gap-3">
+                      <span className="rounded-full bg-[#00204A] px-3 py-1 text-[10px] font-bold tracking-[0.18em] text-white">
+                        事業
+                      </span>
+                      <span className="h-px flex-1 bg-stone-200" />
+                    </div>
+                    <h2 className="font-serif text-3xl font-black text-[#00204A] md:text-5xl">
+                      令和7年度事業報告・令和8年度事業計画
+                    </h2>
+                    <div className="mt-8 grid gap-6">
+                      {activityReports.map((report) => (
+                        <div key={report.title} className="rounded-[8px] border border-stone-200 bg-white p-5">
+                          <h3 className="mb-4 flex items-center gap-2 text-lg font-black text-[#00204A]">
+                            <ScrollText className="h-5 w-5 text-[#CD9535]" />
+                            {report.title}
+                          </h3>
+                          <div className="space-y-3">
+                            {report.rows.map(([item, date, body]) => (
+                              <div key={item} className="rounded-[6px] bg-[#FAF7EF] p-4">
+                                <p className="text-sm font-black text-[#00204A]">{item}</p>
+                                <p className="mt-1 text-xs font-bold text-[#CD9535]">{date}</p>
+                                <p className="mt-2 text-sm leading-7 text-stone-700">{body}</p>
                               </div>
                             ))}
                           </div>
                         </div>
-
-                        <p className="text-stone-500 text-xs leading-relaxed font-sans">
-                          {articles.find(a => a.id === selectedArticle)?.outline}
-                        </p>
-                      </div>
-
-                      <div className="mt-6 flex flex-wrap gap-2.5 justify-end">
-                        <button 
-                          onClick={() => setSelectedArticle(null)}
-                          className="bg-stone-100 hover:bg-stone-200 text-stone-800 text-[11px] font-mono font-bold tracking-widest px-4 py-2.5 transition-colors cursor-pointer"
-                        >
-                          SPECIAL LIST
-                        </button>
-                        <a 
-                          href="http://dousoukai.hum.ibaraki.ac.jp/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-stone-950 hover:bg-[#CD9535] text-white hover:text-stone-900 text-xs font-mono font-bold px-4 py-2.5 transition-colors flex items-center gap-1.5 shadow-sm"
-                        >
-                          <span>VISIT FULL BULLETIN SITE</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {/* Footer toggle prompt */}
-                  {selectedArticle === null && (
-                    <div className="mt-4 text-left border-t border-stone-100 pt-3">
-                      <button 
-                        onClick={() => setActiveTab('pdf')}
-                        className="text-[10px] font-sans font-bold text-[#CD9535] hover:text-stone-900 tracking-wide underline uppercase"
-                      >
-                        → 実際の冊子そのままのレイアウト（PDF版）で読みたい場合はこちら
-                      </button>
+                      ))}
                     </div>
-                  )}
+                  </section>
 
-                </div>
-              )}
-
-              {/* TAB 3: PRINT PDF DIGITAL MOCKUP (Exquisite page book representation) */}
-              {activeTab === 'pdf' && (
-                <div className="flex-grow flex flex-col justify-between py-1 text-left">
-                  <div>
-                    <div className="mb-4 flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 border-b border-stone-100 pb-2">
-                      <div>
-                        <span className="text-[9px] font-mono font-bold text-[#CD9535] tracking-[0.25em] block uppercase">PRINTED DOCUMENT REPLICA</span>
-                        <h4 className="text-base font-serif font-black text-stone-900 mt-0.5">
-                          冊子見開き完全再現ビュー
-                        </h4>
-                      </div>
-                      
-                      <div className="flex items-center gap-2 mt-1.5 sm:mt-0">
-                        <span className="text-[10px] font-mono text-stone-400 font-bold tracking-wider">
-                          4 PAGES
-                        </span>
-                        <a 
-                          href="http://dousoukai.hum.ibaraki.ac.jp/" 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="bg-stone-950 text-white hover:bg-[#CD9535] hover:text-stone-900 transition-colors text-[10px] font-mono font-bold px-3 py-1.5 flex items-center gap-1 uppercase tracking-wider"
-                        >
-                          <span>DOWNLOAD</span>
-                          <FileDown className="w-3.5 h-3.5" />
-                        </a>
-                      </div>
+                  <section id="magazine43-finance" className="scroll-mt-6 border-t border-stone-200 pt-12">
+                    <div className="mb-6 flex items-center gap-3">
+                      <span className="rounded-full bg-[#00204A] px-3 py-1 text-[10px] font-bold tracking-[0.18em] text-white">
+                        会計
+                      </span>
+                      <span className="h-px flex-1 bg-stone-200" />
                     </div>
-
-                    {/* Book wireframe preview: high-end flat book render */}
-                    <div className="bg-[#FAF9F5] border border-stone-250 p-4 relative overflow-hidden flex flex-col items-center select-none h-[180px] justify-center bg-white shadow-inner">
-                      
-                      {/* Left and Right navigation buttons on top of book */}
-                      <button 
-                        disabled={pdfPage === 1}
-                        onClick={() => setPdfPage(p => Math.max(1, p - 1))}
-                        className={`absolute left-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-none border border-stone-800 bg-white/95 flex items-center justify-center text-stone-800 hover:bg-stone-50 transition-colors z-20 ${pdfPage === 1 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-
-                      <button 
-                        disabled={pdfPage === 4}
-                        onClick={() => setPdfPage(p => Math.min(4, p + 1))}
-                        className={`absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-none border border-stone-800 bg-white/95 flex items-center justify-center text-stone-800 hover:bg-stone-50 transition-colors z-20 ${pdfPage === 4 ? 'opacity-20 cursor-not-allowed' : 'cursor-pointer'}`}
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-
-                      {/* simulated book layout with elegant spine shadow */}
-                      <div className="w-[170px] h-[145px] bg-[#FCFAF7] shadow-[0_8px_25px_rgba(0,0,0,0.08)] border-y border-stone-300 px-3.5 py-3 flex flex-col justify-between transition-all duration-300 relative border-l border-r-4 border-r-stone-400">
-                        <div className="absolute top-2 right-2.5 text-[8px] font-mono text-stone-400 font-extrabold tracking-wider">PAGE 0{pdfPage}/04</div>
-                        
-                        {pdfPage === 1 && (
-                          <div className="space-y-3 pt-1 text-left">
-                            <div className="flex justify-between items-baseline border-b border-stone-200 pb-1">
-                              <span className="text-[10.5px] font-serif font-black text-stone-900 tracking-tight">第42号 表紙</span>
-                              <div className="w-5 h-0.5 bg-[#CD9535]" />
-                            </div>
-                            
-                            {/* Stylized physical graphic mock */}
-                            <div className="w-full h-11 bg-[#1C1C1C] flex flex-col justify-center items-center p-1.5 relative">
-                              <span className="text-[#CD9535] text-[9px] font-serif font-extrabold tracking-tight">同窓会報</span>
-                              <span className="text-white text-[6px] font-mono tracking-widest uppercase mt-0.5">IBARAKI UNIV</span>
-                            </div>
-
-                            <div className="space-y-0.5 mt-0.5">
-                              <div className="w-full h-0.5 bg-stone-300" />
-                              <div className="w-2/3 h-0.5 bg-stone-200" />
-                            </div>
+                    <h2 className="font-serif text-3xl font-black text-[#00204A] md:text-5xl">決算報告・予算案</h2>
+                    <p className="mt-6 text-sm leading-8 text-stone-600">
+                      会報第43号掲載の決算・予算資料を、スマートフォンで読みやすい主要項目テーブルとして再構成しました。
+                    </p>
+                    <div className="mt-8 grid gap-6">
+                      {financeTables.map((table) => (
+                        <div key={table.title} className="overflow-hidden rounded-[8px] border border-stone-200 bg-white">
+                          <div className="flex items-center gap-3 bg-[#00204A] px-5 py-4 text-white">
+                            <ReceiptText className="h-5 w-5 text-[#CD9535]" />
+                            <h3 className="text-sm font-black tracking-wide">{table.title}</h3>
                           </div>
-                        )}
-
-                        {pdfPage === 2 && (
-                          <div className="space-y-2.5 pt-0.5 text-left">
-                            <span className="text-[9px] font-mono font-extrabold text-stone-800 tracking-wider block border-b border-stone-200 pb-0.5">02: 決算会計報告</span>
-                            
-                            <div className="space-y-1.5 mt-1">
-                              <div className="flex gap-1.5 justify-between">
-                                <div className="w-1/3 h-5 bg-[#FCFAF7] border border-stone-200 p-0.5 flex flex-col justify-between">
-                                  <div className="bg-stone-300 h-0.5 w-full" />
-                                </div>
-                                <div className="w-2/3 h-5 bg-[#FCFAF7] border border-stone-300 p-0.5">
-                                  <div className="bg-[#CD9535] h-1 w-4/5" />
-                                </div>
+                          <div className="divide-y divide-stone-200">
+                            {table.rows.map((row) => (
+                              <div key={`${table.title}-${row.item}`} className="grid gap-2 px-5 py-4 md:grid-cols-[1.2fr_1fr_1fr]">
+                                <p className="text-sm font-black text-[#00204A]">{row.item}</p>
+                                <p className="text-sm font-bold text-stone-800">{row.current}</p>
+                                <p className="text-xs font-semibold leading-6 text-stone-500">{row.note || row.previous}</p>
                               </div>
-                              <div className="w-full h-9 bg-stone-50 border border-stone-200 p-0.5 flex flex-col justify-between">
-                                <span className="text-[6px] text-stone-400 font-mono tracking-tighter uppercase font-bold">REVENUE</span>
-                                <div className="flex gap-0.5">
-                                  <div className="h-1 bg-stone-800" style={{ width: '60%' }} />
-                                  <div className="h-1 bg-[#CD9535]" style={{ width: '30%' }} />
-                                </div>
-                              </div>
-                            </div>
+                            ))}
                           </div>
-                        )}
-
-                        {pdfPage === 3 && (
-                          <div className="space-y-2.5 pt-0.5 text-left">
-                            <span className="text-[9px] font-mono font-extrabold text-stone-800 tracking-wider block border-b border-stone-200 pb-0.5">03: 論文選出・学生寄稿</span>
-                            
-                            <div className="space-y-1.5">
-                              <div className="w-full h-7 bg-white border border-stone-200 p-1 flex items-center gap-1.5">
-                                <span className="text-[#CD9535] text-[9px] font-serif font-black">文</span>
-                                <div className="flex-1 space-y-0.5">
-                                  <div className="w-2/3 h-0.5 bg-stone-300" />
-                                </div>
-                              </div>
-                              
-                              <div className="w-full h-8 bg-white border border-stone-200 p-1 flex flex-col justify-between">
-                                <div className="w-full h-0.5 bg-stone-300" />
-                                <div className="grid grid-cols-2 gap-1">
-                                  <div className="h-2 bg-stone-100" />
-                                  <div className="h-2 bg-[#CD9535]/15" />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        {pdfPage === 4 && (
-                          <div className="space-y-2.5 pt-0.5 text-left">
-                            <span className="text-[9px] font-mono font-extrabold text-stone-800 tracking-wider block border-b border-stone-200 pb-0.5">04: 登録住所一斉更新</span>
-                            
-                            <div className="w-full h-11 bg-[#FCFAF7] border border-dashed border-[#CD9535]/40 p-1 flex flex-col justify-between items-center text-center">
-                              <span className="text-[7px] font-bold text-stone-700 tracking-tighter">データ更新管理</span>
-                              <div className="bg-stone-900 text-white rounded-none w-12 h-3 flex items-center justify-center text-[6px] font-mono font-bold tracking-wide">
-                                CLOUD REG
-                              </div>
-                            </div>
-                            
-                            <div className="space-y-0.5">
-                              <div className="w-full h-0.5 bg-stone-300" />
-                            </div>
-                          </div>
-                        )}
-
-                        <div className="text-[7px] text-stone-400 text-center font-mono tracking-widest">
-                          - NO. 42 BULLETIN REPLICA -
                         </div>
-                      </div>
-
+                      ))}
                     </div>
-                  </div>
+                  </section>
 
-                  <div className="mt-3 flex flex-col sm:flex-row items-center justify-between gap-3">
-                    <button 
-                      onClick={() => setActiveTab('magazine')}
-                      className="text-[10px] font-sans font-bold text-[#CD9535] hover:text-stone-900 tracking-wide underline uppercase"
-                    >
-                      ← スマホに最適化されたWebマガジン版はこちら
-                    </button>
-                    
-                    <a 
-                      href="http://dousoukai.hum.ibaraki.ac.jp/" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-xs bg-stone-950 hover:bg-[#CD9535] text-white hover:text-stone-900 font-mono font-bold py-2 px-4 transition-all flex items-center gap-1.5 select-none"
-                    >
-                      <span>OPEN PRINT PDF HIGH-RES</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </a>
-                  </div>
+                  <section id="magazine43-editor" className="scroll-mt-6 border-t border-stone-200 pt-12">
+                    <div className="mb-6 flex items-center gap-3">
+                      <span className="rounded-full bg-[#00204A] px-3 py-1 text-[10px] font-bold tracking-[0.18em] text-white">
+                        後記
+                      </span>
+                      <span className="h-px flex-1 bg-stone-200" />
+                    </div>
+                    <h2 className="font-serif text-3xl font-black text-[#00204A] md:text-5xl">編集後記</h2>
+                    <div className="mt-8 space-y-5 text-[15px] leading-9 tracking-wide text-stone-700">
+                      {editorParagraphs.map((paragraph) => (
+                        <p key={paragraph}>{paragraph}</p>
+                      ))}
+                    </div>
+                    <div className="mt-8 grid gap-3 rounded-[8px] bg-[#F5F3EC] p-5 sm:grid-cols-3">
+                      <div className="flex gap-3">
+                        <Phone className="mt-1 h-5 w-5 text-[#CD9535]" />
+                        <p className="text-xs font-bold leading-6 text-stone-700">029-228-8546 / 090-3100-5814（鈴木）</p>
+                      </div>
+                      <div className="flex gap-3">
+                        <Mail className="mt-1 h-5 w-5 text-[#CD9535]" />
+                        <p className="break-all text-xs font-bold leading-6 text-stone-700">ibadai.bj.dousou@gmail.com</p>
+                      </div>
+                      <div className="flex gap-3">
+                        <MapPin className="mt-1 h-5 w-5 text-[#CD9535]" />
+                        <p className="text-xs font-bold leading-6 text-stone-700">水戸市文京2-1-1 茨城大学人文社会科学部内</p>
+                      </div>
+                    </div>
+                  </section>
 
+                  <div className="mt-14 border-t border-stone-200 pt-8 text-center">
+                    <FileText className="mx-auto mb-3 h-6 w-6 text-[#CD9535]" />
+                    <p className="text-xs font-bold leading-6 text-stone-500">
+                      同窓会会報第43号 WEBマガジン版 / 発行 茨城大学文理・人文学部同窓会
+                    </p>
+                  </div>
                 </div>
-              )}
-
-
-
+              </main>
             </div>
-
           </motion.div>
         </div>
       )}
