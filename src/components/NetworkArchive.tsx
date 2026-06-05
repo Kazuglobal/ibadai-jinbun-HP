@@ -55,7 +55,20 @@ const COVERS_DATA = [
 
 export default function NetworkArchive() {
   const [activeCoverIndex, setActiveCoverIndex] = React.useState(0);
+  const [isCoverAutoPaused, setIsCoverAutoPaused] = React.useState(false);
   const activeCover = COVERS_DATA[activeCoverIndex];
+
+  React.useEffect(() => {
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    if (prefersReducedMotion.matches || isCoverAutoPaused) return;
+
+    const timer = window.setInterval(() => {
+      setActiveCoverIndex((current) => (current + 1) % COVERS_DATA.length);
+    }, 4200);
+
+    return () => window.clearInterval(timer);
+  }, [isCoverAutoPaused]);
 
   const moveCover = (direction: number) => {
     setActiveCoverIndex((current) => (current + direction + COVERS_DATA.length) % COVERS_DATA.length);
@@ -124,14 +137,20 @@ export default function NetworkArchive() {
                   SWIPEABLE JOURNAL COVER HERO
                   ========================================================================= */}
               <div className="my-6" data-gsap-card>
-                <div className="relative overflow-hidden rounded-3xl border border-stone-200/60 bg-white/55 px-3 py-5 shadow-inner sm:px-6 sm:py-7">
+                <div
+                  className="relative overflow-hidden rounded-3xl border border-stone-200/60 bg-white/55 px-3 py-5 shadow-inner sm:px-6 sm:py-7"
+                  onPointerEnter={() => setIsCoverAutoPaused(true)}
+                  onPointerLeave={() => setIsCoverAutoPaused(false)}
+                  onFocusCapture={() => setIsCoverAutoPaused(true)}
+                  onBlurCapture={() => setIsCoverAutoPaused(false)}
+                >
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div className="text-left">
                       <p className="text-[10px] font-black tracking-[0.22em] text-[#CD9535]">
                         SWIPE COVER
                       </p>
                       <p className="mt-1 text-xs font-bold leading-5 text-stone-500">
-                        表紙を左右にスワイプして号を選択
+                        自動で切り替わります。左右スワイプも可能
                       </p>
                     </div>
 
@@ -160,9 +179,11 @@ export default function NetworkArchive() {
                     drag="x"
                     dragConstraints={{ left: 0, right: 0 }}
                     dragElastic={0.08}
+                    onDragStart={() => setIsCoverAutoPaused(true)}
                     onDragEnd={(_, info) => {
                       if (info.offset.x < -45 || info.velocity.x < -300) moveCover(1);
                       if (info.offset.x > 45 || info.velocity.x > 300) moveCover(-1);
+                      setIsCoverAutoPaused(false);
                     }}
                     whileTap={{ cursor: 'grabbing' }}
                     data-gsap-media
