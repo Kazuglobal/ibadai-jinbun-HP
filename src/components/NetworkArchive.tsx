@@ -46,7 +46,7 @@ const COVERS_DATA = [
 
 export default function NetworkArchive() {
   return (
-    <section className="relative bg-[#FAF9F5] py-16 lg:py-24 border-t border-stone-200/40" id="network-archive">
+    <section className="relative bg-[#FAF9F5] py-16 lg:py-24 border-t border-stone-200/40" id="network-archive" data-gsap-section>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* =========================================================================
@@ -67,12 +67,12 @@ export default function NetworkArchive() {
           >
             <div>
               {/* Header section with subtitle */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-baseline justify-between gap-4 mb-6 text-left">
+              <div className="flex flex-col sm:flex-row items-start sm:items-baseline justify-between gap-4 mb-6 text-left" data-gsap-title>
                 <div>
                   <h2 className="text-4xl md:text-5xl font-serif font-bold text-[#00204A] tracking-wider leading-none mb-4 uppercase">
                     ARCHIVE
                   </h2>
-                  <p className="text-stone-500 font-sans font-bold text-xs sm:text-[13px] tracking-widest leading-relaxed">
+                  <p className="text-stone-500 font-sans font-bold text-xs sm:text-[13px] tracking-widest leading-relaxed" data-gsap-copy>
                     会報アーカイブ / 過去の活動記録
                   </p>
                 </div>
@@ -99,6 +99,7 @@ export default function NetworkArchive() {
                 {COVERS_DATA.map((item) => (
                   <motion.div
                     key={item.id}
+                    data-gsap-card
                     whileHover={{ y: -4 }}
                     onClick={() => {
                       window.dispatchEvent(new CustomEvent('open-newsletter'));
@@ -106,7 +107,7 @@ export default function NetworkArchive() {
                     className="flex flex-col text-left cursor-pointer group/card"
                   >
                     {/* Cover Photo booklet element with custom Japanese printed text overlays to match booklet */}
-                    <div className="relative aspect-[1/1.4] w-full rounded-xl overflow-hidden shadow-sm border border-stone-200/40 bg-stone-150 relative">
+                    <div className="relative aspect-[1/1.4] w-full rounded-xl overflow-hidden shadow-sm border border-stone-200/40 bg-stone-150 relative" data-gsap-media>
                       <img 
                         src={item.image} 
                         alt={item.title}
@@ -153,6 +154,7 @@ export default function NetworkArchive() {
 
                 {/* 4. SOLID BLUE BOOK CARD BLOCK (Displays on Desktop, collapses on Mobile to separate wide button) */}
                 <motion.div
+                  data-gsap-card
                   whileHover={{ y: -4 }}
                   className="hidden sm:flex flex-col bg-[#00132C] rounded-xl overflow-hidden shadow-sm border border-amber-900/10 p-3.5 sm:p-4.5 justify-between text-left cursor-pointer min-h-[140px]"
                 >

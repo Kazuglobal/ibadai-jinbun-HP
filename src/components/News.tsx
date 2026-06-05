@@ -51,13 +51,13 @@ interface NewsProps {
 
 export default function News({ onSelectNews }: NewsProps) {
   return (
-    <section className="relative bg-[#FAF9F5] py-16 lg:py-24 border-t border-stone-200/40" id="news">
+    <section className="relative bg-[#FAF9F5] py-16 lg:py-24 border-t border-stone-200/40" id="news" data-gsap-section>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* =========================================================================
             NEWS SECTION HEADER
             ========================================================================= */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8" data-gsap-title>
           
           <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-7 text-left">
             {/* Title with Left Gold Border */}
@@ -72,7 +72,7 @@ export default function News({ onSelectNews }: NewsProps) {
               <span className="text-[#00204A] font-sans font-bold text-[14px] tracking-wider mb-1">
                 最新のお知らせ
               </span>
-              <p className="text-stone-500 text-[12.5px] sm:text-[13px] tracking-wider leading-relaxed">
+              <p className="text-stone-500 text-[12.5px] sm:text-[13px] tracking-wider leading-relaxed" data-gsap-copy>
                 同窓会・大学に関する重要なお知らせや、学生の活躍などをお届けします。
               </p>
             </div>
@@ -122,6 +122,7 @@ export default function News({ onSelectNews }: NewsProps) {
           {NEWS_ITEMS.map((item) => (
             <motion.a
               key={item.id}
+              data-gsap-card
               href={item.link}
               onClick={(e) => {
                 if (onSelectNews) {
@@ -134,7 +135,7 @@ export default function News({ onSelectNews }: NewsProps) {
               className="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-stone-200/30 text-left transition-all duration-200 flex-shrink-0 w-[285px] xs:w-[315px] md:w-auto snap-start"
             >
               {/* Card Thumbnail Container */}
-              <div className="relative w-full aspect-[16/10.2] overflow-hidden bg-stone-100">
+              <div className="relative w-full aspect-[16/10.2] overflow-hidden bg-stone-100" data-gsap-media>
                 <img 
                   src={item.image} 
                   alt={item.title}

@@ -14,6 +14,7 @@ import ChatAssistant from './components/ChatAssistant';
 import MobileBottomNav from './components/MobileBottomNav';
 import NewsletterModal from './components/NewsletterModal';
 import { motion, AnimatePresence } from 'motion/react';
+import { useGsapScrollAnimations } from './hooks/useGsapScrollAnimations';
 
 export default function App() {
   // Demo interactive state
@@ -25,6 +26,7 @@ export default function App() {
   const handleHomeIntroComplete = useCallback(() => {
     setIsHomeIntroComplete(true);
   }, []);
+  const gsapScrollRef = useGsapScrollAnimations(currentView);
 
   const handleSelectTopic = (title: string) => {
     setSelectedTopic(title);
@@ -87,7 +89,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#FAF9F5] text-[#00204A] font-sans antialiased text-base selection:bg-amber-600 selection:text-white pb-20 sm:pb-0">
+    <div ref={gsapScrollRef} className="min-h-screen bg-[#FAF9F5] text-[#00204A] font-sans antialiased text-base selection:bg-amber-600 selection:text-white pb-20 sm:pb-0">
       {/* Header section (Menu) - now with currentView and navigate callback */}
       <Header currentView={currentView} onNavigate={handleNavigate} />
 

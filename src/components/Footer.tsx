@@ -50,7 +50,7 @@ export default function Footer({ onNavigate }: FooterProps) {
   };
 
   return (
-    <footer className="bg-white text-stone-600 border-t border-stone-200/80 pt-16 pb-8 relative overflow-hidden" id="site-footer">
+    <footer className="bg-white text-stone-600 border-t border-stone-200/80 pt-16 pb-8 relative overflow-hidden" id="site-footer" data-gsap-section>
       {/* Decorative organic background line art */}
       <div className="absolute inset-0 pointer-events-none opacity-[0.03] select-none z-0">
         <svg className="w-full h-full" viewBox="0 0 1440 600" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -80,7 +80,7 @@ export default function Footer({ onNavigate }: FooterProps) {
           
           {/* Left Block: Logo, Info & Contacts (span 5) */}
           <div className="lg:col-span-5 flex flex-col items-start text-left">
-            <div className="flex items-center gap-3 mb-6" id="footer-logo-container">
+            <div className="flex items-center gap-3 mb-6" id="footer-logo-container" data-gsap-title>
               <div className="flex flex-col">
                 <span className="text-[11px] font-semibold tracking-wider text-[#CD9535] leading-none">
                   茨城大学
@@ -91,12 +91,12 @@ export default function Footer({ onNavigate }: FooterProps) {
               </div>
             </div>
 
-            <p className="text-stone-600 text-xs md:text-sm leading-relaxed mb-6 font-sans">
+            <p className="text-stone-600 text-xs md:text-sm leading-relaxed mb-6 font-sans" data-gsap-copy>
               茨城大学文理学部および人文社会科学部の卒業生・在学生を繋ぐ、公式同窓会ネットワーク事務局です。本学の学術研究支援、及び同窓生の皆様の相互親睦を目的として活動しています。
             </p>
 
             {/* Office Contact Info Card */}
-            <div className="bg-stone-50 border border-stone-200/60 rounded-2xl p-5 w-full space-y-3 text-xs md:text-sm text-stone-600" id="footer-contact-info">
+            <div className="bg-stone-50 border border-stone-200/60 rounded-2xl p-5 w-full space-y-3 text-xs md:text-sm text-stone-600" id="footer-contact-info" data-gsap-card>
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-[#CD9535] mt-0.5 flex-shrink-0" />
                 <span className="leading-relaxed">
@@ -123,7 +123,7 @@ export default function Footer({ onNavigate }: FooterProps) {
           <div className="lg:col-span-7 grid grid-cols-2 sm:grid-cols-3 gap-8">
             
             {/* Sitemap Column 1: Main Menu */}
-            <div className="flex flex-col text-left">
+            <div className="flex flex-col text-left" data-gsap-card>
               <h4 className="text-[#CD9535] font-bold text-xs md:text-sm uppercase tracking-widest border-b border-stone-200 pb-2.5 mb-4">
                 同窓会メニュー
               </h4>
@@ -151,7 +151,7 @@ export default function Footer({ onNavigate }: FooterProps) {
             </div>
 
             {/* Sitemap Column 2: Various Procedures */}
-            <div className="flex flex-col text-left col-span-1 sm:col-span-2">
+            <div className="flex flex-col text-left col-span-1 sm:col-span-2" data-gsap-card>
               <h4 className="text-[#CD9535] font-bold text-xs md:text-sm uppercase tracking-widest border-b border-stone-200 pb-2.5 mb-4">
                 手続き・ご支援
               </h4>
