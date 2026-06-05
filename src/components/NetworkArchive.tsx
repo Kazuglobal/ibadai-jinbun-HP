@@ -17,7 +17,8 @@ const COVERS_DATA = [
     seasonText: '2026年 最新号',
     image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?q=80&w=600&auto=format&fit=crop',
     title: '同窓会報 第43号',
-    date: '2026年 最新号'
+    date: '2026年 最新号',
+    webMagazineReady: true
   },
   {
     id: '42',
@@ -25,7 +26,8 @@ const COVERS_DATA = [
     seasonText: '2026年 春号',
     image: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?q=80&w=600&auto=format&fit=crop',
     title: '同窓会報 第42号',
-    date: '2026年 春号'
+    date: '2026年 春号',
+    webMagazineReady: false
   },
   {
     id: '40',
@@ -33,7 +35,8 @@ const COVERS_DATA = [
     seasonText: '2024年 春号',
     image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=600&auto=format&fit=crop',
     title: '同窓会報 第40号',
-    date: '2024年 春号'
+    date: '2024年 春号',
+    webMagazineReady: false
   },
   {
     id: '39',
@@ -41,7 +44,8 @@ const COVERS_DATA = [
     seasonText: '2023年 秋号',
     image: 'https://images.unsplash.com/photo-1498243691581-b145c3f54a91?q=80&w=600&auto=format&fit=crop',
     title: '同窓会報 第39号',
-    date: '2023年 秋号'
+    date: '2023年 秋号',
+    webMagazineReady: false
   },
   {
     id: '38',
@@ -49,7 +53,8 @@ const COVERS_DATA = [
     seasonText: '2023年 春号',
     image: 'https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?q=80&w=600&auto=format&fit=crop',
     title: '同窓会報 第38号',
-    date: '2023年 春号'
+    date: '2023年 春号',
+    webMagazineReady: false
   }
 ];
 
@@ -83,7 +88,9 @@ export default function NetworkArchive() {
     return rawOffset;
   };
 
-  const openNewsletter = () => {
+  const openNewsletter = (cover = activeCover) => {
+    if (!cover.webMagazineReady) return;
+
     window.dispatchEvent(new CustomEvent('open-newsletter'));
   };
 
@@ -202,7 +209,7 @@ export default function NetworkArchive() {
                           type="button"
                           onClick={() => {
                             if (isActive) {
-                              openNewsletter();
+                              openNewsletter(item);
                               return;
                             }
 
@@ -255,6 +262,11 @@ export default function NetworkArchive() {
                       <p className="mt-1 text-xs font-bold tracking-wider text-[#CD9535]">
                         {activeCover.date}
                       </p>
+                      {!activeCover.webMagazineReady && (
+                        <p className="mt-2 text-[11px] font-bold tracking-wider text-stone-500">
+                          WEBマガジン準備中
+                        </p>
+                      )}
                       <span className="mt-2 block h-[1.5px] w-8 bg-[#CD9535]" />
                     </div>
 
@@ -275,10 +287,15 @@ export default function NetworkArchive() {
 
                       <button
                         type="button"
-                        onClick={openNewsletter}
-                        className="inline-flex items-center gap-2 rounded-full bg-[#00204A] px-4 py-2.5 text-[11px] font-black tracking-widest text-white shadow-sm transition hover:bg-[#CD9535]"
+                        onClick={() => openNewsletter()}
+                        disabled={!activeCover.webMagazineReady}
+                        className={`inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-[11px] font-black tracking-widest shadow-sm transition ${
+                          activeCover.webMagazineReady
+                            ? 'bg-[#00204A] text-white hover:bg-[#CD9535]'
+                            : 'cursor-not-allowed bg-stone-200 text-stone-500'
+                        }`}
                       >
-                        読む
+                        {activeCover.webMagazineReady ? '読む' : '準備中'}
                         <ArrowRight className="h-3.5 w-3.5" />
                       </button>
                     </div>
