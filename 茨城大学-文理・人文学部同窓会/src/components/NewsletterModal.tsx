@@ -9,7 +9,10 @@ import {
   ExternalLink,
   Laptop,
   Phone,
-  FileDown
+  FileDown,
+  Clock3,
+  MousePointerClick,
+  Sparkles
 } from 'lucide-react';
 
 interface NewsletterModalProps {
@@ -58,36 +61,36 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
   const articles = [
     {
       id: 1,
-      category: '🔥 巻頭スペシャル対談',
-      title: '未来を拓く、OBと大学を結ぶ知の旅。阿部准教授と語る「これからの頼れるつながり」',
-      writer: '阿部 准教授 × 同窓会代表幹事による「ここだけの本音トーク」',
+      category: '巻頭エッセイ',
+      title: '茨城大学 半世紀の想い出',
+      writer: '木戸 之都子（人文・文10回卒）',
       bulletPoints: [
-        '大人にこそ必要な「一生モノの最高のサードプレイス」を創る！',
-        '先輩から後輩へ！社会の荒波をサバイバルするためのリアルな智恵のバトンリレー。'
+        '1976年の入学から、人文図書室、古文書整理、同窓会名簿づくりまでをたどります。',
+        '個人の思い出を通して、文理・人文学部同窓会の歩みと大学の変化が見えてきます。'
       ],
-      outline: '「大学と私たちのこれから」をワクワクする未来地図と共に。大人になって学ぶ楽しさや、世代を超えて仲間と巡り会うストーリーを胸が熱くなる本音で語ります。'
+      outline: '懐かしさだけで終わらない、大学と同窓会が重ねてきた時間を感じられる巻頭記事です。まずここから読むと、第43号全体の温度感がつかめます。'
     },
     {
       id: 2,
-      category: '🏆 受賞記念ドキュメント',
-      title: '「大好きな私たちの街をずっと守りたい！」現役3年生が挑んだ、地方公共交通の未来予想図',
-      writer: '人文社会科学部 3年（第11回学生懸賞論文 最優秀賞）',
+      category: '学部長メッセージ',
+      title: '同窓会の皆様へ',
+      writer: '人文社会科学部長　蓮井 誠一郎',
       bulletPoints: [
-        '机の上の空論じゃない！何度も現地に通い、地域の生の声から生まれた泥臭い現場力。',
-        'プロも驚いた！本気で自治体に採用させたい「今日から動くリアルな移動プラン」。'
+        '人文社会科学部の現在と、これからの教育・研究環境づくりについて語られています。',
+        'オンライン化が進む時代に、対面のつながりやカレッジの価値をどう再構築するかを考えます。'
       ],
-      outline: 'ひとりの学生の熱い「街への想い」に審査員長も思わず唸った。地域の未来をおもしろく塗り替える、ドラマのような挑戦の一部始終を図解でサクッとご覧ください。'
+      outline: '学部の今を知りたい同窓生に向けた、落ち着いた読み応えのあるメッセージです。母校との距離をもう一度近づけてくれます。'
     },
     {
       id: 3,
-      category: '🚀 カリキュラム超解説',
-      title: '教室に「伝説の先輩たち」が大集結！ここでしか聴けないガチ起業・キャリア講義レポート',
-      writer: '人文社会科学部・特別地域連携プログラム 講師陣',
+      category: '学生レポート',
+      title: 'ひたちなか市における子どもの居場所づくり',
+      writer: '人文社会科学部4年　中塩 紗矢香',
       bulletPoints: [
-        '第一線の現場を駆ける起業家から若手実務家まで、各界の先輩たちが教壇へ降臨。',
-        '教科書には絶対に載っていない、生々しい「仕事の裏側と楽しさ」に震える。'
+        'フリースクールや地域の居場所での実践から、子ども一人ひとりに寄り添う支援を考えます。',
+        '在学生が地域の現場で何を学び、将来へどうつなげようとしているかが伝わる記事です。'
       ],
-      outline: '今まさにキャンバスで巻き起こっている熱いエネルギーを感じてみませんか？社会で即戦力になり「自分の力で稼ぎ、楽しむ」ヒントがぎゅっと詰まった超人気講義の最前線。'
+      outline: '現役学生のまなざしから、大学での学びが地域の課題と結びつく瞬間を読めます。卒業生にも在学生にも届く、今号の注目記事です。'
     }
   ];
 
@@ -114,14 +117,16 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
           >
             
             {/* COLUMN 1: EDITORIAL JACKET COVER (Stark Bauhaus & Swiss Modernism) */}
-            <div className="hidden md:flex bg-[#1C1C1C] text-[#F3EFE9] p-5 md:p-6 flex-col justify-between md:w-48 md:border-r border-stone-800 flex-shrink-0 relative">
+            <div className="hidden md:flex bg-[#1C1C1C] text-[#F3EFE9] p-5 md:p-6 flex-col justify-between md:w-52 md:border-r border-stone-800 flex-shrink-0 relative overflow-hidden">
               {/* Asymmetric layout designators */}
               <div className="absolute top-0 right-0 h-full w-[1px] bg-stone-800/45 left-10 pointer-events-none" />
+              <div className="absolute -right-14 -top-12 h-32 w-32 rounded-full bg-[#CD9535]/18 blur-2xl" />
+              <div className="absolute bottom-6 left-4 h-20 w-20 rounded-full bg-white/7 blur-xl" />
               
               <div className="relative z-10 text-left">
                 {/* Micro editorial metadata header */}
                 <div className="flex items-center gap-2 mb-4 md:mb-6 text-[10px] font-mono tracking-[0.25em] text-[#CD9535] uppercase font-bold">
-                  <span>No. 42 / SPRING ISSUE</span>
+                  <span>No. 43 / NEW ISSUE</span>
                 </div>
 
                 <div className="space-y-1">
@@ -132,14 +137,30 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                     同窓会報
                   </h2>
                   <div className="text-[36px] font-mono font-extrabold leading-none text-[#CD9535] mt-0.5 tracking-tighter">
-                    VOL.42
+                    VOL.43
                   </div>
                 </div>
 
                 <div className="h-[1px] bg-stone-800 my-4" />
 
-                <p className="text-stone-400 text-[11px] leading-relaxed tracking-wide font-sans">
-                  忙しいあなたに、最高の読書体験を。すべての貴重な情報をパッと直感的に楽しめるよう、イラスト図解と要点を凝縮した新感覚のデジタル会報へ蘇らせました。
+                <p className="text-stone-300 text-[11px] leading-relaxed tracking-wide font-sans">
+                  半世紀の記憶、学部長メッセージ、学生の地域実践、総会案内を、すぐ読める入口に整理しました。
+                </p>
+
+                <div className="mt-5 space-y-2">
+                  {['読みどころを先に確認', 'スマホで見やすい', '冊子風にも切替'].map((label) => (
+                    <div key={label} className="flex items-center gap-2 text-[10px] font-bold text-stone-300">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#CD9535]" />
+                      {label}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="relative z-10 rounded-lg border border-white/10 bg-white/7 p-3">
+                <p className="text-[9px] font-mono font-bold tracking-[0.22em] text-[#CD9535]">PICK UP</p>
+                <p className="mt-1 text-[12px] font-serif font-black leading-snug text-white">
+                  まずは巻頭特集から。懐かしさと現在の学びがつながります。
                 </p>
               </div>
             </div>
@@ -152,7 +173,7 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                 <div className="flex flex-col gap-1 text-left w-full sm:w-auto">
                   {/* Mobile-only micro header */}
                   <div className="md:hidden flex items-center gap-1.5 text-[9px] font-mono tracking-widest text-[#CD9535] uppercase font-bold mb-1">
-                    <span>同窓会報 VOL.42</span>
+                    <span>同窓会報 VOL.43</span>
                     <span className="text-stone-300">/</span>
                     <span className="text-stone-400 font-medium">ALUMNI BULLETIN</span>
                   </div>
@@ -193,12 +214,28 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
               {activeTab === 'select' && (
                 <div className="flex-grow flex flex-col justify-center py-1 text-left">
                   <div className="mb-4">
-                    <h3 className="text-lg sm:text-xl font-serif font-black tracking-tight text-[#1A1A1A] leading-snug">
-                      開いた瞬間、心が躍る。新しい「会報スタイル」をあなたへ。
+                    <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#CD9535]/25 bg-[#CD9535]/10 px-3 py-1.5 text-[10px] font-black tracking-[0.18em] text-[#9B6B18]">
+                      <Sparkles className="h-3.5 w-3.5" />
+                      最新号を、読みやすく再編集
+                    </div>
+                    <h3 className="text-xl sm:text-2xl font-serif font-black tracking-tight text-[#1A1A1A] leading-snug">
+                      まず読みたい記事が、すぐ見つかる会報です。
                     </h3>
-                    <p className="text-stone-600 text-[11px] sm:text-[11.5px] mt-1 font-sans leading-relaxed">
-                      文字がびっしりの退屈な冊子はもうおしまい。15秒で楽しさが伝わる「ビジュアル図解」と「本物そっくりPDF」、お好きな方法で今すぐ体験してください！
+                    <p className="text-stone-600 text-[12px] sm:text-[12.5px] mt-2 font-sans leading-relaxed">
+                      巻頭エッセイ、学部長挨拶、学生レポート、総会案内。第43号の見どころを、短く読むか、冊子の雰囲気でじっくり読むか選べます。
                     </p>
+                    <div className="mt-3 grid grid-cols-3 gap-2">
+                      {[
+                        { icon: Clock3, label: '1分で概要' },
+                        { icon: MousePointerClick, label: 'タップで記事' },
+                        { icon: BookOpen, label: '冊子風表示' },
+                      ].map(({ icon: Icon, label }) => (
+                        <div key={label} className="flex items-center justify-center gap-1.5 rounded-lg bg-white px-2 py-2 text-[10px] font-black text-stone-700 shadow-sm ring-1 ring-stone-200/70">
+                          <Icon className="h-3.5 w-3.5 text-[#CD9535]" />
+                          <span>{label}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4" id="editorial-options">
@@ -206,26 +243,27 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                     {/* OPTION A: WEB MAGAZINE CARDS STYLE */}
                     <div 
                       onClick={() => setActiveTab('magazine')}
-                      className="group bg-white border border-stone-200 hover:border-stone-900 p-3.5 sm:p-4.5 cursor-pointer transition-all hover:shadow-[0_12px_35px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 flex flex-col justify-between"
+                      className="group relative overflow-hidden rounded-2xl bg-white border border-[#CD9535]/35 hover:border-[#CD9535] p-4 sm:p-5 cursor-pointer transition-all hover:shadow-[0_18px_45px_rgba(205,149,53,0.18)] hover:-translate-y-1 flex flex-col justify-between"
                     >
+                      <span className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-[#CD9535]/12 blur-xl" />
                       <div>
                         {/* Wireframe simulated tag */}
                         <div className="flex justify-between items-center mb-3">
-                          <span className="text-[9px] font-mono font-bold tracking-widest bg-stone-900 text-[#FCFAF7] px-2 py-0.5 leading-normal uppercase">
-                            WEB DIGEST
+                          <span className="text-[9px] font-mono font-bold tracking-widest bg-[#00204A] text-[#FCFAF7] px-2.5 py-1 rounded-full leading-normal uppercase">
+                            おすすめ
                           </span>
-                          <span className="text-[#CD9535] text-[10px] font-mono font-bold flex items-center gap-1">
+                          <span className="text-[#CD9535] text-[10px] font-mono font-bold flex items-center gap-1.5">
                             <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-                            15-SEC SPEED
+                            すぐ読める
                           </span>
                         </div>
 
-                        <h4 className="font-serif font-black text-stone-900 text-sm mb-1 group-hover:text-[#CD9535] transition-colors leading-snug">
-                          サクッと弾ける！新感覚のWeb要点マガジン
+                        <h4 className="font-serif font-black text-stone-900 text-base mb-1 group-hover:text-[#CD9535] transition-colors leading-snug">
+                          見どころから読む Webマガジン
                         </h4>
                         
-                        <p className="text-stone-500 text-[10.5px] leading-relaxed mb-3">
-                          図解と最高の書き出しだけで構成されたスマホ特化型。驚くほどスラスラ読めて、エッセンスがパッと頭に入ります。
+                        <p className="text-stone-600 text-[11.5px] leading-relaxed mb-3">
+                          長い記事に入る前に、読みどころをカードで確認。気になる記事だけを選んで、短時間で会報の流れをつかめます。
                         </p>
 
                         {/* HIGHLY SCHEMATIC GRAPHICAL WIREFRAME WITH ZERO COGNITIVE BURDEN */}
@@ -258,34 +296,34 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                         </div>
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between text-[11px] font-mono font-bold tracking-widest text-[#CD9535] border-t border-stone-100 pt-2 group-hover:text-stone-900 transition-colors">
-                        <span>START READING WEB</span>
-                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                      <div className="mt-4 flex items-center justify-between rounded-full bg-[#00204A] px-4 py-2.5 text-[11px] font-black tracking-widest text-white transition-colors group-hover:bg-[#CD9535] group-hover:text-[#1A1A1A]">
+                        <span>見どころを読む</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
 
                     {/* OPTION B: PDF REPLICA BOOK STYLE */}
                     <div 
                       onClick={() => setActiveTab('pdf')}
-                      className="group bg-white border border-stone-200 hover:border-stone-900 p-3.5 sm:p-4.5 cursor-pointer transition-all hover:shadow-[0_12px_35px_rgba(0,0,0,0.08)] hover:-translate-y-0.5 flex flex-col justify-between"
+                      className="group rounded-2xl bg-white border border-stone-200 hover:border-stone-900 p-4 sm:p-5 cursor-pointer transition-all hover:shadow-[0_18px_45px_rgba(0,32,74,0.12)] hover:-translate-y-1 flex flex-col justify-between"
                     >
                       <div>
                         {/* Wireframe simulated tag */}
                         <div className="flex justify-between items-start mb-3">
-                          <span className="text-[9px] font-mono font-bold tracking-widest bg-[#CD9535] text-[#FCFAF7] px-2 py-0.5 leading-normal uppercase">
-                            PDF EDITION
+                          <span className="text-[9px] font-mono font-bold tracking-widest bg-[#CD9535] text-[#FCFAF7] px-2.5 py-1 rounded-full leading-normal uppercase">
+                            冊子派
                           </span>
                           <span className="text-stone-400 text-[10px] font-mono tracking-wider font-semibold">
                             冊子レイアウト
                           </span>
                         </div>
 
-                        <h4 className="font-serif font-black text-stone-900 text-sm mb-1 group-hover:text-[#CD9535] transition-colors leading-snug">
-                          本をめくるワクワク。美デザインのデジタル冊子
+                        <h4 className="font-serif font-black text-stone-900 text-base mb-1 group-hover:text-[#CD9535] transition-colors leading-snug">
+                          紙面の雰囲気で読む デジタル冊子
                         </h4>
                         
-                        <p className="text-stone-500 text-[10.5px] leading-relaxed mb-3">
-                          慣れ親しんだ紙の良さをそのままに、ペラペラとめくる楽しさ。まるで本を手元で広げるような没入感をお届けします。
+                        <p className="text-stone-600 text-[11.5px] leading-relaxed mb-3">
+                          これまでの会報らしい読み心地を大切にした表示です。ページをめくりながら、資料として落ち着いて確認できます。
                         </p>
 
                         {/* HIGHLY SCHEMATIC PRINT LAYOUT WIREFRAME FOR PRINT */}
@@ -312,9 +350,9 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                         </div>
                       </div>
 
-                      <div className="mt-4 flex items-center justify-between text-[11px] font-mono font-bold tracking-widest text-[#CD9535] border-t border-stone-100 pt-2 group-hover:text-stone-900 transition-colors">
-                        <span>OPEN PDF REPLICA</span>
-                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                      <div className="mt-4 flex items-center justify-between rounded-full border border-stone-900 px-4 py-2.5 text-[11px] font-black tracking-widest text-stone-900 transition-colors group-hover:bg-stone-950 group-hover:text-white">
+                        <span>冊子風で開く</span>
+                        <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
 
@@ -330,7 +368,7 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                     <div>
                       <div className="mb-4">
                         <span className="text-[9px] font-mono font-bold text-[#CD9535] tracking-[0.25em] block uppercase">
-                          No.42 WEB EDITION SPECS / 大切なエッセンス
+                          No.43 WEB EDITION / 今号の読みどころ
                         </span>
                         <h4 className="text-base sm:text-lg font-serif font-black text-stone-900 leading-tight mt-1">
                           気になる記事をタップ！胸が高鳴るストーリーが待っています
@@ -512,7 +550,7 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                         {pdfPage === 1 && (
                           <div className="space-y-3 pt-1 text-left">
                             <div className="flex justify-between items-baseline border-b border-stone-200 pb-1">
-                              <span className="text-[10.5px] font-serif font-black text-stone-900 tracking-tight">第42号 表紙</span>
+                              <span className="text-[10.5px] font-serif font-black text-stone-900 tracking-tight">第43号 表紙</span>
                               <div className="w-5 h-0.5 bg-[#CD9535]" />
                             </div>
                             
@@ -594,7 +632,7 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                         )}
 
                         <div className="text-[7px] text-stone-400 text-center font-mono tracking-widest">
-                          - NO. 42 BULLETIN REPLICA -
+                          - NO. 43 BULLETIN REPLICA -
                         </div>
                       </div>
 
