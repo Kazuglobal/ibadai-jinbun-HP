@@ -151,7 +151,7 @@ export default function App() {
       <MobileBottomNav currentView={currentView} onNavigate={handleNavigate} onOpenChat={handleOpenChat} />
 
       {/* Pop-up modal newsletter helper */}
-      <NewsletterModal />
+      <NewsletterModal autoOpenReady={isHomeIntroComplete} />
     </div>
   );
 }
