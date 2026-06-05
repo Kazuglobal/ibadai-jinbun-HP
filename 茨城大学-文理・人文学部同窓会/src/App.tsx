@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import About from './components/About';
@@ -14,12 +14,19 @@ import ChatAssistant from './components/ChatAssistant';
 import MobileBottomNav from './components/MobileBottomNav';
 import NewsletterModal from './components/NewsletterModal';
 import { motion, AnimatePresence } from 'motion/react';
+import { useGsapHomeAnimations } from './hooks/useGsapHomeAnimations';
 
 export default function App() {
   // Demo interactive state
   const [currentView, setCurrentView] = useState<'home' | 'about'>('home');
   const [selectedTopic, setSelectedTopic] = useState<string>('');
   const [isRegModalOpen, setIsRegModalOpen] = useState<boolean>(false);
+  const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
+  const [isHomeIntroComplete, setIsHomeIntroComplete] = useState(false);
+  const handleHomeIntroComplete = useCallback(() => {
+    setIsHomeIntroComplete(true);
+  }, []);
+  const homeGsapRef = useGsapHomeAnimations(currentView === 'home', handleHomeIntroComplete);
 
   const handleSelectTopic = (title: string) => {
     setSelectedTopic(title);
@@ -45,6 +52,11 @@ export default function App() {
     } else {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+  };
+
+  const handleOpenChat = () => {
+    window.dispatchEvent(new CustomEvent('open-alumni-chat'));
+    setIsChatOpen(true);
   };
 
   // Synchronize on backward/forward browser events or hash loaded initially
@@ -86,6 +98,7 @@ export default function App() {
         <AnimatePresence mode="wait">
           {currentView === 'home' ? (
             <motion.div
+              ref={homeGsapRef}
               key="home-view"
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
@@ -132,10 +145,10 @@ export default function App() {
       </AnimatePresence>
 
       {/* Persistent floating AI Chat Assistant */}
-      <ChatAssistant />
+      <ChatAssistant isOpen={isChatOpen} onOpenChange={setIsChatOpen} />
 
       {/* Styled Mobile Bottom Navigation Bar */}
-      <MobileBottomNav currentView={currentView} onNavigate={handleNavigate} />
+      <MobileBottomNav currentView={currentView} onNavigate={handleNavigate} onOpenChat={handleOpenChat} />
 
       {/* Pop-up modal newsletter helper */}
       <NewsletterModal />
