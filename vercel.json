@@ -1,0 +1,4 @@
+{
+  "buildCommand": "cd \"茨城大学-文理・人文学部同窓会\" && npm install && npm run build",
+  "outputDirectory": "茨城大学-文理・人文学部同窓会/dist"
+}
