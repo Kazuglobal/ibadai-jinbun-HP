@@ -15,6 +15,10 @@ import {
   Sparkles
 } from 'lucide-react';
 
+import activityImage from '../data/newsletter43/activity.jpg';
+import hasuiImage from '../data/newsletter43/hasui.jpg';
+import homeworkImage from '../data/newsletter43/homework.jpg';
+
 interface NewsletterModalProps {
   autoOpenReady?: boolean;
   onClose?: () => void;
@@ -64,35 +68,51 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
       category: '巻頭エッセイ',
       title: '茨城大学 半世紀の想い出',
       writer: '木戸 之都子（人文・文10回卒）',
+      readTime: '3 min',
+      image: activityImage,
+      imageAlt: '茨城大学の活動風景',
+      pullQuote: '個人の記憶から、同窓会の歩みが立ち上がる巻頭記事。',
       bulletPoints: [
         '1976年の入学から、人文図書室、古文書整理、同窓会名簿づくりまでをたどります。',
         '個人の思い出を通して、文理・人文学部同窓会の歩みと大学の変化が見えてきます。'
       ],
-      outline: '懐かしさだけで終わらない、大学と同窓会が重ねてきた時間を感じられる巻頭記事です。まずここから読むと、第43号全体の温度感がつかめます。'
+      outline: '懐かしさだけで終わらない、大学と同窓会が重ねてきた時間を感じられる巻頭記事です。まずここから読むと、第43号全体の温度感がつかめます。',
+      sections: ['学生時代の風景', '人文図書室の歩み', '同窓会名簿づくり']
     },
     {
       id: 2,
       category: '学部長メッセージ',
       title: '同窓会の皆様へ',
       writer: '人文社会科学部長　蓮井 誠一郎',
+      readTime: '2 min',
+      image: hasuiImage,
+      imageAlt: '蓮井誠一郎 人文社会科学部長',
+      pullQuote: '母校の現在と、これからの学びの場を知るメッセージ。',
       bulletPoints: [
         '人文社会科学部の現在と、これからの教育・研究環境づくりについて語られています。',
         'オンライン化が進む時代に、対面のつながりやカレッジの価値をどう再構築するかを考えます。'
       ],
-      outline: '学部の今を知りたい同窓生に向けた、落ち着いた読み応えのあるメッセージです。母校との距離をもう一度近づけてくれます。'
+      outline: '学部の今を知りたい同窓生に向けた、落ち着いた読み応えのあるメッセージです。母校との距離をもう一度近づけてくれます。',
+      sections: ['学部の現在', '対面の価値', 'カレッジの再構築']
     },
     {
       id: 3,
       category: '学生レポート',
       title: 'ひたちなか市における子どもの居場所づくり',
       writer: '人文社会科学部4年　中塩 紗矢香',
+      readTime: '4 min',
+      image: homeworkImage,
+      imageAlt: '子どもが宿題をする活動風景',
+      pullQuote: '地域の現場で学ぶ在学生の声から、大学の今が見えてきます。',
       bulletPoints: [
         'フリースクールや地域の居場所での実践から、子ども一人ひとりに寄り添う支援を考えます。',
         '在学生が地域の現場で何を学び、将来へどうつなげようとしているかが伝わる記事です。'
       ],
-      outline: '現役学生のまなざしから、大学での学びが地域の課題と結びつく瞬間を読めます。卒業生にも在学生にも届く、今号の注目記事です。'
+      outline: '現役学生のまなざしから、大学での学びが地域の課題と結びつく瞬間を読めます。卒業生にも在学生にも届く、今号の注目記事です。',
+      sections: ['地域の居場所', '個別最適な支援', '将来への学び']
     }
   ];
+  const selectedArticleData = articles.find((article) => article.id === selectedArticle);
 
   return (
     <AnimatePresence>
@@ -360,123 +380,196 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                 </div>
               )}
 
-              {/* TAB 2: WEB MAGAZINE SUMMARY SLIDESHOW (Strict Minimal layout) */}
+              {/* TAB 2: WEB MAGAZINE */}
               {activeTab === 'magazine' && (
-                <div className="flex-grow flex flex-col justify-between py-1 text-left">
+                <div className="flex-grow min-h-0 overflow-y-auto pr-1 text-left">
                   
                   {selectedArticle === null ? (
-                    <div>
-                      <div className="mb-4">
-                        <span className="text-[9px] font-mono font-bold text-[#CD9535] tracking-[0.25em] block uppercase">
-                          No.43 WEB EDITION / 今号の読みどころ
-                        </span>
-                        <h4 className="text-base sm:text-lg font-serif font-black text-stone-900 leading-tight mt-1">
-                          気になる記事をタップ！胸が高鳴るストーリーが待っています
-                        </h4>
-                      </div>
-
-                      <div className="space-y-3.5 max-h-[220px] overflow-y-auto pr-1">
-                        {articles.map((art) => (
-                          <div 
-                            key={art.id}
-                            onClick={() => setSelectedArticle(art.id)}
-                            className="bg-white border border-stone-200 hover:border-stone-800 p-4 rounded-none cursor-pointer transition-all flex items-start gap-4 group"
-                          >
-                            <span className="w-9 h-9 border border-stone-200 text-stone-800 flex items-center justify-center font-mono font-extrabold text-[13px] flex-shrink-0 group-hover:bg-stone-950 group-hover:text-[#FCFAF7] group-hover:border-stone-950 transition-all duration-300">
-                              0{art.id}
+                    <div className="space-y-5 pb-2">
+                      <section className="relative overflow-hidden rounded-3xl bg-[#0F172A] text-white">
+                        <img
+                          src={activityImage}
+                          alt="会報第43号の活動風景"
+                          className="absolute inset-0 h-full w-full object-cover opacity-35"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute inset-0 bg-linear-to-r from-[#0F172A] via-[#0F172A]/84 to-[#0F172A]/35" />
+                        <div className="relative p-5 sm:p-7">
+                          <div className="mb-5 flex flex-wrap items-center gap-2">
+                            <span className="rounded-full bg-[#CD9535] px-3 py-1 text-[10px] font-black tracking-[0.2em] text-[#1A1A1A]">
+                              WEB MAGAZINE
                             </span>
-                            
-                            <div className="flex-1 text-left">
-                              <span className="text-[9px] font-mono tracking-widest text-[#CD9535] block font-bold mb-0.5">
-                                {art.category}
-                              </span>
-                              
-                              <h5 className="font-sans font-bold text-stone-800 text-[13.5px] sm:text-sm group-hover:text-[#CD9535] transition-colors leading-snug">
-                                {art.title}
-                              </h5>
-                              <p className="text-[11px] text-stone-400 font-medium">
-                                {art.writer}
-                              </p>
-                            </div>
-
-                            <ChevronRight className="w-4.5 h-4.5 text-stone-300 self-center group-hover:text-stone-950 transition-colors" />
+                            <span className="rounded-full border border-white/25 px-3 py-1 text-[10px] font-bold tracking-[0.16em] text-white/80">
+                              第43号 / 2026
+                            </span>
                           </div>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    // Beautiful Editorial Spec Details Layout (Unbelievably simple, ultra-graphic, zero-reading burden)
-                    <motion.div 
-                      key="selected-art-view"
-                      initial={{ opacity: 0, x: 8 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      className="bg-white border border-stone-200 p-6 text-left flex-grow flex flex-col justify-between"
-                    >
-                      <div>
-                        {/* Header metadata */}
-                        <div className="flex items-center justify-between border-b border-stone-200 pb-2.5 mb-4">
-                          <span className="text-[9.5px] font-mono font-black text-[#CD9535] tracking-widest uppercase">
-                            {articles.find(a => a.id === selectedArticle)?.category}
-                          </span>
-                          <button 
-                            onClick={() => setSelectedArticle(null)}
-                            className="text-[10px] font-mono font-bold text-stone-500 hover:text-stone-950 hover:underline tracking-wider"
-                          >
-                            ← INDEX / 戻る
-                          </button>
-                        </div>
-
-                        <h4 className="text-base sm:text-lg font-serif font-black text-[#1A1A1A] leading-snug mb-1">
-                          {articles.find(a => a.id === selectedArticle)?.title}
-                        </h4>
-                        
-                        <p className="text-[11px] text-stone-400 font-mono font-bold tracking-wide mb-5">
-                          {articles.find(a => a.id === selectedArticle)?.writer}
-                        </p>
-
-                        {/* Interactive schematic diagram representation with a beautiful dot blueprint style and zero-cognitive load */}
-                        <div className="p-5 bg-[#FCFAF7] border-l-4 border-[#CD9535] border-y border-r border-stone-200/80 mb-4 select-none relative overflow-hidden bg-[radial-gradient(#EFECE6_1px,transparent_1px)] [background-size:16px_16px]">
-                          <span className="text-[9px] font-mono font-bold tracking-widest text-[#CD9535] block mb-3 uppercase flex items-center gap-1.5">
-                            <span className="h-1.5 w-1.5 rounded-full bg-[#CD9535] animate-ping" />
-                            ◆ 15秒で頭に入る構造プロット ◆
-                          </span>
-                          
-                          <div className="space-y-3.5 relative z-10">
-                            {articles.find(a => a.id === selectedArticle)?.bulletPoints.map((pt, idx) => (
-                              <div key={idx} className="flex items-start gap-2.5">
-                                <span className="bg-[#CD9535] text-stone-900 rounded-none font-mono w-4.5 h-4.5 text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
-                                  0{idx + 1}
-                                </span>
-                                <p className="text-stone-850 text-xs font-bold leading-relaxed font-sans">
-                                  {pt}
-                                </p>
+                          <h4 className="max-w-md font-serif text-2xl font-black leading-tight sm:text-3xl">
+                            会報の読みどころを、物語の入口から。
+                          </h4>
+                          <p className="mt-4 max-w-lg text-[13px] font-semibold leading-7 text-white/78">
+                            半世紀の記憶、母校の現在、在学生の地域実践。第43号を「気になるところから読める」Webマガジンとして再構成しました。
+                          </p>
+                          <div className="mt-5 grid grid-cols-3 gap-2 max-w-md">
+                            {[
+                              ['3', '主要記事'],
+                              ['1 min', '概要確認'],
+                              ['43', '最新号'],
+                            ].map(([value, label]) => (
+                              <div key={label} className="rounded-xl border border-white/15 bg-white/10 px-3 py-2 backdrop-blur">
+                                <p className="font-mono text-lg font-black text-[#CD9535]">{value}</p>
+                                <p className="text-[10px] font-bold tracking-wider text-white/70">{label}</p>
                               </div>
                             ))}
                           </div>
                         </div>
+                      </section>
 
-                        <p className="text-stone-500 text-xs leading-relaxed font-sans">
-                          {articles.find(a => a.id === selectedArticle)?.outline}
-                        </p>
+                      <div className="grid gap-3">
+                        {articles.map((art) => (
+                          <motion.button
+                            key={art.id}
+                            type="button"
+                            onClick={() => setSelectedArticle(art.id)}
+                            whileHover={{ y: -2 }}
+                            className="group grid overflow-hidden rounded-2xl border border-stone-200 bg-white text-left shadow-sm transition hover:border-[#CD9535]/70 hover:shadow-[0_18px_45px_rgba(0,32,74,0.10)] sm:grid-cols-[132px_1fr]"
+                          >
+                            <div className="relative h-28 sm:h-full">
+                              <img
+                                src={art.image}
+                                alt={art.imageAlt}
+                                className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
+                                referrerPolicy="no-referrer"
+                              />
+                              <span className="absolute left-3 top-3 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-black text-[#00204A] shadow-sm">
+                                0{art.id}
+                              </span>
+                            </div>
+                            
+                            <div className="p-4">
+                              <div className="mb-2 flex flex-wrap items-center gap-2">
+                                <span className="rounded-full bg-[#CD9535]/12 px-2.5 py-1 text-[10px] font-black tracking-widest text-[#9B6B18]">
+                                  {art.category}
+                                </span>
+                                <span className="text-[10px] font-mono font-bold tracking-wider text-stone-400">
+                                  {art.readTime}
+                                </span>
+                              </div>
+                              <h5 className="font-serif text-lg font-black leading-snug text-[#1A1A1A] transition-colors group-hover:text-[#CD9535]">
+                                {art.title}
+                              </h5>
+                              <p className="mt-1 text-[11px] font-bold text-stone-500">{art.writer}</p>
+                              <p className="mt-2 text-[12px] font-semibold leading-6 text-stone-600">
+                                {art.pullQuote}
+                              </p>
+                              <div className="mt-3 flex items-center justify-between border-t border-stone-100 pt-3">
+                                <span className="text-[10px] font-black tracking-[0.18em] text-[#00204A]">
+                                  READ FEATURE
+                                </span>
+                                <ArrowRight className="h-4 w-4 text-[#CD9535] transition-transform group-hover:translate-x-1" />
+                              </div>
+                            </div>
+                          </motion.button>
+                        ))}
                       </div>
+                    </div>
+                  ) : (
+                    <motion.div 
+                      key="selected-art-view"
+                      initial={{ opacity: 0, x: 8 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="overflow-hidden rounded-3xl border border-stone-200 bg-white text-left shadow-[0_18px_55px_rgba(0,32,74,0.08)]"
+                    >
+                      {selectedArticleData && (
+                        <>
+                        <div className="relative min-h-[220px] bg-[#0F172A] text-white">
+                          <img
+                            src={selectedArticleData.image}
+                            alt={selectedArticleData.imageAlt}
+                            className="absolute inset-0 h-full w-full object-cover opacity-55"
+                            referrerPolicy="no-referrer"
+                          />
+                          <div className="absolute inset-0 bg-linear-to-t from-[#0F172A] via-[#0F172A]/64 to-transparent" />
+                          <button 
+                            onClick={() => setSelectedArticle(null)}
+                            className="absolute left-4 top-4 z-10 rounded-full border border-white/20 bg-white/90 px-3 py-1.5 text-[10px] font-black tracking-wider text-[#00204A] shadow-sm transition hover:bg-[#CD9535]"
+                          >
+                            ← 一覧へ
+                          </button>
+                          <div className="absolute inset-x-0 bottom-0 p-5 sm:p-7">
+                            <div className="mb-3 flex flex-wrap items-center gap-2">
+                              <span className="rounded-full bg-[#CD9535] px-3 py-1 text-[10px] font-black tracking-[0.18em] text-[#1A1A1A]">
+                                {selectedArticleData.category}
+                              </span>
+                              <span className="rounded-full bg-white/12 px-3 py-1 text-[10px] font-bold tracking-wider text-white/85">
+                                {selectedArticleData.readTime}
+                              </span>
+                            </div>
+                            <h4 className="max-w-xl font-serif text-2xl font-black leading-tight sm:text-3xl">
+                              {selectedArticleData.title}
+                            </h4>
+                            <p className="mt-2 text-[12px] font-bold tracking-wide text-white/74">
+                              {selectedArticleData.writer}
+                            </p>
+                          </div>
+                        </div>
 
-                      <div className="mt-6 flex flex-wrap gap-2.5 justify-end">
-                        <button 
-                          onClick={() => setSelectedArticle(null)}
-                          className="bg-stone-100 hover:bg-stone-200 text-stone-800 text-[11px] font-mono font-bold tracking-widest px-4 py-2.5 transition-colors cursor-pointer"
-                        >
-                          SPECIAL LIST
-                        </button>
-                        <a 
-                          href="http://dousoukai.hum.ibaraki.ac.jp/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-stone-950 hover:bg-[#CD9535] text-white hover:text-stone-900 text-xs font-mono font-bold px-4 py-2.5 transition-colors flex items-center gap-1.5 shadow-sm"
-                        >
-                          <span>VISIT FULL BULLETIN SITE</span>
-                          <ExternalLink className="w-3.5 h-3.5" />
-                        </a>
-                      </div>
+                        <div className="p-5 sm:p-7">
+                          <p className="border-l-4 border-[#CD9535] bg-[#FAF7EF] px-4 py-3 font-serif text-[15px] font-black leading-8 text-[#00204A]">
+                            {selectedArticleData.pullQuote}
+                          </p>
+
+                          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                            {selectedArticleData.sections.map((section) => (
+                              <div key={section} className="rounded-xl border border-stone-200 bg-white px-3 py-3">
+                                <p className="text-[10px] font-black tracking-[0.16em] text-[#CD9535]">POINT</p>
+                                <p className="mt-1 text-xs font-black leading-5 text-[#00204A]">{section}</p>
+                              </div>
+                            ))}
+                          </div>
+
+                          <div className="mt-6 rounded-2xl border border-stone-200 bg-[#FCFAF7] p-5">
+                            <span className="mb-3 flex items-center gap-2 text-[10px] font-black tracking-[0.2em] text-[#CD9535]">
+                              <span className="h-2 w-2 rounded-full bg-[#CD9535]" />
+                              この記事の見どころ
+                          </span>
+                            <div className="space-y-3.5">
+                              {selectedArticleData.bulletPoints.map((pt, idx) => (
+                              <div key={idx} className="flex items-start gap-2.5">
+                                  <span className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-[#CD9535] font-mono text-[10px] font-black text-[#1A1A1A]">
+                                  0{idx + 1}
+                                </span>
+                                  <p className="text-sm font-semibold leading-7 text-stone-700">
+                                  {pt}
+                                </p>
+                              </div>
+                            ))}
+                            </div>
+                          </div>
+
+                          <p className="mt-5 text-[13px] font-semibold leading-8 text-stone-600">
+                            {selectedArticleData.outline}
+                          </p>
+
+                          <div className="mt-6 flex flex-wrap gap-2.5 justify-end">
+                            <button 
+                              onClick={() => setSelectedArticle(null)}
+                              className="rounded-full bg-stone-100 px-4 py-2.5 text-[11px] font-black tracking-widest text-stone-800 transition-colors hover:bg-stone-200"
+                            >
+                              記事一覧へ戻る
+                            </button>
+                            <a 
+                              href="http://dousoukai.hum.ibaraki.ac.jp/"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-1.5 rounded-full bg-[#00204A] px-4 py-2.5 text-xs font-black text-white shadow-sm transition-colors hover:bg-[#CD9535] hover:text-[#1A1A1A]"
+                            >
+                              <span>会報サイトを見る</span>
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </a>
+                          </div>
+                        </div>
+                        </>
+                      )}
                     </motion.div>
                   )}
 
