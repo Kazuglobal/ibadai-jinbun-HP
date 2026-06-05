@@ -156,7 +156,7 @@ export default function NetworkArchive() {
                   </div>
 
                   <motion.div
-                    className="relative h-[255px] cursor-grab overflow-hidden rounded-2xl [touch-action:pan-y] sm:h-[315px]"
+                    className="relative h-[330px] cursor-grab overflow-hidden rounded-2xl [touch-action:pan-y] sm:h-[395px]"
                     drag="x"
                     dragConstraints={{ left: 0, right: 0 }}
                     dragElastic={0.08}
@@ -187,12 +187,12 @@ export default function NetworkArchive() {
 
                             setActiveCoverIndex(index);
                           }}
-                          className="absolute left-1/2 top-1 flex w-[138px] origin-center -translate-x-1/2 flex-col text-left outline-none sm:w-[176px]"
+                          className="absolute left-1/2 top-2 flex w-[178px] origin-center -translate-x-1/2 flex-col text-left outline-none sm:w-[220px]"
                           animate={{
-                            x: offset * 118,
+                            x: offset * 148,
                             y: isActive ? 0 : 18,
                             rotate: offset * -5,
-                            scale: isActive ? 1 : 0.78,
+                            scale: isActive ? 1 : 0.7,
                             opacity: isVisible ? (isActive ? 1 : 0.48) : 0,
                             zIndex: 10 - Math.abs(offset),
                           }}
@@ -213,7 +213,7 @@ export default function NetworkArchive() {
                               <span className="border-b border-white/25 pb-1 text-center font-serif text-[10px] tracking-widest">
                                 同窓会報
                               </span>
-                              <span className="text-center font-serif text-xl font-black tracking-wide sm:text-2xl">
+                              <span className="text-center font-serif text-2xl font-black tracking-wide sm:text-3xl">
                                 {item.numberText}
                               </span>
                               <span className="text-center text-[8px] font-bold tracking-widest text-stone-100/90">
