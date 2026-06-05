@@ -721,13 +721,13 @@ export default function Stories() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-[#FAF9F5] py-16 lg:py-24 border-t border-stone-200/40" id="stories-section">
+    <section className="relative overflow-hidden bg-[#FAF9F5] py-16 lg:py-24 border-t border-stone-200/40" id="stories-section" data-gsap-section>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* =========================================================================
             SECTION HEADER
             ========================================================================= */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 mb-8 border-b border-stone-200/50">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 mb-8 border-b border-stone-200/50" data-gsap-title>
           
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-7 text-left">
             {/* Elegant Section Title with Left Gold Border */}
@@ -754,7 +754,7 @@ export default function Stories() {
         </div>
 
         {/* Small introductory text narrative */}
-        <div className="text-left text-stone-600 text-sm sm:text-[14.5px] tracking-wide leading-relaxed mb-8 max-w-3xl">
+        <div className="text-left text-stone-600 text-sm sm:text-[14.5px] tracking-wide leading-relaxed mb-8 max-w-3xl" data-gsap-copy>
           茨城大学文理・人文学部で学び、さまざまな分野で活躍する卒業生の声をご紹介します。
         </div>
 
@@ -977,8 +977,9 @@ export default function Stories() {
                       onClick={() => setSelectedGrad(grad)}
                       className="snap-start flex-shrink-0 w-[290px] xs:w-[325px] sm:w-[340px] md:w-[350px] bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-stone-200/50 text-left flex flex-col transition-all cursor-pointer"
                     >
+                      <div className="flex min-h-full flex-col" data-gsap-card>
                       {/* Top portrait container */}
-                      <div className="relative aspect-[16/11] w-full overflow-hidden bg-stone-150">
+                      <div className="relative aspect-[16/11] w-full overflow-hidden bg-stone-150" data-gsap-media>
                         <img 
                           src={grad.image} 
                           alt={grad.name}
@@ -1077,6 +1078,7 @@ export default function Stories() {
                         </div>
 
                       </div>
+                      </div>
 
                     </motion.div>
                   );
@@ -1109,7 +1111,7 @@ export default function Stories() {
         {/* =========================================================================
             BOTTOM ALUMNI INTERVIEW RECRUITMENT BANNER
             ========================================================================= */}
-        <div className="w-full bg-[#FCFBF8] border border-stone-200/50 rounded-2xl p-6 sm:p-8 md:px-12 mt-16 sm:mt-20 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="w-full bg-[#FCFBF8] border border-stone-200/50 rounded-2xl p-6 sm:p-8 md:px-12 mt-16 sm:mt-20 flex flex-col md:flex-row items-center justify-between gap-6" data-gsap-card>
           <div className="flex flex-col md:flex-row items-center md:items-start gap-4 text-center md:text-left">
             
             {/* White rounded people user circle avatar */}

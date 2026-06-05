@@ -62,7 +62,7 @@ interface EventsProps {
 
 export default function Events({ onSelectEvent }: EventsProps) {
   return (
-    <section className="relative overflow-hidden bg-[#00132C] py-16 lg:py-24" id="events-section">
+    <section className="relative overflow-hidden bg-[#00132C] py-16 lg:py-24" id="events-section" data-gsap-section>
       
       {/* Golden Dot Grid decoration (Top-Right as in screenshot) */}
       <div className="absolute right-[4%] top-[10%] hidden md:grid grid-cols-6 gap-2 opacity-85 z-0">
@@ -76,7 +76,7 @@ export default function Events({ onSelectEvent }: EventsProps) {
         {/* =========================================================================
             HEADER GRID: Title (Left Vertical Gold Line), Small Info, and Pill Button
             ========================================================================= */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 sm:mb-16">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 sm:mb-16" data-gsap-title>
           
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-7 text-left">
             {/* Elegant Section Title with Left Gold Border */}
@@ -87,7 +87,7 @@ export default function Events({ onSelectEvent }: EventsProps) {
             </div>
             
             {/* Title description - classy creamy text with gold accent details */}
-            <div className="flex flex-col justify-center text-stone-200">
+            <div className="flex flex-col justify-center text-stone-200" data-gsap-copy>
               <span className="font-sans font-bold text-[14px] sm:text-[14.5px] tracking-wider leading-relaxed">
                 参加して、つながって、
               </span>
@@ -123,6 +123,7 @@ export default function Events({ onSelectEvent }: EventsProps) {
           {EVENTS_DATA.map((item) => (
             <motion.div
               key={item.id}
+              data-gsap-card
               whileHover={{ y: -4 }}
               transition={{ duration: 0.3 }}
               className="bg-[#FAF9F5] rounded-2xl overflow-hidden shadow-md border border-amber-900/10 text-left p-5 sm:p-6 flex flex-col justify-between flex-shrink-0 w-[290px] xs:w-[320px] md:w-auto snap-start group"
@@ -155,7 +156,7 @@ export default function Events({ onSelectEvent }: EventsProps) {
                 </div>
  
                 {/* 2. Middle Row inside the card: Beautiful Wide Banner Image with Overlaid Calendar Binder */}
-                <div className="relative h-[130px] sm:h-[155px] w-full rounded-xl overflow-hidden shadow-xs border border-black/5 mb-4 select-none">
+                <div className="relative h-[130px] sm:h-[155px] w-full rounded-xl overflow-hidden shadow-xs border border-black/5 mb-4 select-none" data-gsap-media>
                   <img 
                     src={item.image} 
                     alt={item.title}
