@@ -276,36 +276,65 @@ function scrollToSection(id: string) {
 }
 
 function ArticleBlock({ article, children }: { article: Article; children?: React.ReactNode }) {
+  const [firstParagraph, ...restParagraphs] = article.paragraphs;
+
   return (
     <article
       id={`magazine43-${article.id}`}
-      className="scroll-mt-6 overflow-hidden rounded-[10px] border border-stone-200 bg-white shadow-[0_18px_50px_rgba(0,32,74,0.08)]"
+      className="scroll-mt-6 overflow-hidden rounded-[12px] border border-stone-200 bg-white shadow-[0_22px_70px_rgba(0,32,74,0.1)]"
     >
-      <div className="border-b border-stone-200 bg-[#F5F3EC] px-5 py-4 sm:px-8">
-        <p className="text-[10px] font-black tracking-[0.24em] text-[#CD9535]">ARTICLE / {article.label}</p>
+      <div className="bg-[#00204A] px-5 py-4 sm:px-8">
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-[10px] font-black tracking-[0.24em] text-[#CD9535]">ARTICLE / {article.label}</p>
+          <p className="hidden text-[10px] font-black tracking-[0.28em] text-white/45 sm:block">NEWSLETTER 43</p>
+        </div>
       </div>
-      <div className="px-5 py-8 sm:px-8 sm:py-10">
-      <div className="mb-6 flex items-center gap-3">
-        <span className="rounded-full bg-[#00204A] px-3 py-1 text-[10px] font-bold tracking-[0.18em] text-white">
-          {article.label}
-        </span>
-        <span className="h-px flex-1 bg-stone-200" />
-      </div>
-      <h2 className="font-serif text-3xl font-black leading-tight tracking-wide text-[#00204A] md:text-5xl">
-        {article.title}
-      </h2>
-      {article.author && <p className="mt-3 text-sm font-bold leading-relaxed text-stone-500">{article.author}</p>}
-      {article.lead && (
-        <p className="mt-6 border-l-4 border-[#CD9535] bg-[#FAF7EF] px-5 py-4 text-sm font-semibold leading-8 text-stone-700">
-          {article.lead}
-        </p>
-      )}
-      <div className="mt-8 space-y-5 text-[15px] leading-9 tracking-wide text-stone-700">
-        {article.paragraphs.map((paragraph) => (
-          <p key={paragraph}>{paragraph}</p>
-        ))}
-      </div>
-      {children}
+      <div className="px-5 py-9 sm:px-8 sm:py-12">
+        <div className="mb-7 flex items-center gap-3">
+          <span className="rounded-full bg-[#F5F3EC] px-3 py-1 text-[10px] font-black tracking-[0.18em] text-[#00204A]">
+            {article.label}
+          </span>
+          <span className="h-px flex-1 bg-stone-200" />
+        </div>
+
+        <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_132px]">
+          <div>
+            <h2 className="max-w-3xl font-serif text-4xl font-black leading-tight tracking-wide text-[#00204A] md:text-6xl">
+              {article.title}
+            </h2>
+            {article.author && (
+              <p className="mt-5 inline-flex rounded-full border border-stone-200 bg-white px-4 py-2 text-xs font-black leading-relaxed text-stone-500">
+                {article.author}
+              </p>
+            )}
+          </div>
+
+          <div className="hidden border-l border-stone-200 pl-5 lg:block">
+            <p className="text-[10px] font-black leading-6 tracking-[0.28em] text-[#CD9535] [writing-mode:vertical-rl]">
+              IBADAI ALUMNI MAGAZINE
+            </p>
+          </div>
+        </div>
+
+        {article.lead && (
+          <div className="mt-8 rounded-[10px] border border-[#CD9535]/30 bg-[#FAF7EF] p-5 sm:p-7">
+            <p className="mb-3 text-[10px] font-black tracking-[0.28em] text-[#CD9535]">LEAD</p>
+            <p className="text-base font-bold leading-9 tracking-wide text-stone-700">{article.lead}</p>
+          </div>
+        )}
+
+        <div className="mt-10 max-w-3xl space-y-6 text-[15px] leading-9 tracking-wide text-stone-700 sm:text-base sm:leading-10">
+          {firstParagraph && (
+            <p className="border-b border-stone-200 pb-6 text-[17px] font-semibold leading-10 text-[#00204A]">
+              {firstParagraph}
+            </p>
+          )}
+          {restParagraphs.map((paragraph) => (
+            <p key={paragraph}>{paragraph}</p>
+          ))}
+        </div>
+
+        {children && <div className="mt-10">{children}</div>}
       </div>
     </article>
   );
@@ -520,7 +549,7 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
 
                   <div className="space-y-8">
                   <ArticleBlock article={articles[0]}>
-                    <div className="mt-8 grid gap-3 rounded-[8px] bg-[#00204A] p-5 text-white sm:grid-cols-2">
+                    <div className="grid gap-3 rounded-[10px] bg-[#00204A] p-5 text-white shadow-[0_18px_45px_rgba(0,32,74,0.18)] sm:grid-cols-2">
                       <div className="flex gap-3">
                         <CalendarDays className="mt-1 h-5 w-5 flex-shrink-0 text-[#CD9535]" />
                         <p className="text-sm font-bold leading-7">第18回総会開催：2026年7月18日（土）</p>
@@ -533,25 +562,30 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                   </ArticleBlock>
 
                   <ArticleBlock article={articles[1]}>
-                    <figure className="mt-8 overflow-hidden rounded-[8px] border border-stone-200 bg-white">
-                      <img src={hasuiImage} alt="蓮井誠一郎 学部長" className="h-[320px] w-full object-cover object-top" />
-                      <figcaption className="px-4 py-3 text-xs font-bold text-stone-500">
+                    <figure className="overflow-hidden rounded-[10px] border border-stone-200 bg-white shadow-[0_18px_48px_rgba(0,32,74,0.08)]">
+                      <img src={hasuiImage} alt="蓮井誠一郎 学部長" className="h-[360px] w-full object-cover object-top" />
+                      <figcaption className="border-t border-stone-200 bg-[#F5F3EC] px-5 py-4 text-xs font-bold text-stone-500">
                         蓮井誠一郎 人文社会科学部長
                       </figcaption>
                     </figure>
                   </ArticleBlock>
 
                   <ArticleBlock article={articles[2]}>
-                    <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                    <div className="grid gap-4 sm:grid-cols-2">
                       {[
                         [homeworkImage, 'てらこやで宿題をする様子'],
                         [jumpRopeImage, 'てらこやで大縄跳びをする様子'],
                         [lunchImage, '「ふらっと」でのお昼ご飯の様子'],
                         [activityImage, '「ふらっと」での活動の様子'],
                       ].map(([src, caption]) => (
-                        <figure key={caption} className="overflow-hidden rounded-[8px] border border-stone-200 bg-white">
-                          <img src={src} alt={caption} className="h-56 w-full object-cover" />
-                          <figcaption className="px-4 py-3 text-xs font-bold text-stone-500">{caption}</figcaption>
+                        <figure
+                          key={caption}
+                          className="overflow-hidden rounded-[10px] border border-stone-200 bg-white shadow-[0_16px_42px_rgba(0,32,74,0.08)]"
+                        >
+                          <img src={src} alt={caption} className="h-60 w-full object-cover" />
+                          <figcaption className="border-t border-stone-200 bg-[#F5F3EC] px-4 py-3 text-xs font-bold text-stone-500">
+                            {caption}
+                          </figcaption>
                         </figure>
                       ))}
                     </div>
@@ -572,13 +606,13 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                     <p className="mt-6 text-[15px] leading-9 text-stone-700">
                       会則第9条により、第18回総会を下記のとおり開催します。今年度は開催場所がつくば市内に変わりました。総会終了後には講演会と懇親会を予定しています。
                     </p>
-                    <div className="mt-8 overflow-hidden rounded-[8px] border border-stone-200">
+                    <div className="mt-8 overflow-hidden rounded-[10px] border border-stone-200 shadow-[0_16px_42px_rgba(0,32,74,0.08)]">
                       {meetingDetails.map(([label, value]) => (
                         <div key={label} className="grid border-b border-stone-200 last:border-b-0 md:grid-cols-[150px_1fr]">
-                          <div className="bg-[#F5F3EC] px-4 py-3 text-xs font-black tracking-widest text-[#CD9535]">
+                          <div className="bg-[#F5F3EC] px-5 py-4 text-xs font-black tracking-widest text-[#CD9535]">
                             {label}
                           </div>
-                          <div className="px-4 py-3 text-sm font-semibold leading-7 text-stone-700">{value}</div>
+                          <div className="bg-white px-5 py-4 text-sm font-semibold leading-7 text-stone-700">{value}</div>
                         </div>
                       ))}
                     </div>
@@ -599,8 +633,11 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                     <h2 className="font-serif text-3xl font-black text-[#00204A] md:text-5xl">第40回理事会議事要録</h2>
                     <div className="mt-8 space-y-4">
                       {boardMinutes.map((minute, index) => (
-                        <div key={minute} className="flex gap-4 rounded-[8px] border border-stone-200 bg-white p-4">
-                          <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-[#CD9535] text-xs font-black text-white">
+                        <div
+                          key={minute}
+                          className="flex gap-4 rounded-[10px] border border-stone-200 bg-[#FAF7EF] p-4 shadow-[0_12px_30px_rgba(0,32,74,0.06)]"
+                        >
+                          <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-[#00204A] text-xs font-black text-white">
                             {index + 1}
                           </span>
                           <p className="text-sm font-semibold leading-7 text-stone-700">{minute}</p>
@@ -626,14 +663,17 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                     </h2>
                     <div className="mt-8 grid gap-6">
                       {activityReports.map((report) => (
-                        <div key={report.title} className="rounded-[8px] border border-stone-200 bg-white p-5">
+                        <div
+                          key={report.title}
+                          className="rounded-[10px] border border-stone-200 bg-white p-5 shadow-[0_16px_42px_rgba(0,32,74,0.08)]"
+                        >
                           <h3 className="mb-4 flex items-center gap-2 text-lg font-black text-[#00204A]">
                             <ScrollText className="h-5 w-5 text-[#CD9535]" />
                             {report.title}
                           </h3>
                           <div className="space-y-3">
                             {report.rows.map(([item, date, body]) => (
-                              <div key={item} className="rounded-[6px] bg-[#FAF7EF] p-4">
+                              <div key={item} className="rounded-[8px] bg-[#FAF7EF] p-4">
                                 <p className="text-sm font-black text-[#00204A]">{item}</p>
                                 <p className="mt-1 text-xs font-bold text-[#CD9535]">{date}</p>
                                 <p className="mt-2 text-sm leading-7 text-stone-700">{body}</p>
@@ -663,7 +703,10 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                     </p>
                     <div className="mt-8 grid gap-6">
                       {financeTables.map((table) => (
-                        <div key={table.title} className="overflow-hidden rounded-[8px] border border-stone-200 bg-white">
+                        <div
+                          key={table.title}
+                          className="overflow-hidden rounded-[10px] border border-stone-200 bg-white shadow-[0_16px_42px_rgba(0,32,74,0.08)]"
+                        >
                           <div className="flex items-center gap-3 bg-[#00204A] px-5 py-4 text-white">
                             <ReceiptText className="h-5 w-5 text-[#CD9535]" />
                             <h3 className="text-sm font-black tracking-wide">{table.title}</h3>
@@ -700,7 +743,7 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                         <p key={paragraph}>{paragraph}</p>
                       ))}
                     </div>
-                    <div className="mt-8 grid gap-3 rounded-[8px] bg-[#F5F3EC] p-5 sm:grid-cols-3">
+                    <div className="mt-8 grid gap-3 rounded-[10px] border border-[#CD9535]/25 bg-[#F5F3EC] p-5 sm:grid-cols-3">
                       <div className="flex gap-3">
                         <Phone className="mt-1 h-5 w-5 text-[#CD9535]" />
                         <p className="text-xs font-bold leading-6 text-stone-700">029-228-8546 / 090-3100-5814（鈴木）</p>
