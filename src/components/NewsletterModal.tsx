@@ -54,6 +54,65 @@ const tocItems = [
   { id: 'editor', label: '後記', title: '編集後記' },
 ];
 
+const magazineCards = [
+  {
+    id: 'cover',
+    label: 'MEMORY',
+    title: '茨城大学 半世紀の想い出',
+    copy: '学生時代から人文図書室、同窓会名簿づくりまで。大学と歩んだ半世紀をたどる巻頭エッセイ。',
+    image: activityImage,
+  },
+  {
+    id: 'greeting',
+    label: 'MESSAGE',
+    title: '同窓会の皆様へ',
+    copy: '新学部長が語る、学部教育の現在と「カレッジの再構築」。',
+    image: hasuiImage,
+  },
+  {
+    id: 'iop',
+    label: 'STUDENT',
+    title: 'ひたちなか市における子どもの居場所づくり',
+    copy: '学生の地域実践を、写真とともに読める活動レポートとして構成。',
+    image: homeworkImage,
+  },
+  {
+    id: 'meeting',
+    label: 'MEETING',
+    title: '第18回総会の開催について',
+    copy: '日時、会場、講演会、懇親会まで、総会参加に必要な情報を整理。',
+    image: lunchImage,
+  },
+  {
+    id: 'board',
+    label: 'RECORD',
+    title: '第40回理事会議事要録',
+    copy: '議事の流れと承認事項を、要点ごとに読みやすく再編集。',
+    image: jumpRopeImage,
+  },
+  {
+    id: 'activities',
+    label: 'PLAN',
+    title: '事業報告・事業計画',
+    copy: '令和7年度の活動と令和8年度の計画を、カード単位で確認できます。',
+    image: activityImage,
+  },
+  {
+    id: 'finance',
+    label: 'FINANCE',
+    title: '決算報告・予算案',
+    copy: '会計資料をスマートフォンでも追いやすいテーブルカードに再構成。',
+    image: hasuiImage,
+  },
+  {
+    id: 'editor',
+    label: 'EDITOR',
+    title: '編集後記',
+    copy: 'デジタル化の背景、会員へのお願い、事務局連絡先をまとめました。',
+    image: lunchImage,
+  },
+];
+
 const articles: Article[] = [
   {
     id: 'cover',
@@ -218,7 +277,14 @@ function scrollToSection(id: string) {
 
 function ArticleBlock({ article, children }: { article: Article; children?: React.ReactNode }) {
   return (
-    <article id={`magazine43-${article.id}`} className="scroll-mt-6 border-t border-stone-200 pt-12">
+    <article
+      id={`magazine43-${article.id}`}
+      className="scroll-mt-6 overflow-hidden rounded-[10px] border border-stone-200 bg-white shadow-[0_18px_50px_rgba(0,32,74,0.08)]"
+    >
+      <div className="border-b border-stone-200 bg-[#F5F3EC] px-5 py-4 sm:px-8">
+        <p className="text-[10px] font-black tracking-[0.24em] text-[#CD9535]">ARTICLE / {article.label}</p>
+      </div>
+      <div className="px-5 py-8 sm:px-8 sm:py-10">
       <div className="mb-6 flex items-center gap-3">
         <span className="rounded-full bg-[#00204A] px-3 py-1 text-[10px] font-bold tracking-[0.18em] text-white">
           {article.label}
@@ -240,6 +306,7 @@ function ArticleBlock({ article, children }: { article: Article; children?: Reac
         ))}
       </div>
       {children}
+      </div>
     </article>
   );
 }
@@ -401,28 +468,57 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                   </div>
                 </section>
 
-                <div className="mx-auto max-w-4xl px-5 py-12 md:px-10">
-                  <section className="mb-12 rounded-[8px] border border-stone-200 bg-white p-6">
-                    <h2 className="mb-5 font-serif text-2xl font-black text-[#00204A]">目次</h2>
-                    <div className="grid gap-3 md:grid-cols-2">
-                      {tocItems.map((item) => (
+                <div className="mx-auto max-w-5xl px-5 py-12 md:px-10">
+                  <section className="mb-12">
+                    <div className="mb-7 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                      <div>
+                        <p className="text-[11px] font-black tracking-[0.28em] text-[#CD9535]">FEATURE INDEX</p>
+                        <h2 className="mt-2 font-serif text-3xl font-black text-[#00204A] md:text-5xl">
+                          記事カードから読む
+                        </h2>
+                      </div>
+                      <p className="max-w-sm text-sm font-semibold leading-7 text-stone-500">
+                        第43号の内容をセクションごとの記事カードに整理しました。気になる記事から読み進められます。
+                      </p>
+                    </div>
+
+                    <div className="grid gap-4 md:grid-cols-2">
+                      {magazineCards.map((card, index) => (
                         <button
-                          key={item.id}
-                          onClick={() => scrollToSection(item.id)}
-                          className="group flex items-center gap-4 rounded-[6px] border border-stone-200 p-4 text-left transition hover:border-[#CD9535] hover:bg-[#FAF7EF]"
+                          key={card.id}
+                          onClick={() => scrollToSection(card.id)}
+                          className={`group overflow-hidden rounded-[10px] border border-stone-200 bg-white text-left shadow-[0_16px_42px_rgba(0,32,74,0.08)] transition hover:-translate-y-1 hover:border-[#CD9535]/50 hover:shadow-[0_22px_58px_rgba(0,32,74,0.13)] ${
+                            index === 0 ? 'md:col-span-2 md:grid md:grid-cols-[1.05fr_0.95fr]' : ''
+                          }`}
                         >
-                          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#00204A] text-[10px] font-black tracking-widest text-white">
-                            {item.label}
+                          <span className={`relative block overflow-hidden ${index === 0 ? 'h-64 md:h-full' : 'h-48'}`}>
+                            <img src={card.image} alt="" className="h-full w-full object-cover transition duration-700 group-hover:scale-105" />
+                            <span className="absolute inset-0 bg-linear-to-t from-[#00132C]/65 via-[#00132C]/10 to-transparent" />
+                            <span className="absolute left-4 top-4 rounded-full bg-white px-3 py-1 text-[10px] font-black tracking-[0.22em] text-[#CD9535]">
+                              {card.label}
+                            </span>
                           </span>
-                          <span className="flex-1 text-sm font-bold leading-6 text-stone-700 group-hover:text-[#00204A]">
-                            {item.title}
+                          <span className="flex min-h-[220px] flex-col justify-between p-5 sm:p-6">
+                            <span>
+                              <span className="mb-4 block h-[2px] w-10 bg-[#CD9535]" />
+                              <span className="block font-serif text-2xl font-black leading-tight text-[#00204A]">
+                                {card.title}
+                              </span>
+                              <span className="mt-4 block text-sm font-semibold leading-7 text-stone-600">
+                                {card.copy}
+                              </span>
+                            </span>
+                            <span className="mt-6 inline-flex items-center gap-2 text-[11px] font-black tracking-[0.22em] text-[#00204A]">
+                              READ ARTICLE
+                              <ArrowRight className="h-4 w-4 text-[#CD9535] transition group-hover:translate-x-1" />
+                            </span>
                           </span>
-                          <ArrowRight className="h-4 w-4 text-[#CD9535]" />
                         </button>
                       ))}
                     </div>
                   </section>
 
+                  <div className="space-y-8">
                   <ArticleBlock article={articles[0]}>
                     <div className="mt-8 grid gap-3 rounded-[8px] bg-[#00204A] p-5 text-white sm:grid-cols-2">
                       <div className="flex gap-3">
@@ -461,7 +557,11 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                     </div>
                   </ArticleBlock>
 
-                  <section id="magazine43-meeting" className="scroll-mt-6 border-t border-stone-200 pt-12">
+                  <section id="magazine43-meeting" className="scroll-mt-6 overflow-hidden rounded-[10px] border border-stone-200 bg-white shadow-[0_18px_50px_rgba(0,32,74,0.08)]">
+                    <div className="border-b border-stone-200 bg-[#F5F3EC] px-5 py-4 sm:px-8">
+                      <p className="text-[10px] font-black tracking-[0.24em] text-[#CD9535]">ARTICLE / 総会</p>
+                    </div>
+                    <div className="px-5 py-8 sm:px-8 sm:py-10">
                     <div className="mb-6 flex items-center gap-3">
                       <span className="rounded-full bg-[#00204A] px-3 py-1 text-[10px] font-bold tracking-[0.18em] text-white">
                         総会
@@ -482,9 +582,14 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                         </div>
                       ))}
                     </div>
+                    </div>
                   </section>
 
-                  <section id="magazine43-board" className="scroll-mt-6 border-t border-stone-200 pt-12">
+                  <section id="magazine43-board" className="scroll-mt-6 overflow-hidden rounded-[10px] border border-stone-200 bg-white shadow-[0_18px_50px_rgba(0,32,74,0.08)]">
+                    <div className="border-b border-stone-200 bg-[#F5F3EC] px-5 py-4 sm:px-8">
+                      <p className="text-[10px] font-black tracking-[0.24em] text-[#CD9535]">ARTICLE / 記録</p>
+                    </div>
+                    <div className="px-5 py-8 sm:px-8 sm:py-10">
                     <div className="mb-6 flex items-center gap-3">
                       <span className="rounded-full bg-[#00204A] px-3 py-1 text-[10px] font-bold tracking-[0.18em] text-white">
                         記録
@@ -502,9 +607,14 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                         </div>
                       ))}
                     </div>
+                    </div>
                   </section>
 
-                  <section id="magazine43-activities" className="scroll-mt-6 border-t border-stone-200 pt-12">
+                  <section id="magazine43-activities" className="scroll-mt-6 overflow-hidden rounded-[10px] border border-stone-200 bg-white shadow-[0_18px_50px_rgba(0,32,74,0.08)]">
+                    <div className="border-b border-stone-200 bg-[#F5F3EC] px-5 py-4 sm:px-8">
+                      <p className="text-[10px] font-black tracking-[0.24em] text-[#CD9535]">ARTICLE / 事業</p>
+                    </div>
+                    <div className="px-5 py-8 sm:px-8 sm:py-10">
                     <div className="mb-6 flex items-center gap-3">
                       <span className="rounded-full bg-[#00204A] px-3 py-1 text-[10px] font-bold tracking-[0.18em] text-white">
                         事業
@@ -533,9 +643,14 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                         </div>
                       ))}
                     </div>
+                    </div>
                   </section>
 
-                  <section id="magazine43-finance" className="scroll-mt-6 border-t border-stone-200 pt-12">
+                  <section id="magazine43-finance" className="scroll-mt-6 overflow-hidden rounded-[10px] border border-stone-200 bg-white shadow-[0_18px_50px_rgba(0,32,74,0.08)]">
+                    <div className="border-b border-stone-200 bg-[#F5F3EC] px-5 py-4 sm:px-8">
+                      <p className="text-[10px] font-black tracking-[0.24em] text-[#CD9535]">ARTICLE / 会計</p>
+                    </div>
+                    <div className="px-5 py-8 sm:px-8 sm:py-10">
                     <div className="mb-6 flex items-center gap-3">
                       <span className="rounded-full bg-[#00204A] px-3 py-1 text-[10px] font-bold tracking-[0.18em] text-white">
                         会計
@@ -565,9 +680,14 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                         </div>
                       ))}
                     </div>
+                    </div>
                   </section>
 
-                  <section id="magazine43-editor" className="scroll-mt-6 border-t border-stone-200 pt-12">
+                  <section id="magazine43-editor" className="scroll-mt-6 overflow-hidden rounded-[10px] border border-stone-200 bg-white shadow-[0_18px_50px_rgba(0,32,74,0.08)]">
+                    <div className="border-b border-stone-200 bg-[#F5F3EC] px-5 py-4 sm:px-8">
+                      <p className="text-[10px] font-black tracking-[0.24em] text-[#CD9535]">ARTICLE / 後記</p>
+                    </div>
+                    <div className="px-5 py-8 sm:px-8 sm:py-10">
                     <div className="mb-6 flex items-center gap-3">
                       <span className="rounded-full bg-[#00204A] px-3 py-1 text-[10px] font-bold tracking-[0.18em] text-white">
                         後記
@@ -594,7 +714,9 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
                         <p className="text-xs font-bold leading-6 text-stone-700">水戸市文京2-1-1 茨城大学人文社会科学部内</p>
                       </div>
                     </div>
+                    </div>
                   </section>
+                  </div>
 
                   <div className="mt-14 border-t border-stone-200 pt-8 text-center">
                     <FileText className="mx-auto mb-3 h-6 w-6 text-[#CD9535]" />
