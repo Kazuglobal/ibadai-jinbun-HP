@@ -91,7 +91,7 @@ export default function NetworkArchive() {
   const openNewsletter = (cover = activeCover) => {
     if (!cover.webMagazineReady) return;
 
-    window.dispatchEvent(new CustomEvent('open-newsletter'));
+    window.dispatchEvent(new CustomEvent('open-newsletter-43'));
   };
 
   return (

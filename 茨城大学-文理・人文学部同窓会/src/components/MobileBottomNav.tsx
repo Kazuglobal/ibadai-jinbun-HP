@@ -9,16 +9,12 @@ import {
 } from 'lucide-react';
 
 interface MobileBottomNavProps {
-  currentView: 'home' | 'about';
-  onNavigate: (targetView: 'home' | 'about', hash?: string) => void;
+  currentView: 'home' | 'about' | 'newsletter43';
+  onNavigate: (targetView: 'home' | 'about' | 'newsletter43', hash?: string) => void;
+  onOpenChat: () => void;
 }
 
-export default function MobileBottomNav({ currentView, onNavigate }: MobileBottomNavProps) {
-  // Dispatches the custom event to open the AI Chat
-  const triggerAIChat = () => {
-    window.dispatchEvent(new CustomEvent('open-alumni-chat'));
-  };
-
+export default function MobileBottomNav({ currentView, onNavigate, onOpenChat }: MobileBottomNavProps) {
   const navItems = [
     {
       label: 'ホーム',
@@ -56,7 +52,7 @@ export default function MobileBottomNav({ currentView, onNavigate }: MobileBotto
     {
       label: 'チャット',
       icon: <MessageSquare className="w-5 h-5 text-[#CD9535]" />,
-      onClick: triggerAIChat,
+      onClick: onOpenChat,
       badge: true,
       highlight: true,
     }
