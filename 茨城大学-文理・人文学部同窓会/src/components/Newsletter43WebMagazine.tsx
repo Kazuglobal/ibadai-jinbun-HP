@@ -8,7 +8,6 @@ import {
   ChevronRight,
   Clock,
   FileText,
-  Image as ImageIcon,
   Minus,
   Plus,
   Quote,
@@ -19,6 +18,7 @@ import hasuiImage from '../data/newsletter43/hasui.jpg';
 import homeworkImage from '../data/newsletter43/homework.jpg';
 import jumpRopeImage from '../data/newsletter43/jump-rope.jpg';
 import lunchImage from '../data/newsletter43/lunch.jpg';
+import NewsletterArticleBody, { type NewsletterArticlePhoto } from './NewsletterArticleBody';
 
 type MagazineArticle = {
   id: string;
@@ -27,8 +27,7 @@ type MagazineArticle = {
   title: string;
   author: string;
   deck: string;
-  image?: string;
-  imageAlt?: string;
+  photos?: NewsletterArticlePhoto[];
   accent: string;
   readTime: string;
   pullQuote: string;
@@ -43,8 +42,6 @@ const articles: MagazineArticle[] = [
     title: '茨城大学 半世紀の想い出',
     author: '木戸 之都子（人文・文10回卒）',
     deck: '入学から50年。人文学部、人文図書室、同窓会名簿づくりの記憶をたどる巻頭エッセイ。',
-    image: activityImage,
-    imageAlt: '茨城大学の活動風景',
     accent: '#B57A24',
     readTime: '約5分',
     pullQuote: '半世紀の記憶は、学びの場と人のつながりが重なってできた同窓会の歩みでもあります。',
@@ -63,8 +60,7 @@ const articles: MagazineArticle[] = [
     title: '同窓会の皆様へ',
     author: '同窓会名誉会長・人文社会科学部長　蓮井 誠一郎',
     deck: '新学部長就任に際して、学部・大学院教育の現在と、人のつながりの再構築を語る。',
-    image: hasuiImage,
-    imageAlt: '蓮井誠一郎 人文社会科学部長',
+    photos: [{ image: hasuiImage, label: '蓮井誠一郎 人文社会科学部長' }],
     accent: '#2F6F73',
     readTime: '約4分',
     pullQuote: 'テクノロジーを活用しながら、豊かな心のやりとりをいかに追求するか。',
@@ -83,8 +79,12 @@ const articles: MagazineArticle[] = [
     title: 'ひたちなか市における子どもの居場所づくり',
     author: '人文社会科学部4年　中塩 紗矢香',
     deck: 'NPO法人「ただいま」でのiOP活動を通じ、学校の外側から子どもたちの実態を見つめる。',
-    image: homeworkImage,
-    imageAlt: 'てらこやで宿題をする様子',
+    photos: [
+      { image: homeworkImage, label: 'てらこやで宿題をする様子' },
+      { image: jumpRopeImage, label: 'てらこやで大縄跳びをする様子' },
+      { image: lunchImage, label: 'ふらっとでのお昼ご飯の様子' },
+      { image: activityImage, label: 'ふらっとでの活動の様子' },
+    ],
     accent: '#8C4A5B',
     readTime: '約4分',
     pullQuote: '学校以外の第三の居場所から、子ども一人ひとりに寄り添う支援を考える。',
@@ -150,13 +150,6 @@ const articles: MagazineArticle[] = [
       '会員の皆様、今後とも、更なるご支援、ご協力をいただけますようお願い申しあげます。',
     ],
   },
-];
-
-const gallery = [
-  { image: homeworkImage, label: 'てらこやで宿題をする様子' },
-  { image: jumpRopeImage, label: 'てらこやで大縄跳びをする様子' },
-  { image: lunchImage, label: 'ふらっとでのお昼ご飯の様子' },
-  { image: activityImage, label: 'ふらっとでの活動の様子' },
 ];
 
 const issueHighlights = [
@@ -412,43 +405,20 @@ export default function Newsletter43WebMagazine() {
               <p className="mt-5 max-w-3xl text-[15px] font-medium leading-8 text-stone-600 sm:text-base">{activeArticle.deck}</p>
             </div>
 
-            <div className="grid gap-8 p-5 sm:p-8 xl:grid-cols-[340px_1fr]">
-              <div className="space-y-5">
-                {activeArticle.image ? (
-                  <figure className="border border-[#D7C8AA] bg-[#F8F1E6] p-3">
-                    <div className="aspect-[4/3] overflow-hidden bg-stone-200">
-                      <img src={activeArticle.image} alt={activeArticle.imageAlt} className="h-full w-full object-cover" />
-                    </div>
-                    <figcaption className="mt-3 text-xs font-bold leading-5 text-stone-500">{activeArticle.imageAlt}</figcaption>
-                  </figure>
-                ) : (
-                  <div className="flex aspect-[4/3] items-center justify-center border border-[#D7C8AA] bg-[#F8F1E6] text-[#B57A24]">
-                    <FileText className="h-12 w-12" />
-                  </div>
-                )}
+            <div className="grid gap-8 p-5 sm:p-8 xl:grid-cols-[280px_1fr]">
+              <div>
                 <aside className="border-l-4 bg-[#F8F1E6] p-5" style={{ borderColor: activeArticle.accent }}>
                   <Quote className="h-5 w-5" style={{ color: activeArticle.accent }} />
                   <p className="mt-3 font-serif text-xl font-bold leading-8 text-[#14213D]">{activeArticle.pullQuote}</p>
                 </aside>
               </div>
 
-              <div
-                className="space-y-6 text-stone-700"
-                style={{ fontSize: `${fontScale}rem`, lineHeight: 1.95 }}
-              >
-                {activeArticle.body.map((paragraph, index) => (
-                  <p
-                    key={paragraph}
-                    className={
-                      index === 0
-                        ? 'first-letter:float-left first-letter:mr-3 first-letter:font-serif first-letter:text-[4.6em] first-letter:font-bold first-letter:leading-[0.84] first-letter:text-[#B57A24]'
-                        : undefined
-                    }
-                  >
-                    {paragraph}
-                  </p>
-                ))}
-              </div>
+              <NewsletterArticleBody
+                articleId={activeArticle.id}
+                body={activeArticle.body}
+                photos={activeArticle.photos ?? []}
+                fontScale={fontScale}
+              />
             </div>
 
             <div className="flex flex-col gap-3 border-t border-[#D7C8AA] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
@@ -475,25 +445,6 @@ export default function Newsletter43WebMagazine() {
           </article>
         </div>
 
-        <div className="mt-10 rounded-lg border border-[#D7C8AA] bg-[#FFFCF6] p-5 shadow-sm sm:p-8">
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-[11px] font-black tracking-[0.2em] text-[#B57A24]">PHOTO STORY</p>
-              <h4 className="mt-2 font-serif text-3xl font-bold text-[#14213D]">学生レポート写真</h4>
-            </div>
-            <ImageIcon className="h-6 w-6 text-[#B57A24]" />
-          </div>
-          <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {gallery.map((item) => (
-              <figure key={item.label} className="border border-[#D7C8AA] bg-[#F8F1E6] p-2">
-                <div className="aspect-[4/3] overflow-hidden bg-stone-200">
-                  <img src={item.image} alt={item.label} className="h-full w-full object-cover transition-transform duration-500 hover:scale-105" />
-                </div>
-                <figcaption className="mt-3 px-1 pb-1 text-xs font-bold leading-5 text-stone-600">{item.label}</figcaption>
-              </figure>
-            ))}
-          </div>
-        </div>
       </div>
     </section>
   );
