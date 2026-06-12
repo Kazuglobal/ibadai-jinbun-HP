@@ -74,7 +74,7 @@ export default function Update() {
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8 mb-12 sm:mb-16">
           <div className="flex-1 text-left">
             {/* Elegant section heading with Gold left vertical line */}
-            <div className="border-l-[3.5px] border-[#CD9535] pl-4 flex items-center h-12 mb-5">
+            <div className="border-l-[3.5px] border-[#CD9535] pl-4 flex items-center h-12 mb-5" data-gsap-section-title>
               <h2 className="text-4xl md:text-5xl font-serif font-bold text-[#00204A] tracking-widest leading-none">
                 UPDATE
               </h2>
@@ -95,7 +95,7 @@ export default function Update() {
             </div>
 
             {/* Quick Flowchart Graphic (HTML/Tailwind) - 視覚的な3ステップ図解 */}
-            <div className="bg-[#FAF9F5] border border-stone-200 p-4 rounded-2xl mb-6">
+            <div className="bg-[#FAF9F5] border border-stone-200 p-4 rounded-2xl mb-6" data-gsap-card>
               <span className="text-[10px] font-bold text-[#CD9535] tracking-widest uppercase block mb-3 font-sans">かんたん登録ステップ図解</span>
               <div className="grid grid-cols-1 sm:grid-cols-2 max-w-xl gap-3">
                 <div className="bg-white p-3 rounded-xl border border-stone-200/60 flex items-start gap-2.5">
@@ -133,7 +133,7 @@ export default function Update() {
           {/* =========================================================================
               STEPS TIMELINE CHART (Desktop & Tablet top-aligned)
               ========================================================================= */}
-          <div className="w-full lg:w-[48%] mt-8 lg:mt-3" id="timeline-steps">
+          <div className="w-full lg:w-[48%] mt-8 lg:mt-3" id="timeline-steps" data-gsap-card>
             <div className="relative grid grid-cols-4 gap-2">
               
               {/* Connecting horizontal dotted line (Underlay) */}

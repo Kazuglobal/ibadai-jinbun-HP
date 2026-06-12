@@ -110,7 +110,10 @@ export function useGsapHomeAnimations(enabled: boolean, onIntroComplete?: () => 
         });
       }
 
-      const pendingImages = Array.from(root.querySelectorAll('img')).filter((image) => !image.complete);
+      const pendingImages = Array.from(root.querySelectorAll('img')).filter(
+        (image): image is HTMLImageElement =>
+          image instanceof HTMLImageElement && !image.complete,
+      );
       const refresh = () => ScrollTrigger.refresh();
       pendingImages.forEach((image) => image.addEventListener('load', refresh, { once: true }));
 

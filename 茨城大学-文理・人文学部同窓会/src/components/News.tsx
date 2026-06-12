@@ -51,13 +51,28 @@ interface NewsProps {
 
 export default function News({ onSelectNews }: NewsProps) {
   return (
-    <section className="relative bg-[#FAF9F5] py-16 lg:py-24 border-t border-stone-200/40" id="news">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+    <section className="relative border-t border-stone-200/40 bg-[#F4F4F4] py-10 md:bg-[#FAF9F5] md:py-16 lg:py-24" id="news">
+      <div className="relative z-10 mx-auto max-w-7xl px-5 sm:px-6 lg:px-8">
+        <div className="mb-10 flex items-start justify-between md:hidden" data-gsap-section-title>
+          <div>
+            <p className="text-[13px] font-black tracking-[0.04em] text-[#00204A]">NEWS</p>
+            <h2 className="mt-3 text-[25px] font-black leading-none tracking-[0.04em] text-[#17233A]">
+              ニュース
+            </h2>
+          </div>
+
+          <a
+            href="#all-news"
+            className="relative mt-7 block w-28 border-b-2 border-stone-300 pb-3 text-right text-[15px] font-bold tracking-[0.04em] text-[#006BC7] after:absolute after:-bottom-0.5 after:left-0 after:h-0.5 after:w-9 after:bg-[#0074CC]"
+          >
+            view all
+          </a>
+        </div>
         
         {/* =========================================================================
             NEWS SECTION HEADER
             ========================================================================= */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-8">
+        <div className="mb-8 hidden flex-col justify-between gap-6 md:flex md:flex-row md:items-end" data-gsap-section-title>
           
           <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-7 text-left">
             {/* Title with Left Gold Border */}
@@ -95,7 +110,7 @@ export default function News({ onSelectNews }: NewsProps) {
         </div>
 
         {/* Visual category tag indicators - みてすぐわかるお知らせの分類 */}
-        <div className="flex flex-wrap gap-2 mb-8" id="news-quick-categories">
+        <div className="mb-8 hidden flex-wrap gap-2 md:flex" id="news-quick-categories">
           <span className="bg-red-50 text-red-800 text-[10.5px] font-bold px-3 py-1 rounded-full border border-red-200/50 flex items-center gap-1">
             <span className="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse" />
             重要なお知らせ
@@ -117,11 +132,12 @@ export default function News({ onSelectNews }: NewsProps) {
         {/* =========================================================================
             NEWS GRID CARDS (Horizontal Scroll on Mobile, Grid on Tablet/Desktop)
             ========================================================================= */}
-        <div className="flex md:grid overflow-x-auto md:overflow-x-visible md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 pb-6 md:pb-0 scrollbar-none scroll-smooth -mx-4 px-4 md:mx-0 md:px-0 snap-x snap-mandatory">
+        <div className="grid gap-9 md:grid-cols-2 md:gap-6 md:pb-0 lg:grid-cols-4 lg:gap-8">
           
           {NEWS_ITEMS.map((item) => (
             <motion.a
               key={item.id}
+              data-gsap-card
               href={item.link}
               onClick={(e) => {
                 if (onSelectNews) {
@@ -131,10 +147,10 @@ export default function News({ onSelectNews }: NewsProps) {
               }}
               whileHover={{ y: -6 }}
               transition={{ duration: 0.3 }}
-              className="group flex flex-col bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-stone-200/30 text-left transition-all duration-200 flex-shrink-0 w-[285px] xs:w-[315px] md:w-auto snap-start"
+              className="group grid grid-cols-[36%_1fr] items-start gap-4 text-left md:flex md:w-auto md:flex-col md:gap-0 md:overflow-hidden md:rounded-2xl md:border md:border-stone-200/30 md:bg-white md:shadow-sm md:transition-all md:duration-200 md:hover:shadow-md"
             >
               {/* Card Thumbnail Container */}
-              <div className="relative w-full aspect-[16/10.2] overflow-hidden bg-stone-100">
+              <div className="relative aspect-[3/2] w-full overflow-hidden bg-stone-100 md:aspect-[16/10.2]">
                 <img 
                   src={item.image} 
                   alt={item.title}
@@ -143,31 +159,36 @@ export default function News({ onSelectNews }: NewsProps) {
                 />
                 
                 {/* Slid-on category solid badge (exact alignment & color styling) */}
-                <div className={`absolute bottom-0 left-0 ${item.categoryColor} text-white text-[11px] font-sans font-bold py-2 px-4.5 tracking-wider`}>
+                <div className={`absolute bottom-0 left-0 hidden ${item.categoryColor} px-4.5 py-2 font-sans text-[11px] font-bold tracking-wider text-white md:block`}>
                   {item.category}
                 </div>
               </div>
 
               {/* Card Meta and Text Content */}
-              <div className="flex-1 flex flex-col justify-between p-6 xs:p-7 pt-5">
+              <div className="flex min-w-0 flex-1 flex-col justify-between md:p-6 md:pt-5">
                 
                 {/* Title & Description Stack */}
                 <div>
-                  <h3 className="text-[16px] sm:text-lg font-serif font-bold text-[#00204A] leading-[1.45] tracking-wide mb-3 min-h-[48px] line-clamp-2 group-hover:text-[#CD9535]/90 transition-colors">
-                    {item.title}
-                  </h3>
-                  
-                  <div className="text-stone-400 font-sans text-xs tracking-wider mb-4">
-                    {item.date}
+                  <div className="mb-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 md:mb-4">
+                    <time className="font-sans text-[10px] font-bold tracking-[0.08em] text-stone-400 md:text-xs md:font-normal md:tracking-wider">
+                      {item.date}
+                    </time>
+                    <span className="border border-[#0074CC] px-2 py-0.5 text-[9px] font-medium tracking-[0.06em] text-[#0074CC] md:hidden">
+                      {item.category}
+                    </span>
                   </div>
 
-                  <p className="text-stone-600 text-xs sm:text-[13px] leading-relaxed tracking-wider line-clamp-3 mb-6">
+                  <h3 className="line-clamp-3 font-sans text-[13px] font-bold leading-[1.55] tracking-[0.025em] text-[#17233A] transition-colors group-hover:text-[#0074CC] sm:text-[14px] md:mb-3 md:min-h-[48px] md:line-clamp-2 md:font-serif md:text-lg md:leading-[1.45] md:tracking-wide md:text-[#00204A] md:group-hover:text-[#CD9535]/90">
+                    {item.title}
+                  </h3>
+
+                  <p className="mb-6 hidden text-xs leading-relaxed tracking-wider text-stone-600 md:line-clamp-3 md:block md:text-[13px]">
                     {item.description}
                   </p>
                 </div>
 
                 {/* Arrow Vector (bottom aligned with content grid margins) */}
-                <div className="flex justify-end pt-3">
+                <div className="hidden justify-end pt-3 md:flex">
                   <div className="text-[#00204A] opacity-90 transition-transform duration-300 group-hover:translate-x-1.5">
                     <svg className="w-5 h-5 stroke-[1.2]" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                       <path d="M5 12h14M12 5l7 7-7 7" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -185,7 +206,7 @@ export default function News({ onSelectNews }: NewsProps) {
         {/* =========================================================================
             BOTTOM CALL TO ACTION BUTTON (Sleek Rounded Wide Pill)
             ========================================================================= */}
-        <div className="mt-16 text-center">
+        <div className="mt-16 hidden text-center md:block">
           <motion.a
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
