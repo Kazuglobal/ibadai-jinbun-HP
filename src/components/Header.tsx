@@ -3,8 +3,8 @@ import { X, ArrowRight, Menu, ChevronDown, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 interface HeaderProps {
-  currentView?: 'home' | 'about';
-  onNavigate?: (view: 'home' | 'about', hash?: string) => void;
+  currentView?: 'home' | 'about' | 'newsletter43';
+  onNavigate?: (view: 'home' | 'about' | 'newsletter43', hash?: string) => void;
 }
 
 export default function Header({ currentView = 'home', onNavigate }: HeaderProps) {
@@ -43,7 +43,7 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
     }
   };
 
-  const handleItemClick = (view: 'home' | 'about', hash?: string) => {
+  const handleItemClick = (view: 'home' | 'about' | 'newsletter43', hash?: string) => {
     setMobileMenuOpen(false);
     setAboutDropdownOpen(false);
     if (onNavigate) {
@@ -197,7 +197,7 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
             <button
               onClick={() => {
                 setAboutDropdownOpen(false);
-                window.dispatchEvent(new CustomEvent('open-newsletter'));
+                handleItemClick('newsletter43', '#newsletter-43');
               }}
               className="relative py-2 px-2 text-[#CD9535] hover:text-[#00204A] text-[11px] font-bold font-sans tracking-wider whitespace-nowrap transition-colors duration-200 group focus:outline-none cursor-pointer flex items-center gap-1.5"
             >
@@ -205,7 +205,7 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-[#CD9535]"></span>
               </span>
-              <span>最新会報 (No.42)</span>
+              <span>最新会報 (No.43)</span>
             </button>
 
           </nav>
@@ -378,10 +378,7 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
                 {/* Mobile tray manual newsletter toggle */}
                 <button
                   onClick={() => {
-                    setMobileMenuOpen(false);
-                    setTimeout(() => {
-                      window.dispatchEvent(new CustomEvent('open-newsletter'));
-                    }, 200);
+                    handleItemClick('newsletter43', '#newsletter-43');
                   }}
                   className="flex items-center justify-between py-2.5 text-left w-full group border-b border-amber-100 bg-amber-500/5 px-2.5 rounded-lg"
                 >
@@ -390,7 +387,7 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
                       <span className="relative inline-flex rounded-full h-2 w-2 bg-[#CD9535]"></span>
                     </span>
-                    最新会報 (No.42) 読込
+                    最新会報 (No.43) を読む
                   </span>
                   <ArrowRight className="w-4 h-4 text-[#CD9535]" />
                 </button>

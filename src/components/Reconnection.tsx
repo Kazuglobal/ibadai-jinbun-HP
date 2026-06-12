@@ -4,7 +4,7 @@ import { ArrowRight } from 'lucide-react';
 
 export default function Reconnection() {
   return (
-    <section className="relative overflow-hidden bg-white py-16 lg:py-24 border-t border-stone-200/50" id="reconnection-section" data-gsap-section>
+    <section className="relative overflow-hidden bg-white py-16 lg:py-24 border-t border-stone-200/50" id="reconnection-section">
       
       {/* Decorative Dotted Grid in BG (Left Top for Desktop) */}
       <div className="absolute top-[8%] left-[2%] pointer-events-none select-none z-0 opacity-40 hidden lg:block">
@@ -45,7 +45,7 @@ export default function Reconnection() {
           <div className="lg:col-span-6 flex flex-col items-start text-left">
             
             {/* Elegant Vertical Decorative Line + Header Title */}
-            <div className="mb-6 lg:mb-8" data-gsap-title>
+            <div className="mb-6 lg:mb-8">
               <h2 className="text-4xl md:text-5xl font-serif font-bold text-[#00204A] leading-[1.3] tracking-wider select-none">
                 母校とのつながりを、
                 <br />
@@ -54,7 +54,7 @@ export default function Reconnection() {
             </div>
 
             {/* Clear Japanese multi-paragraph details precisely matched */}
-            <div className="text-stone-600 font-sans text-xs sm:text-[14.5px] leading-relaxed tracking-wider mb-10 space-y-4 max-w-2xl border-l-[1.5px] border-stone-200 pl-4.5" data-gsap-copy>
+            <div className="text-stone-600 font-sans text-xs sm:text-[14.5px] leading-relaxed tracking-wider mb-10 space-y-4 max-w-2xl border-l-[1.5px] border-stone-200 pl-4.5">
               <p>
                 ニュースを見る、イベントに参加する、会報を読む、住所を更新する。
               </p>
@@ -103,7 +103,7 @@ export default function Reconnection() {
           {/* -------------------------------------------------------------------------
               RIGHT STRIP: High Fidelity Circular Collage & Floating Cards
               ------------------------------------------------------------------------- */}
-          <div className="lg:col-span-6 relative flex justify-center items-center py-6 w-full min-h-[420px] sm:min-h-[480px]" data-gsap-media>
+          <div className="lg:col-span-6 relative flex justify-center items-center py-6 w-full min-h-[420px] sm:min-h-[480px]">
             
             {/* Background Golden Crescent Arc overlay block (curves from left) */}
             <div className="absolute left-[3%] top-[3%] w-[90%] aspect-square max-w-[420px] bg-[#fdfaf2] border border-amber-900/5 rounded-full select-none -z-10" />
@@ -116,7 +116,6 @@ export default function Reconnection() {
 
             {/* COLLAGE IMAGE A: Main Grand Circular Clock Tower Campus building */}
             <motion.div 
-              data-gsap-card
               initial={{ opacity: 0, scale: 0.92 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
@@ -133,7 +132,6 @@ export default function Reconnection() {
 
             {/* COLLAGE IMAGE B: Laptop / Group debate in a woody modern lounge */}
             <motion.div 
-              data-gsap-card
               initial={{ opacity: 0, x: 25 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
@@ -150,7 +148,6 @@ export default function Reconnection() {
 
             {/* COLLAGE IMAGE C: Classical domed academic library hall/pillars */}
             <motion.div 
-              data-gsap-card
               initial={{ opacity: 0, y: 25 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

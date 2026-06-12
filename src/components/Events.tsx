@@ -1,4 +1,5 @@
 import React from 'react';
+import { MapPin } from 'lucide-react';
 import { motion } from 'motion/react';
 
 // Classy Events data structure representing the exact layout, metadata, and styles from the screenshot
@@ -62,7 +63,7 @@ interface EventsProps {
 
 export default function Events({ onSelectEvent }: EventsProps) {
   return (
-    <section className="relative overflow-hidden bg-[#00132C] py-16 lg:py-24" id="events-section" data-gsap-section>
+    <section className="relative overflow-hidden bg-[#F4F4F4] py-10 md:bg-[#00132C] md:py-16 lg:py-24" id="events-section">
       
       {/* Golden Dot Grid decoration (Top-Right as in screenshot) */}
       <div className="absolute right-[4%] top-[10%] hidden md:grid grid-cols-6 gap-2 opacity-85 z-0">
@@ -72,11 +73,26 @@ export default function Events({ onSelectEvent }: EventsProps) {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div className="mb-9 flex items-start justify-between px-1 md:hidden">
+          <div>
+            <p className="text-[13px] font-black tracking-[0.04em] text-[#00204A]">EVENTS</p>
+            <h2 className="mt-3 text-[25px] font-black leading-none tracking-[0.04em] text-[#17233A]">
+              イベント
+            </h2>
+          </div>
+
+          <a
+            href="#all-events"
+            className="relative mt-7 block w-28 border-b-2 border-stone-300 pb-3 text-right text-[15px] font-bold tracking-[0.04em] text-[#006BC7] after:absolute after:-bottom-0.5 after:left-0 after:h-0.5 after:w-9 after:bg-[#0074CC]"
+          >
+            view all
+          </a>
+        </div>
         
         {/* =========================================================================
             HEADER GRID: Title (Left Vertical Gold Line), Small Info, and Pill Button
             ========================================================================= */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12 sm:mb-16" data-gsap-title>
+        <div className="mb-12 hidden flex-col justify-between gap-6 md:flex md:flex-row md:items-center sm:mb-16">
           
           <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-7 text-left">
             {/* Elegant Section Title with Left Gold Border */}
@@ -87,7 +103,7 @@ export default function Events({ onSelectEvent }: EventsProps) {
             </div>
             
             {/* Title description - classy creamy text with gold accent details */}
-            <div className="flex flex-col justify-center text-stone-200" data-gsap-copy>
+            <div className="flex flex-col justify-center text-stone-200">
               <span className="font-sans font-bold text-[14px] sm:text-[14.5px] tracking-wider leading-relaxed">
                 参加して、つながって、
               </span>
@@ -115,15 +131,64 @@ export default function Events({ onSelectEvent }: EventsProps) {
 
         </div>
 
+        <div className="-mr-4 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 pl-[10vw] pr-4 scrollbar-none sm:-mr-6 sm:pr-6 md:hidden">
+          {EVENTS_DATA.map((item) => {
+            const location = item.details.find((detail) => detail.label === '場所')?.value ?? '';
+            const formattedDate = `${item.dateYear}.${item.dateDay
+              .split('.')
+              .map((part) => part.padStart(2, '0'))
+              .join('.')}`;
+
+            return (
+              <motion.a
+                key={item.id}
+                href={item.link}
+                onClick={(event) => {
+                  if (onSelectEvent) {
+                    event.preventDefault();
+                    onSelectEvent(item.title.replace(/\n/g, ''));
+                  }
+                }}
+                whileTap={{ scale: 0.99 }}
+                className="group w-[80vw] max-w-[520px] flex-none snap-center text-left"
+              >
+                <div className="aspect-[16/9] overflow-hidden bg-stone-200">
+                  <img
+                    src={item.image}
+                    alt={item.title.replace(/\n/g, '')}
+                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    referrerPolicy="no-referrer"
+                  />
+                </div>
+
+                <div className="flex h-8 items-center bg-[#DFF2FC] text-[#006FB8]">
+                  <span className="flex h-full items-center bg-[#C9EAF8] px-2.5 text-[10px] font-black tracking-[0.08em]">
+                    DATE
+                  </span>
+                  <time className="px-3 text-[11px] font-bold tracking-[0.04em]">{formattedDate}</time>
+                </div>
+
+                <h3 className="mt-4 whitespace-pre-line text-[17px] font-black leading-[1.35] tracking-[0.01em] text-[#3C3C3C]">
+                  {item.title}
+                </h3>
+
+                <p className="mt-2.5 flex items-start gap-1 text-[12px] font-medium leading-5 text-stone-400">
+                  <MapPin className="mt-0.5 h-3.5 w-3.5 flex-none fill-stone-400 text-stone-400" />
+                  <span>{location}</span>
+                </p>
+              </motion.a>
+            );
+          })}
+        </div>
+
         {/* =========================================================================
             THREE COLUMN EVENTS CARDS GRID - Horizontal Scroll on Mobile, Grid on Tablet/Desktop
             ========================================================================= */}
-        <div className="flex md:grid overflow-x-auto md:overflow-x-visible md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 pb-6 md:pb-0 scrollbar-none scroll-smooth -mx-4 px-4 md:mx-0 md:px-0 snap-x snap-mandatory">
+        <div className="hidden gap-6 pb-0 md:grid md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
           
           {EVENTS_DATA.map((item) => (
             <motion.div
               key={item.id}
-              data-gsap-card
               whileHover={{ y: -4 }}
               transition={{ duration: 0.3 }}
               className="bg-[#FAF9F5] rounded-2xl overflow-hidden shadow-md border border-amber-900/10 text-left p-5 sm:p-6 flex flex-col justify-between flex-shrink-0 w-[290px] xs:w-[320px] md:w-auto snap-start group"
@@ -156,7 +221,7 @@ export default function Events({ onSelectEvent }: EventsProps) {
                 </div>
  
                 {/* 2. Middle Row inside the card: Beautiful Wide Banner Image with Overlaid Calendar Binder */}
-                <div className="relative h-[130px] sm:h-[155px] w-full rounded-xl overflow-hidden shadow-xs border border-black/5 mb-4 select-none" data-gsap-media>
+                <div className="relative h-[130px] sm:h-[155px] w-full rounded-xl overflow-hidden shadow-xs border border-black/5 mb-4 select-none">
                   <img 
                     src={item.image} 
                     alt={item.title}
@@ -228,7 +293,7 @@ export default function Events({ onSelectEvent }: EventsProps) {
       {/* =========================================================================
           BOTTOM CAPTION / NOTIFICATION FOOTER WITH CLEAN CONTRAST
           ========================================================================= */}
-      <div className="w-full bg-white text-center py-4.5 mt-16 sm:mt-24 border-t border-stone-205/30">
+      <div className="mt-12 w-full border-t border-stone-200/30 bg-white py-4.5 text-center md:mt-24">
         <p className="text-stone-500 font-sans font-medium text-[10px] xs:text-[11px] sm:text-xs tracking-widest px-4 select-none">
           ※イベントの内容・日程は変更になる場合があります。
         </p>

@@ -65,7 +65,7 @@ export default function Update() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-white py-16 lg:py-24 border-t border-stone-200/50" id="update-section" data-gsap-section>
+    <section className="relative overflow-hidden bg-white py-16 lg:py-24 border-t border-stone-200/50" id="update-section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         
         {/* =========================================================================
@@ -74,13 +74,13 @@ export default function Update() {
         <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-8 mb-12 sm:mb-16">
           <div className="flex-1 text-left">
             {/* Elegant section heading with Gold left vertical line */}
-            <div className="border-l-[3.5px] border-[#CD9535] pl-4 flex items-center h-12 mb-5" data-gsap-title>
+            <div className="border-l-[3.5px] border-[#CD9535] pl-4 flex items-center h-12 mb-5" data-gsap-section-title>
               <h2 className="text-4xl md:text-5xl font-serif font-bold text-[#00204A] tracking-widest leading-none">
                 UPDATE
               </h2>
             </div>
             
-            <h3 className="text-lg sm:text-[21px] font-sans font-bold text-[#00204A] tracking-wider leading-relaxed mb-4" data-gsap-copy>
+            <h3 className="text-lg sm:text-[21px] font-sans font-bold text-[#00204A] tracking-wider leading-relaxed mb-4">
               住所変更や連絡先更新を、オンラインでかんたんに。
             </h3>
 
