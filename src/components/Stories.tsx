@@ -14,6 +14,7 @@ import {
   Users, 
   ChevronLeft,
   ArrowRight,
+  Gift,
   Linkedin,
   Facebook,
   Instagram,
@@ -400,7 +401,7 @@ const GRADUATES_DATA = [
   },
   {
     id: 22,
-    image: 'https://images.unsplash.com/photo-1594744803329-e58b31de215f?q=80&w=600&auto=format&fit=crop', // Counsellor lady
+    image: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop', // Counsellor lady
     category: 'education',
     categoryLabel: '教育・行政',
     categoryBg: 'bg-[#FDFAF0]',
@@ -522,8 +523,6 @@ export default function Stories() {
   const [onlyWithDiscount, setOnlyWithDiscount] = useState(false);
   const itemsPerPage = 3;
 
-  const sliderRef = React.useRef<HTMLDivElement>(null);
-
   // Handles sort state dropdown overlay
   const [showSortDropdown, setShowSortDropdown] = useState(false);
 
@@ -554,16 +553,6 @@ export default function Stories() {
   // Image Upload Fields
   const [formImage, setFormImage] = useState<string>('');
   const [isDragging, setIsDragging] = useState(false);
-
-  const scrollSlider = (direction: 'left' | 'right') => {
-    if (sliderRef.current) {
-      const scrollAmount = 350;
-      sliderRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      });
-    }
-  };
 
   const handleAddSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -643,10 +632,7 @@ export default function Stories() {
     setFormImage('');
     setIsSubmitModalOpen(false);
     
-    // Scroll slider back to left
-    if (sliderRef.current) {
-      sliderRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-    }
+    document.getElementById('stories-results-anchor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   // Reset demo list
@@ -695,8 +681,19 @@ export default function Stories() {
     return result;
   }, [graduates, activeCategory, onlyWithDiscount, searchQuery, sortOrder]);
 
+  const hasActiveFilters =
+    activeCategory !== 'all' || onlyWithDiscount || searchQuery.trim() !== '';
+  const featuredGrad = graduates[0] ?? null;
+  const resultsForDisplay = useMemo(
+    () =>
+      filteredAndSortedGrads.filter(
+        (grad) => hasActiveFilters || !featuredGrad || grad.id !== featuredGrad.id,
+      ),
+    [featuredGrad, filteredAndSortedGrads, hasActiveFilters],
+  );
+
   // Total pages calculation
-  const totalPages = Math.max(1, Math.ceil(filteredAndSortedGrads.length / itemsPerPage));
+  const totalPages = Math.max(1, Math.ceil(resultsForDisplay.length / itemsPerPage));
 
   // Ensure current page does not go out of bound when filter shifts
   React.useEffect(() => {
@@ -706,8 +703,8 @@ export default function Stories() {
   // Slice list for visual pagination
   const paginatedGrads = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
-    return filteredAndSortedGrads.slice(startIndex, startIndex + itemsPerPage);
-  }, [filteredAndSortedGrads, currentPage]);
+    return resultsForDisplay.slice(startIndex, startIndex + itemsPerPage);
+  }, [currentPage, resultsForDisplay]);
 
   const handlePageChange = (pageNo: number) => {
     if (pageNo >= 1 && pageNo <= totalPages) {
@@ -721,441 +718,352 @@ export default function Stories() {
   };
 
   return (
-    <section className="relative overflow-hidden bg-[#FAF9F5] py-16 lg:py-24 border-t border-stone-200/40" id="stories-section" data-gsap-section>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        
-        {/* =========================================================================
-            SECTION HEADER
-            ========================================================================= */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 mb-8 border-b border-stone-200/50" data-gsap-title>
-          
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-7 text-left">
-            {/* Elegant Section Title with Left Gold Border */}
-            <div className="border-l-[3.5px] border-[#CD9535] pl-4 flex items-center h-12">
-              <h2 className="text-4xl md:text-5xl font-serif font-bold text-[#00204A] tracking-wider leading-none">
-                STORIES
-              </h2>
-            </div>
-            
-            {/* Classy grey sub-title explanation text */}
-            <div className="flex flex-col justify-center text-stone-500 pt-1">
-              <span className="font-sans font-bold text-[14px] tracking-widest leading-none">
-                卒業生インタビュー
-              </span>
-            </div>
+    <section
+      className="relative scroll-mt-20 overflow-hidden border-t border-stone-200/40 bg-[#FAF9F5] py-3 sm:scroll-mt-24 sm:py-16 lg:py-24"
+      id="stories-section"
+    >
+      <div className="relative z-10 mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <header className="max-w-3xl" data-gsap-section-title>
+          <div className="border-l-[3px] border-[#CD9535] pl-4 sm:pl-7">
+            <p className="font-serif text-[16px] font-bold tracking-[0.18em] text-[#B57A24] sm:text-[30px]">
+              STORIES
+            </p>
+            <h2 className="mt-1.5 font-serif text-[24px] font-bold leading-[1.35] tracking-[0.04em] text-[#00204A] sm:mt-4 sm:text-[46px] sm:leading-[1.4] lg:text-[54px]">
+              先輩の歩みから、
+              <br />
+              次の一歩を見つける
+            </h2>
           </div>
+          <p className="mt-3 text-[11px] leading-5 tracking-[0.04em] text-stone-600 sm:mt-6 sm:text-base sm:leading-7">
+            茨城大学文理・人文学部で学び、さまざまな分野で活躍する卒業生の声をご紹介します。
+          </p>
+        </header>
 
-          {/* Desktop/Tablet Header Search Link Trigger */}
-          <div className="hidden md:flex items-center gap-1 text-stone-600 font-sans text-xs tracking-wider">
-            <span>卒業生の職種・分野から探す</span>
-            <Search className="w-3.5 h-3.5 ml-1 text-stone-500" />
-          </div>
-
-        </div>
-
-        {/* Small introductory text narrative */}
-        <div className="text-left text-stone-600 text-sm sm:text-[14.5px] tracking-wide leading-relaxed mb-8 max-w-3xl" data-gsap-copy>
-          茨城大学文理・人文学部で学び、さまざまな分野で活躍する卒業生の声をご紹介します。
-        </div>
-
-        {/* =========================================================================
-            SEARCH BAR (PIXEL APPLIED RESPONSIVE INPUT AS IN SCREENSHOTS)
-            ========================================================================= */}
-        <div className="mb-8 max-w-full">
-          <div className="relative border border-stone-200 bg-white rounded-lg flex items-center justify-between py-3.5 px-4.5 shadow-sm hover:border-[#CD9535]/80 focus-within:border-[#CD9535] focus-within:ring-1 focus-within:ring-[#CD9535]/20 transition-all">
-            <div className="flex items-center gap-3.5 w-full">
-              <Search className="w-5 h-5 text-stone-400 flex-shrink-0" />
-              <input
-                type="text"
-                placeholder="卒業生の職種・分野から探す（キーワード：社会、IT、メディア等）"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full text-sm sm:text-[14.5px] text-[#00204A] bg-transparent outline-none placeholder-stone-400 font-sans"
-                id="stories-search-input"
+        {featuredGrad && !hasActiveFilters && (
+          <motion.button
+            type="button"
+            onClick={() => setSelectedGrad(featuredGrad)}
+            whileHover={{ y: -3 }}
+            transition={{ duration: 0.25 }}
+            className="group mt-4 w-full overflow-hidden border border-stone-200 bg-white text-left shadow-sm sm:mt-9"
+            data-gsap-card
+          >
+            <div className="relative aspect-[12/5] overflow-hidden sm:aspect-[16/9] lg:aspect-[16/7]">
+              <img
+                src={featuredGrad.image}
+                alt={featuredGrad.name}
+                className="h-full w-full object-cover object-[center_28%] transition-transform duration-700 group-hover:scale-[1.025] sm:object-center"
+                referrerPolicy="no-referrer"
               />
+              <div className="absolute inset-0 bg-[#00132C]/55" />
+              <div className="absolute inset-0 flex max-w-2xl flex-col justify-end p-4 text-white sm:p-9 lg:p-12">
+                <div className="flex flex-wrap items-center gap-2 text-[9px] font-bold tracking-wider sm:gap-3 sm:text-xs">
+                  <span className="border border-[#D7A946] px-2 py-1 text-[#F3C76B] sm:px-3 sm:py-1.5">
+                    {featuredGrad.categoryLabel}
+                  </span>
+                  <span className="text-white/80">{featuredGrad.gradYear}</span>
+                </div>
+                <h3 className="mt-3 font-serif text-[19px] font-bold leading-[1.4] tracking-[0.04em] sm:mt-5 sm:text-[38px] sm:leading-[1.45]">
+                  {featuredGrad.title}
+                </h3>
+                <p className="mt-3 text-[9px] font-medium leading-4 text-white/90 sm:mt-5 sm:text-sm sm:leading-6">
+                  {featuredGrad.affiliation}
+                </p>
+                <p className="mt-0.5 text-[11px] font-bold tracking-wider sm:mt-1 sm:text-base">{featuredGrad.name}</p>
+              </div>
             </div>
-            
-            <ChevronRight className="w-[18px] h-[18px] text-stone-400 hover:text-[#00204A] transition-colors flex-shrink-0 select-none" />
-          </div>
+            <div className="flex items-center gap-2 border-t border-stone-200 px-4 py-2.5 text-xs font-bold tracking-wider text-[#00204A] sm:gap-3 sm:px-9 sm:py-4 sm:text-base">
+              <span>インタビューを読む</span>
+              <ArrowRight className="h-4 w-4 text-[#CD9535] transition-transform group-hover:translate-x-1 sm:h-5 sm:w-5" />
+            </div>
+          </motion.button>
+        )}
+
+        <div className="mt-3 border border-stone-200 bg-white shadow-sm transition-colors focus-within:border-[#CD9535] sm:mt-8">
+          <label className="flex items-center gap-3 px-4 py-2.5 sm:px-5 sm:py-4">
+            <Search className="h-4 w-4 flex-none text-stone-400 sm:h-5 sm:w-5" />
+            <input
+              type="search"
+              aria-label="卒業生の職種・分野から探す"
+              placeholder="卒業生の職種・分野から探す"
+              value={searchQuery}
+              onChange={(event) => setSearchQuery(event.target.value)}
+              className="min-w-0 flex-1 bg-transparent text-xs text-[#00204A] outline-none placeholder:text-stone-400 sm:text-base"
+              id="stories-search-input"
+            />
+          </label>
         </div>
 
-        {/* =========================================================================
-            CATEGORY TABS FILTERS (Pill Layout Wrapping precisely like mockup)
-            ========================================================================= */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-10">
-          <nav className="flex flex-wrap items-center gap-2 sm:gap-3" aria-label="Graduate Categories Filter">
-            {CATEGORY_TABS.map((tab) => {
-              const IconComponent = tab.icon;
-              const isTabActive = activeCategory === tab.id;
-              
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => {
-                    setActiveCategory(tab.id);
-                    setCurrentPage(1);
-                  }}
-                  className={`py-2.5 px-4.5 rounded-full text-xs sm:text-[13px] font-sans font-bold tracking-wider flex items-center gap-2 transition-all cursor-pointer border ${
+        <nav
+          className="mt-3 grid grid-cols-4 gap-1.5 rounded-xl border border-stone-200 bg-[#F5F3EC] p-1.5 shadow-sm sm:mt-5 sm:grid-cols-8 sm:gap-0 sm:rounded-none sm:border-x-0 sm:border-t-0 sm:bg-transparent sm:p-0 sm:shadow-none"
+          aria-label="Graduate Categories Filter"
+        >
+          {CATEGORY_TABS.map((tab) => {
+            const IconComponent = tab.icon ?? Users;
+            const isTabActive = activeCategory === tab.id;
+
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => {
+                  setActiveCategory(tab.id);
+                  setCurrentPage(1);
+                }}
+                className={`relative flex min-h-[72px] flex-col items-center justify-center gap-1 rounded-lg border px-1 py-2 text-center text-[10px] font-bold leading-[1.25] transition-all sm:min-h-24 sm:gap-2 sm:rounded-none sm:border-0 sm:px-2 sm:pb-4 sm:pt-3 sm:text-xs sm:leading-4 ${
+                  isTabActive
+                    ? 'border-[#00204A] bg-[#00204A] text-white shadow-sm sm:bg-transparent sm:text-[#00204A] sm:shadow-none'
+                    : 'border-white bg-white text-stone-600 hover:border-[#CD9535]/40 hover:text-[#00204A] sm:border-transparent sm:bg-transparent'
+                }`}
+                aria-pressed={isTabActive}
+              >
+                <span
+                  className={`flex h-8 w-8 items-center justify-center rounded-full transition-colors sm:h-10 sm:w-10 ${
                     isTabActive
-                      ? 'bg-[#00132C] text-white border-[#00132C]'
-                      : 'bg-white text-[#00204A] border-stone-200 hover:border-[#CD9535]/60 hover:text-[#CD9535]'
+                      ? 'bg-white/15 text-[#F3C76B] sm:bg-[#00204A] sm:text-white'
+                      : 'bg-[#F2F4F8] text-[#00204A]'
                   }`}
                 >
-                  {IconComponent && <IconComponent className="w-3.5 h-3.5 opacity-85" />}
-                  <span>{tab.label}</span>
-                  {tab.id === 'other' && <ChevronDown className="w-3.5 h-3.5 ml-0.5 opacity-80" />}
-                </button>
-              );
-            })}
-          </nav>
-
-          {/* Special Toggle filter for discount benefits */}
-          <button
-            onClick={() => {
-              setOnlyWithDiscount(!onlyWithDiscount);
-              setCurrentPage(1);
-            }}
-            className={`py-2.5 px-4.5 rounded-full text-xs sm:text-[13px] font-sans font-bold tracking-wider flex items-center gap-2 transition-all cursor-pointer border shadow-xs select-none ${
-              onlyWithDiscount
-                ? 'bg-[#CD9535] text-white border-[#CD9535]'
-                : 'bg-amber-50/70 text-amber-800 border-amber-200/50 hover:bg-amber-100/70 hover:text-[#CD9535] hover:border-[#CD9535]'
-            }`}
-          >
-            <span className="text-sm">🎁</span>
-            <span>お店・事業（割引特典あり）</span>
-          </button>
-        </div>
-
-        {/* Results anchor for smooth pagination scroll support */}
-        <div id="stories-results-anchor" className="scroll-mt-6" />
-
-        {/* =========================================================================
-            RESULTS COUNTER & SORT DROPDOWN BAR
-            ========================================================================= */}
-        <div className="flex items-center justify-between mb-8 pb-3 border-b border-dashed border-stone-200/60">
-          
-          {/* Output match counter */}
-          <div className="text-stone-700 font-sans text-xs sm:text-sm tracking-wider flex items-center gap-3">
-            <div className="flex items-center">
-              <span className="font-serif font-bold text-xl sm:text-2xl text-[#CD9535] mr-1.5 transition-all">
-                {filteredAndSortedGrads.length}
-              </span>
-              <span>件の卒業生インタビューが見つかりました</span>
-            </div>
-            {localStorage.getItem('ibaraki_alumni_stories') && (
-              <button 
-                onClick={handleResetDemoList}
-                className="text-[10px] text-stone-400 hover:text-red-500 underline ml-2 cursor-pointer border-none bg-transparent"
-              >
-                (初期データにリセット)
+                  <IconComponent className="h-4 w-4 sm:h-[18px] sm:w-[18px]" />
+                </span>
+                <span>{tab.label}</span>
+                {isTabActive && <span className="absolute inset-x-2 bottom-0 h-0.5 bg-[#CD9535] sm:inset-x-2" />}
               </button>
-            )}
-          </div>
+            );
+          })}
+        </nav>
 
-          {/* Newest Sorting Dropdown menu button */}
-          <div className="relative">
-            <button
-              onClick={() => setShowSortDropdown(!showSortDropdown)}
-              className="py-2 px-4 bg-white border border-stone-200 rounded-lg text-xs sm:text-[13px] font-sans font-bold text-stone-700 tracking-wider flex items-center gap-1.5 shadow-sm hover:border-stone-300 transition-colors select-none cursor-pointer"
-              aria-haspopup="listbox"
-              id="stories-sort-dropdown-trigger"
-            >
-              <span>{sortOrder === 'newest' ? '新着順' : '卒業年順'}</span>
-              <ChevronDown className={`w-3.5 h-3.5 text-stone-500 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
-            </button>
+        <button
+          type="button"
+          onClick={() => {
+            setOnlyWithDiscount(!onlyWithDiscount);
+            setCurrentPage(1);
+          }}
+          className={`mt-1 flex w-full items-center justify-between border-y px-2 py-2.5 text-left text-xs font-bold transition-colors sm:mt-4 sm:py-4 sm:text-sm ${
+            onlyWithDiscount
+              ? 'border-[#CD9535] bg-amber-50 text-[#9A6718]'
+              : 'border-stone-200 text-stone-600 hover:text-[#00204A]'
+          }`}
+          aria-pressed={onlyWithDiscount}
+        >
+          <span className="flex items-center gap-3">
+            <Gift className="h-4 w-4 text-[#CD9535] sm:h-5 sm:w-5" />
+            特典のあるお店・事業のみ表示
+          </span>
+          <ChevronRight className={`h-5 w-5 transition-transform ${onlyWithDiscount ? 'rotate-90' : ''}`} />
+        </button>
 
-            {/* Custom overlay menu items */}
-            {showSortDropdown && (
-              <>
-                <div 
-                  className="fixed inset-0 z-20 cursor-default" 
-                  onClick={() => setShowSortDropdown(false)} 
-                />
-                <ul 
-                  className="absolute right-0 mt-1.5 w-32 bg-white border border-stone-150 rounded-lg shadow-lg z-30 text-left overflow-hidden text-xs sm:text-[13px] font-sans font-medium"
-                  role="listbox"
+        <div id="stories-results-anchor" className="scroll-mt-24 pt-4 sm:pt-10">
+          <div className="flex items-end justify-between gap-4 border-b border-stone-200 pb-3 sm:pb-4">
+            <div>
+              <h3 className="font-serif text-[18px] font-bold tracking-[0.04em] text-[#00204A] sm:text-[31px]">
+                {hasActiveFilters ? '検索結果' : '新着インタビュー'}
+                <span className="ml-2 text-[14px] text-[#B57A24] sm:text-xl">
+                  {filteredAndSortedGrads.length}件
+                </span>
+              </h3>
+              {typeof window !== 'undefined' && localStorage.getItem('ibaraki_alumni_stories') && (
+                <button
+                  type="button"
+                  onClick={handleResetDemoList}
+                  className="mt-2 text-[10px] text-stone-400 underline hover:text-red-500"
                 >
-                  <li>
-                    <button
-                      onClick={() => {
-                        setSortOrder('newest');
-                        setShowSortDropdown(false);
-                      }}
-                      className={`w-full py-2.5 px-4 text-left transition-colors cursor-pointer ${
-                        sortOrder === 'newest' 
-                          ? 'bg-stone-50 text-[#CD9535] font-semibold' 
-                          : 'text-stone-700 hover:bg-stone-50'
-                      }`}
-                    >
-                      新着順
-                    </button>
-                  </li>
-                  <li>
-                    <button
-                      onClick={() => {
-                        setSortOrder('oldest');
-                        setShowSortDropdown(false);
-                      }}
-                      className={`w-full py-2.5 px-4 text-left transition-colors cursor-pointer ${
-                        sortOrder === 'oldest' 
-                          ? 'bg-stone-50 text-[#CD9535] font-semibold' 
-                          : 'text-stone-700 hover:bg-stone-50'
-                      }`}
-                    >
-                      卒業年順
-                    </button>
-                  </li>
-                </ul>
-              </>
-            )}
+                  初期データに戻す
+                </button>
+              )}
+            </div>
+
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setShowSortDropdown(!showSortDropdown)}
+                className="flex items-center gap-1.5 px-2 py-2 text-xs font-bold tracking-wider text-stone-600 hover:text-[#00204A] sm:text-sm"
+                aria-haspopup="listbox"
+                aria-expanded={showSortDropdown}
+                id="stories-sort-dropdown-trigger"
+              >
+                <span>{sortOrder === 'newest' ? '新着順' : '卒業年順'}</span>
+                <ChevronDown className={`h-4 w-4 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
+              </button>
+
+              {showSortDropdown && (
+                <>
+                  <button
+                    type="button"
+                    className="fixed inset-0 z-20 cursor-default"
+                    onClick={() => setShowSortDropdown(false)}
+                    aria-label="並び順メニューを閉じる"
+                  />
+                  <ul className="absolute right-0 z-30 mt-1 w-36 overflow-hidden border border-stone-200 bg-white text-sm shadow-lg" role="listbox">
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSortOrder('newest');
+                          setShowSortDropdown(false);
+                        }}
+                        className={`w-full px-4 py-3 text-left ${
+                          sortOrder === 'newest' ? 'bg-stone-50 font-bold text-[#B57A24]' : 'text-stone-700'
+                        }`}
+                      >
+                        新着順
+                      </button>
+                    </li>
+                    <li>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSortOrder('oldest');
+                          setShowSortDropdown(false);
+                        }}
+                        className={`w-full px-4 py-3 text-left ${
+                          sortOrder === 'oldest' ? 'bg-stone-50 font-bold text-[#B57A24]' : 'text-stone-700'
+                        }`}
+                      >
+                        卒業年順
+                      </button>
+                    </li>
+                  </ul>
+                </>
+              )}
+            </div>
           </div>
 
-        </div>
-
-        {/* =========================================================================
-            GRADUATES INTERVIEW CARDS SLIDER (Horizontal slide with scroll snapping)
-            ========================================================================= */}
-        <div className="relative group/slider select-none">
-          
-          {/* Left Arrow Button for smooth sliding on Desktop */}
-          <button 
-            onClick={() => scrollSlider('left')}
-            className="absolute -left-4 sm:-left-6 top-[50%] -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/95 border border-stone-200 shadow-lg flex items-center justify-center text-[#00204A] hover:bg-stone-50 active:scale-95 transition-all opacity-0 group-hover/slider:opacity-100 md:opacity-100 focus:outline-none focus:ring-2 focus:ring-[#CD9535]/50 cursor-pointer"
-            aria-label="Scroll left"
-          >
-            <ChevronLeft className="w-6 h-6 stroke-[2]" />
-          </button>
-          
-          {/* Right Arrow Button for smooth sliding on Desktop */}
-          <button 
-            onClick={() => scrollSlider('right')}
-            className="absolute -right-4 sm:-right-6 top-[50%] -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/95 border border-stone-200 shadow-lg flex items-center justify-center text-[#00204A] hover:bg-stone-50 active:scale-95 transition-all opacity-0 group-hover/slider:opacity-100 md:opacity-100 focus:outline-none focus:ring-2 focus:ring-[#CD9535]/50 cursor-pointer"
-            aria-label="Scroll right"
-          >
-            <ChevronRight className="w-6 h-6 stroke-[2]" />
-          </button>
-
-          {/* Swipe Indicator instruction helper line */}
-          <div className="flex items-center justify-between text-stone-400 text-[11px] sm:text-xs font-sans tracking-widest mb-4 pl-1">
-            <span className="flex items-center gap-1.5">
-              <span className="inline-block w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-              左右にフリック・スワイプしてスクロールできます ⇆
-            </span>
-            <span className="hidden md:inline font-bold text-[#CD9535]">矢印キーまたは上のボタンでの操作も可能です</span>
-          </div>
-
-          {/* Slider Row Container */}
-          <div 
-            ref={sliderRef}
-            className="flex overflow-x-auto gap-6 sm:gap-8 pb-8 pt-2 snap-x snap-mandatory scroll-smooth"
-            style={{
-              scrollbarWidth: 'none', // for Firefox
-              msOverflowStyle: 'none', // for IE/Edge
-              WebkitOverflowScrolling: 'touch'
-            }}
-          >
-            <style>{`
-              /* Hide scrollbar for Chrome, Safari and Opera */
-              div::-webkit-scrollbar {
-                display: none;
-              }
-            `}</style>
-            
+          <div className="divide-y divide-stone-200">
             <AnimatePresence mode="popLayout">
-              {filteredAndSortedGrads.length > 0 ? (
-                filteredAndSortedGrads.map((grad, index) => {
+              {paginatedGrads.length > 0 ? (
+                paginatedGrads.map((grad, index) => {
                   const ItemIcon = grad.categoryIcon;
-                  
+
                   return (
-                    <motion.div
+                    <motion.button
+                      type="button"
                       key={grad.id}
-                      initial={{ opacity: 0, x: 30 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, scale: 0.92 }}
-                      transition={{ duration: 0.45, delay: Math.min(index * 0.04, 0.4) }}
-                      whileHover={{ y: -6 }}
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.05 }}
                       onClick={() => setSelectedGrad(grad)}
-                      className="snap-start flex-shrink-0 w-[290px] xs:w-[325px] sm:w-[340px] md:w-[350px] bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-stone-200/50 text-left flex flex-col transition-all cursor-pointer"
+                      className="group grid w-full grid-cols-[82px_1fr_auto] gap-3 py-3 text-left sm:grid-cols-[150px_1fr_auto] sm:gap-6 sm:py-6"
+                      data-gsap-card
                     >
-                      <div className="flex min-h-full flex-col" data-gsap-card>
-                      {/* Top portrait container */}
-                      <div className="relative aspect-[16/11] w-full overflow-hidden bg-stone-150" data-gsap-media>
-                        <img 
-                          src={grad.image} 
+                      <div className="aspect-square overflow-hidden bg-stone-100 sm:aspect-[4/3]">
+                        <img
+                          src={grad.image}
                           alt={grad.name}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105 filter brightness-[0.98]"
+                          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.035]"
                           referrerPolicy="no-referrer"
                         />
-                        {/* Floating Badges */}
-                        <div className="absolute top-3.5 left-3.5 z-10 flex flex-col gap-2 items-start">
-                          <span className={`inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-sans font-bold py-1 px-3 rounded-full border shadow-sm ${grad.categoryBg} ${grad.categoryBorder} ${grad.categoryText}`}>
-                            {ItemIcon && <ItemIcon className="w-3.5 h-3.5" />}
-                            <span>{grad.categoryLabel}</span>
-                          </span>
+                      </div>
 
-                          {/* Floating Amber "割引特典あり" tag directly on top of card inside image overlay */}
-                          {grad.hasDiscount && (
-                            <span className="inline-flex items-center gap-1.5 text-[10px] sm:text-[10.5px] font-sans font-black py-1 px-3.5 rounded-lg bg-amber-500 text-white border border-amber-400 shadow-md transform hover:scale-105 transition-transform">
-                              <span>🎁</span>
-                              <span>割引特典あり</span>
+                      <div className="min-w-0 self-center">
+                        <div className="flex flex-wrap items-center gap-2 text-[10px] sm:text-xs">
+                          <span className={`border px-2 py-1 font-bold ${grad.categoryBorder} ${grad.categoryText}`}>
+                            <span className="inline-flex items-center gap-1">
+                              {ItemIcon && <ItemIcon className="h-3 w-3" />}
+                              {grad.categoryLabel}
                             </span>
-                          )}
+                          </span>
+                          <span className="text-stone-400">{grad.gradYear}</span>
                         </div>
+                        <h4 className="mt-1.5 line-clamp-2 font-serif text-[13px] font-bold leading-[1.45] tracking-[0.025em] text-[#00204A] transition-colors group-hover:text-[#B57A24] sm:mt-2 sm:text-xl sm:leading-[1.5]">
+                          {grad.title}
+                        </h4>
+                        <p className="mt-1.5 line-clamp-1 text-[9px] leading-4 text-stone-500 sm:mt-2 sm:text-xs sm:leading-5">
+                          {grad.affiliation}
+                        </p>
+                        <p className="mt-0.5 text-[10px] font-bold tracking-wider text-[#00204A] sm:text-sm">{grad.name}</p>
                       </div>
 
-                      {/* Card details body section */}
-                      <div className="flex-1 p-5 sm:p-6 flex flex-col justify-between">
-                        
-                        {/* Main Information Stack */}
-                        <div>
-                          {/* Graduation & Major Info */}
-                          <div className="text-stone-400 font-sans text-xs tracking-wider mb-2">
-                            {grad.gradYear}　{grad.major}
-                          </div>
-
-                          {/* Headline Title */}
-                          <h3 className="text-base sm:text-lg font-serif font-bold text-[#00204A] leading-[1.4] tracking-wider mb-4 min-h-[44px] line-clamp-2 group-hover:text-[#CD9535] transition-colors">
-                            {grad.title}
-                          </h3>
-
-                          {/* Special Quotes Design Layout */}
-                          <div className="relative mb-4 mt-2">
-                            <span className="absolute -top-3 -left-1 text-3xl font-serif text-[#CD9535]/20 leading-none select-none">“</span>
-                            <p className="text-stone-600 text-xs sm:text-[13.5px] leading-relaxed tracking-wider pl-4 pr-1 line-clamp-3 select-text">
-                              {grad.quote}
-                            </p>
-                            <span className="absolute -bottom-3 right-1 text-3xl font-serif text-[#CD9535]/20 leading-none select-none">”</span>
-                          </div>
-                        </div>
-
-                        {/* Interactive mini SNS Row */}
-                        {(grad.linkedinUrl || grad.facebookUrl || grad.instagramUrl || grad.xUrl || grad.websiteUrl) && (
-                          <div className="flex flex-wrap items-center gap-2 mb-3 mt-1.5" onClick={(e) => e.stopPropagation()}>
-                            <span className="text-[10px] uppercase font-sans font-black tracking-widest text-stone-400 mr-1 select-none">SNS / HP Link:</span>
-                            {grad.linkedinUrl && (
-                              <a href={grad.linkedinUrl} target="_blank" rel="noopener noreferrer" className="p-1 px-1.5 rounded bg-slate-100 hover:bg-[#0077B5]/10 text-slate-600 hover:text-[#0077B5] transition-colors" title="LinkedIn">
-                                <Linkedin className="w-3.5 h-3.5" />
-                              </a>
-                            )}
-                            {grad.facebookUrl && (
-                              <a href={grad.facebookUrl} target="_blank" rel="noopener noreferrer" className="p-1 px-1.5 rounded bg-slate-100 hover:bg-[#1877F2]/10 text-slate-600 hover:text-[#1877F2] transition-colors" title="Facebook">
-                                <Facebook className="w-3.5 h-3.5" />
-                              </a>
-                            )}
-                            {grad.instagramUrl && (
-                              <a href={grad.instagramUrl} target="_blank" rel="noopener noreferrer" className="p-1 px-1.5 rounded bg-slate-100 hover:bg-pink-50 text-slate-600 hover:text-pink-600 transition-colors" title="Instagram">
-                                <Instagram className="w-3.5 h-3.5" />
-                              </a>
-                            )}
-                            {grad.xUrl && (
-                              <a href={grad.xUrl} target="_blank" rel="noopener noreferrer" className="p-1 px-1.5 rounded bg-slate-100 hover:bg-stone-200 text-slate-600 hover:text-stone-950 transition-colors" title="X (Twitter)">
-                                <Twitter className="w-3.5 h-3.5" />
-                              </a>
-                            )}
-                            {grad.websiteUrl && (
-                              <a href={grad.websiteUrl} target="_blank" rel="noopener noreferrer" className="p-1 px-1.5 rounded bg-slate-100 hover:bg-amber-100/70 text-slate-600 hover:text-[#CD9535] transition-colors" title="Website/HP">
-                                <Globe className="w-3.5 h-3.5" />
-                              </a>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Bottom Graduate attribution + Action arrow button */}
-                        <div className="border-t border-stone-100 pt-3.5 mt-2 flex flex-row items-center justify-between gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="text-stone-500 font-sans text-[10.5px] tracking-wider leading-relaxed truncate">
-                              {grad.affiliation}
-                            </div>
-                            <div className="text-[#00204A] font-sans font-bold text-[13px] sm:text-[14px] tracking-wider mt-0.5">
-                              {grad.name}
-                            </div>
-                          </div>
-
-                          {/* Action icon button matching brand style */}
-                          <div className="w-8 h-8 sm:w-9 sm:h-9 bg-white group-hover:bg-[#00204A] border border-stone-200 group-hover:border-[#00204A] text-[#00204A] group-hover:text-white rounded-full flex items-center justify-center transition-all shadow-none select-none flex-shrink-0">
-                            <ChevronRight className="w-4.5 h-4.5 stroke-[1.8]" />
-                          </div>
-                        </div>
-
-                      </div>
-                      </div>
-
-                    </motion.div>
+                      <ChevronRight className="h-5 w-5 self-center text-[#00204A] transition-transform group-hover:translate-x-1 group-hover:text-[#CD9535]" />
+                    </motion.button>
                   );
                 })
               ) : (
-                // Empty search/filter indicator
-                <div className="w-full py-16 text-center select-none bg-white rounded-2xl border border-stone-200/50 p-8 flex flex-col items-center justify-center">
-                  <p className="text-[#00204A] font-serif font-bold text-lg mb-2">
+                <div className="py-16 text-center">
+                  <p className="font-serif text-lg font-bold text-[#00204A]">
                     該当する卒業生インタビューが見つかりませんでした
                   </p>
-                  <p className="text-stone-400 text-xs sm:text-[13px] tracking-wider mb-6">
-                    条件を変えて再確認いただくか、別のキーワードでお試しください。
+                  <p className="mt-2 text-xs leading-6 text-stone-400">
+                    キーワードや職種を変更して、もう一度お試しください。
                   </p>
                   <button
+                    type="button"
                     onClick={() => {
                       setActiveCategory('all');
                       setOnlyWithDiscount(false);
                       setSearchQuery('');
                     }}
-                    className="bg-white hover:bg-[#00204A]/5 text-[#00204A] border border-[#00204A] font-sans font-bold text-[12px] py-2.5 px-6 rounded-lg transition-all cursor-pointer"
+                    className="mt-6 border border-[#00204A] px-6 py-3 text-xs font-bold text-[#00204A] transition-colors hover:bg-[#00204A] hover:text-white"
                   >
-                    すべての条件をクリアする
+                    条件をすべてクリア
                   </button>
                 </div>
               )}
             </AnimatePresence>
           </div>
+
+          {paginatedGrads.length > 0 && totalPages > 1 && (
+            <div className="mt-7 flex items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={() => handlePageChange(currentPage - 1)}
+                disabled={currentPage === 1}
+                className="flex h-10 w-10 items-center justify-center border border-stone-200 text-[#00204A] transition-colors hover:border-[#00204A] disabled:cursor-not-allowed disabled:opacity-30"
+                aria-label="前のページ"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+              <span className="text-xs font-bold tracking-[0.18em] text-stone-500">
+                {currentPage} / {totalPages}
+              </span>
+              <button
+                type="button"
+                onClick={() => handlePageChange(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className="flex h-10 w-10 items-center justify-center border border-stone-200 text-[#00204A] transition-colors hover:border-[#00204A] disabled:cursor-not-allowed disabled:opacity-30"
+                aria-label="次のページ"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* =========================================================================
-            BOTTOM ALUMNI INTERVIEW RECRUITMENT BANNER
-            ========================================================================= */}
-        <div className="w-full bg-[#FCFBF8] border border-stone-200/50 rounded-2xl p-6 sm:p-8 md:px-12 mt-16 sm:mt-20 flex flex-col md:flex-row items-center justify-between gap-6" data-gsap-card>
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-4 text-center md:text-left">
-            
-            {/* White rounded people user circle avatar */}
-            <div className="bg-white w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center shadow-sm flex-shrink-0 border border-amber-900/5">
-              <Users className="w-6 h-6 text-[#CD9535]" />
-            </div>
-
-            {/* Recruitment core notes */}
-            <div className="flex flex-col pt-1.5 gap-1">
-              <h3 className="text-[#00204A] font-serif font-bold text-base sm:text-lg tracking-wider">
-                STORIESに登録したい方はいませんか？
+        <div className="mt-16 flex flex-col items-center justify-between gap-6 border-y border-stone-200 py-8 text-center md:flex-row md:text-left">
+          <div className="flex flex-col items-center gap-4 md:flex-row">
+            <span className="flex h-14 w-14 flex-none items-center justify-center rounded-full bg-white text-[#CD9535] shadow-sm">
+              <Users className="h-6 w-6" />
+            </span>
+            <div>
+              <h3 className="font-serif text-lg font-bold tracking-wider text-[#00204A]">
+                あなたのストーリーも紹介しませんか？
               </h3>
-              <p className="text-stone-500 text-xs sm:text-[13.5px] tracking-wider leading-relaxed">
-                ご自身の活動や、同窓生に紹介したいお店・事業について掲載・共有しましょう！
+              <p className="mt-1 text-xs leading-6 text-stone-500">
+                卒業後の活動や、同窓生に紹介したいお店・事業を掲載できます。
               </p>
             </div>
-
           </div>
-
-          {/* Guidelines & Direct Input Twin Actions Stack */}
-          <div className="flex flex-col sm:flex-row gap-3 flex-shrink-0 w-full md:w-auto">
-            <motion.a 
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+          <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+            <a
               href="#join-interviews"
-              className="inline-flex items-center justify-center gap-2 bg-white hover:bg-stone-50 text-stone-700 border border-stone-350 py-3 px-5 rounded-lg font-sans font-bold text-xs sm:text-[12.5px] tracking-widest shadow-sm transition-all text-center flex-1 sm:flex-none"
+              className="inline-flex items-center justify-center gap-2 border border-stone-300 bg-white px-5 py-3 text-xs font-bold tracking-wider text-stone-700"
               id="join-interview-btn"
             >
-              <span>掲載ガイドライン</span>
-              <ArrowRight className="w-3.5 h-3.5 text-stone-600" />
-            </motion.a>
-
-            <motion.button 
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+              掲載ガイドライン
+              <ArrowRight className="h-4 w-4" />
+            </a>
+            <button
+              type="button"
               onClick={() => setIsSubmitModalOpen(true)}
-              className="inline-flex items-center justify-center gap-2 bg-[#00204A] hover:bg-[#00204A]/90 text-white border border-[#00204A] py-3 px-5 rounded-lg font-sans font-bold text-xs sm:text-[12.5px] tracking-widest shadow-md transition-all text-center cursor-pointer flex-1 sm:flex-none"
+              className="inline-flex items-center justify-center gap-2 bg-[#00204A] px-5 py-3 text-xs font-bold tracking-wider text-white"
               id="direct-submit-btn"
             >
-              <span>STORIESに直接登録する ✍️</span>
-            </motion.button>
+              掲載を申し込む
+              <ArrowRight className="h-4 w-4" />
+            </button>
           </div>
         </div>
-
       </div>
 
       {/* =========================================================================

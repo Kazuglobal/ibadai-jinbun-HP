@@ -1,6 +1,5 @@
 import { ArrowRight } from 'lucide-react';
 import { heroVisualImages, type HeroVisualImage } from '../data/heroVisualImages';
-import { useHeroFirstViewAnimation } from '../hooks/useHeroFirstViewAnimation';
 
 const actions = [
   { label: 'NEWS', href: '#news', primary: true },
@@ -8,27 +7,9 @@ const actions = [
   { label: 'ARCHIVE', href: '#archive', primary: false },
 ];
 
-function AnimatedTitle({ mobile = false }: { mobile?: boolean }) {
-  const lines = ['知のつながりを、', '未来へひらく。'];
-
+function Photo({ image, className, animate = false }: { image: HeroVisualImage; className: string; animate?: boolean }) {
   return (
-    <h1 className={`${mobile ? 'mt-4 text-[32px] leading-[1.35]' : 'mt-7 max-w-[430px] text-[46px] leading-[1.28]'} font-serif font-bold text-[#00204A]`}>
-      {lines.map((line, lineIndex) => (
-        <span key={line} className="block overflow-hidden pb-1">
-          {Array.from(line).map((char, charIndex) => (
-            <span key={`${char}-${lineIndex}-${charIndex}`} className="inline-block" data-hero-intro="title-char">
-              {char}
-            </span>
-          ))}
-        </span>
-      ))}
-    </h1>
-  );
-}
-
-function Photo({ image, className }: { image: HeroVisualImage; className: string }) {
-  return (
-    <figure className={`overflow-hidden bg-stone-200 ${className}`} data-hero-intro="photo">
+    <figure className={`overflow-hidden bg-stone-200 ${className}`} data-gsap={animate ? 'hero-photo' : undefined}>
       <img src={image.src} alt={image.alt} className="h-full w-full object-cover" referrerPolicy="no-referrer" />
     </figure>
   );
@@ -36,7 +17,7 @@ function Photo({ image, className }: { image: HeroVisualImage; className: string
 
 function HeroActions({ mobile = false }: { mobile?: boolean }) {
   return (
-    <div className={mobile ? 'grid gap-2.5' : 'flex items-center gap-4'} data-hero-intro="actions">
+    <div className={mobile ? 'grid gap-2.5' : 'flex items-center gap-4'} data-gsap="hero-actions">
       {actions.map((action) => (
         <a
           key={action.href}
@@ -54,15 +35,10 @@ function HeroActions({ mobile = false }: { mobile?: boolean }) {
 function DesktopImageGrid() {
   return (
     <div className="relative min-h-[560px]">
-      <Photo image={heroVisualImages.campus} className="absolute left-0 top-0 h-[54%] w-[58%]" />
-      <Photo image={heroVisualImages.graduation} className="absolute right-[10%] top-[7%] h-[48%] w-[29%] rounded-t-full" />
-      <Photo image={heroVisualImages.archive} className="absolute bottom-[12%] left-0 h-[28%] w-[40%]" />
-      <Photo image={heroVisualImages.alumni} className="absolute bottom-[12%] left-[42%] h-[28%] w-[40%]" />
-      <div className="absolute bottom-[35.5%] left-[9%] z-10 flex h-10 w-[62%] items-center justify-center bg-[#00204A]" data-hero-intro="band" aria-hidden="true">
-        <span className="font-serif text-[13px] font-semibold tracking-[0.18em] text-white" data-hero-intro="network">ALUMNI NETWORK</span>
-      </div>
-      <div className="absolute bottom-[39%] left-[3%] z-0 h-px w-[18%] bg-[#CD9535]" data-hero-intro="rule" aria-hidden="true" />
-      <div className="absolute bottom-[39%] left-[71%] z-0 h-px w-[18%] bg-[#CD9535]" data-hero-intro="rule" aria-hidden="true" />
+      <Photo image={heroVisualImages.campus} className="absolute left-0 top-0 h-[54%] w-[58%]" animate />
+      <Photo image={heroVisualImages.graduation} className="absolute right-[10%] top-[7%] h-[48%] w-[29%] rounded-t-full" animate />
+      <Photo image={heroVisualImages.archive} className="absolute bottom-[12%] left-0 h-[28%] w-[40%]" animate />
+      <Photo image={heroVisualImages.alumni} className="absolute bottom-[12%] left-[42%] h-[28%] w-[40%]" animate />
       <div className="absolute bottom-[12%] left-[80%] h-7 w-7 bg-[#00204A]" aria-hidden="true" />
       <div className="absolute right-[4%] top-[8%] h-[17%] w-px bg-[#CD9535]" aria-hidden="true" />
       <div className="absolute right-[4%] top-[55%] h-[13%] w-px bg-[#CD9535]" aria-hidden="true" />
@@ -80,19 +56,23 @@ function DesktopHero() {
     <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
       <div className="grid min-h-[560px] grid-cols-[42%_58%] overflow-hidden bg-transparent">
         <div className="relative py-10 pr-10">
-          <div className="mt-4 flex items-center gap-5" data-hero-intro="eyebrow">
+          <div className="mt-4 flex items-center gap-5" data-gsap="hero-eyebrow">
             <span className="h-9 w-px bg-[#CD9535]" />
             <p className="font-serif text-[15px] tracking-[0.12em] text-[#00204A]">学びの記憶と人のつながりを、未来へ</p>
           </div>
-          <AnimatedTitle />
-          <div className="mt-5 h-px w-20 bg-[#CD9535]" aria-hidden="true" data-hero-intro="rule" />
-          <p className="mt-6 whitespace-pre-line font-serif text-[15px] font-semibold leading-[1.8] tracking-[0.12em] text-[#00204A]" data-hero-intro="copy">
+          <h1 className="mt-7 max-w-[430px] font-serif text-[46px] font-bold leading-[1.28] text-[#00204A]" data-gsap="hero-title">
+            知のつながりを、
+            <br />
+            未来へひらく。
+          </h1>
+          <div className="mt-5 h-px w-20 bg-[#CD9535]" aria-hidden="true" data-gsap="hero-rule" />
+          <p className="mt-6 whitespace-pre-line font-serif text-[15px] font-semibold leading-[1.8] tracking-[0.12em] text-[#00204A]" data-gsap="hero-copy">
             卒業生・在学生・教職員をつなぐ{'\n'}同窓会プラットフォーム
           </p>
           <div className="mt-8">
             <HeroActions />
           </div>
-          <div className="absolute bottom-[15%] left-0 grid grid-cols-8 gap-x-3 gap-y-2 opacity-85" aria-hidden="true" data-hero-intro="ornament">
+          <div className="absolute bottom-[15%] left-0 grid grid-cols-8 gap-x-3 gap-y-2 opacity-85" aria-hidden="true">
             {Array.from({ length: 32 }).map((_, index) => (
               <span key={index} className="h-0.5 w-0.5 rounded-full bg-[#00204A]" />
             ))}
@@ -107,21 +87,25 @@ function DesktopHero() {
 function MobileHero() {
   return (
     <div className="mx-auto max-w-[430px] border-y border-[#D8D2C5] bg-[#FBFAF6]">
-      <Photo image={heroVisualImages.campus} className="h-[206px] w-full" />
+      <Photo image={heroVisualImages.campus} className="h-[206px] w-full" animate />
       <div className="grid grid-cols-2">
-        <Photo image={heroVisualImages.archive} className="h-[86px] w-full" />
-        <Photo image={heroVisualImages.alumni} className="h-[86px] w-full" />
+        <Photo image={heroVisualImages.archive} className="h-[86px] w-full" animate />
+        <Photo image={heroVisualImages.alumni} className="h-[86px] w-full" animate />
       </div>
-      <div className="flex h-9 items-center justify-center gap-5 bg-[#00204A] text-white" data-hero-intro="band">
+      <div className="flex h-9 items-center justify-center gap-5 bg-[#00204A] text-white">
         <span className="h-px w-12 bg-[#CD9535]" />
-        <span className="font-serif text-[11px] font-semibold tracking-[0.38em]" data-hero-intro="network">ALUMNI NETWORK</span>
+        <span className="font-serif text-[11px] font-semibold tracking-[0.38em]">ALUMNI NETWORK</span>
         <span className="h-px w-12 bg-[#CD9535]" />
       </div>
       <div className="px-6 pb-10 pt-7">
-        <p className="font-serif text-[13px] font-semibold leading-relaxed tracking-[0.11em] text-[#00204A]" data-hero-intro="eyebrow">学びの記憶と人のつながりを、未来へ</p>
-        <AnimatedTitle mobile />
-        <div className="mt-4 h-px w-16 bg-[#CD9535]" aria-hidden="true" data-hero-intro="rule" />
-        <p className="mt-4 font-serif text-[12px] font-semibold leading-[1.9] tracking-[0.12em] text-[#00204A]" data-hero-intro="copy">
+        <p className="font-serif text-[13px] font-semibold leading-relaxed tracking-[0.11em] text-[#00204A]" data-gsap="hero-eyebrow">学びの記憶と人のつながりを、未来へ</p>
+        <h1 className="mt-4 font-serif text-[32px] font-bold leading-[1.35] text-[#00204A]" data-gsap="hero-title">
+          知のつながりを、
+          <br />
+          未来へひらく。
+        </h1>
+        <div className="mt-4 h-px w-16 bg-[#CD9535]" aria-hidden="true" data-gsap="hero-rule" />
+        <p className="mt-4 font-serif text-[12px] font-semibold leading-[1.9] tracking-[0.12em] text-[#00204A]" data-gsap="hero-copy">
           卒業生・在学生・教職員をつなぐ
           <br />
           同窓会プラットフォーム
@@ -134,15 +118,9 @@ function MobileHero() {
   );
 }
 
-interface HeroProps {
-  onIntroComplete?: () => void;
-}
-
-export default function Hero({ onIntroComplete }: HeroProps) {
-  const heroRef = useHeroFirstViewAnimation(onIntroComplete);
-
+export default function Hero() {
   return (
-    <section ref={heroRef} className="relative overflow-hidden bg-[#FAF9F5] pb-14 pt-4 lg:pb-12 lg:pt-0" id="home-hero-section">
+    <section className="relative overflow-hidden bg-[#FAF9F5] pb-14 pt-4 lg:pb-12 lg:pt-0" id="home-hero-section" data-gsap="hero-section">
       <div className="hidden lg:block">
         <DesktopHero />
       </div>

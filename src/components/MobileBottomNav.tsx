@@ -4,13 +4,12 @@ import {
   Home, 
   Newspaper, 
   BookOpen, 
-  UserCheck, 
   MessageSquare 
 } from 'lucide-react';
 
 interface MobileBottomNavProps {
-  currentView: 'home' | 'about';
-  onNavigate: (targetView: 'home' | 'about', hash?: string) => void;
+  currentView: 'home' | 'about' | 'newsletter43';
+  onNavigate: (targetView: 'home' | 'about' | 'newsletter43', hash?: string) => void;
   onOpenChat: () => void;
 }
 
@@ -38,14 +37,6 @@ export default function MobileBottomNav({ currentView, onNavigate, onOpenChat }:
       icon: <BookOpen className="w-5 h-5" />,
       onClick: () => {
         onNavigate('home', '#stories-section');
-      },
-      badge: false,
-    },
-    {
-      label: '手続き',
-      icon: <UserCheck className="w-5 h-5" />,
-      onClick: () => {
-        onNavigate('home', '#update-section');
       },
       badge: false,
     },

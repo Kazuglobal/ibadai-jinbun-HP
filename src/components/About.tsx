@@ -63,7 +63,7 @@ export default function About({ onNavigate }: AboutProps) {
   ];
 
   return (
-    <section className="relative overflow-hidden bg-white py-12 xs:py-16 lg:py-24 border-t border-stone-200/50" id="about-section" data-gsap-section>
+    <section className="relative overflow-hidden bg-white py-12 xs:py-16 lg:py-24 border-t border-stone-200/50" id="about-section">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
         {/* =========================================================================
@@ -90,17 +90,17 @@ export default function About({ onNavigate }: AboutProps) {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
             
             {/* Left Description Column */}
-            <div className="lg:col-span-6 flex flex-col items-start text-left" data-gsap-title>
+            <div className="lg:col-span-6 flex flex-col items-start text-left">
               <h1 className="text-4xl sm:text-5xl lg:text-[54px] font-serif font-bold text-[#00204A] tracking-wider leading-tight mb-6">
                 同窓会について
               </h1>
-              <p className="text-stone-600 text-sm sm:text-base leading-relaxed tracking-wider font-sans max-w-xl" data-gsap-copy>
+              <p className="text-stone-600 text-sm sm:text-base leading-relaxed tracking-wider font-sans max-w-xl">
                 茨城大学文理・人文学部同窓会の目的や活動、組織・役員、事業報告などをご紹介します。
               </p>
             </div>
 
             {/* Right Graphics Badge Column - EXACT REPLICATED DESIGN */}
-            <div className="lg:col-span-6 relative flex items-center justify-center lg:justify-end h-[280px] select-none pointer-events-none" data-gsap-media>
+            <div className="lg:col-span-6 relative flex items-center justify-center lg:justify-end h-[280px] select-none pointer-events-none">
               <div className="relative w-full max-w-[460px] h-full flex items-center justify-between">
                 
                 {/* Thin gold orbital tracking curve */}
@@ -157,47 +157,47 @@ export default function About({ onNavigate }: AboutProps) {
         {/* =========================================================================
             01. ABOUT BY NUMBERS & ACTIVITIES (数字でみる同窓会 ＆ 目的・活動)
             ========================================================================= */}
-        <div className="relative py-12 md:py-16 border-t border-stone-200/40 text-left" id="purpose-activities" data-gsap-section>
+        <div className="relative py-12 md:py-16 border-t border-stone-200/40 text-left" id="purpose-activities">
           {/* Header Title group */}
-          <div className="flex items-baseline gap-3 mb-8" data-gsap-title>
+          <div className="flex items-baseline gap-3 mb-8">
             <span className="text-4xl sm:text-5xl font-mono font-bold text-[#CD9535]/65 leading-none">01</span>
             <div>
               <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#00204A] tracking-wider relative pb-1">
                 同窓会の全貌（数字でみる ＆ 目的・活動）
-                <span className="absolute bottom-0 left-0 w-12 h-[2.5px] bg-[#CD9535]" data-gsap-line />
+                <span className="absolute bottom-0 left-0 w-12 h-[2.5px] bg-[#CD9535]" />
               </h2>
             </div>
           </div>
 
           {/* Infographics: Numbers board (みてすぐわかるレイアウト) */}
-          <p className="text-stone-500 text-xs tracking-widest font-sans uppercase mb-4" data-gsap-copy>ALUMNI ASSOCIATION BY THE NUMBERS</p>
+          <p className="text-stone-500 text-xs tracking-widest font-sans uppercase mb-4">ALUMNI ASSOCIATION BY THE NUMBERS</p>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-            <div className="bg-[#00204A] text-white p-6 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm" data-gsap-card>
+            <div className="bg-[#00204A] text-white p-6 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm">
               <span className="text-xs text-[#CD9535] font-sans font-bold tracking-wider mb-2">同窓会員数</span>
               <span className="text-2xl sm:text-3xl font-serif font-extrabold tracking-tight">19,000<span className="text-xs sm:text-sm font-sans font-medium ml-1">人超</span></span>
               <span className="text-[10px] text-stone-300 font-sans mt-2">全国各地・多分野で活躍</span>
             </div>
             
-            <div className="bg-[#FAF9F5] border border-stone-200/80 p-6 rounded-2xl flex flex-col items-center justify-center text-center" data-gsap-card>
+            <div className="bg-[#FAF9F5] border border-stone-200/80 p-6 rounded-2xl flex flex-col items-center justify-center text-center">
               <span className="text-xs text-stone-500 font-sans font-bold tracking-wider mb-2">設立</span>
               <span className="text-2xl sm:text-3xl font-serif font-extrabold text-[#00204A] tracking-tight">1982<span className="text-xs sm:text-sm font-sans font-medium ml-1">年</span></span>
               <span className="text-[10px] text-stone-500 font-sans mt-2">40年を超える歴史と伝統</span>
             </div>
 
-            <div className="bg-[#FAF9F5] border border-stone-200/80 p-6 rounded-2xl flex flex-col items-center justify-center text-center" data-gsap-card>
+            <div className="bg-[#FAF9F5] border border-stone-200/80 p-6 rounded-2xl flex flex-col items-center justify-center text-center">
               <span className="text-xs text-stone-500 font-sans font-bold tracking-wider mb-2">総会・理事会</span>
               <span className="text-2xl sm:text-3xl font-serif font-extrabold text-[#00204A] tracking-tight">隔年/毎年</span>
               <span className="text-[10px] text-stone-500 font-sans mt-2">透明性の高い管理運営</span>
             </div>
 
-            <div className="bg-[#FAF9F5] border border-stone-200/80 p-6 rounded-2xl flex flex-col items-center justify-center text-center" data-gsap-card>
+            <div className="bg-[#FAF9F5] border border-stone-200/80 p-6 rounded-2xl flex flex-col items-center justify-center text-center">
               <span className="text-xs text-stone-500 font-sans font-bold tracking-wider mb-2">就職・研究支援</span>
               <span className="text-2xl sm:text-3xl font-serif font-extrabold text-[#00204A] tracking-tight">2<span className="text-xs sm:text-sm font-sans font-medium ml-1">大主軸</span></span>
               <span className="text-[10px] text-stone-500 font-sans mt-2">後輩たちの未来を応援</span>
             </div>
           </div>
 
-          <div className="border-b border-stone-200/50 pb-6 mb-8" data-gsap-title>
+          <div className="border-b border-stone-200/50 pb-6 mb-8">
             <h3 className="text-sm font-bold text-[#00204A] tracking-widest uppercase mb-2">主な活動内容のマップ</h3>
             <p className="text-stone-600 text-sm leading-relaxed max-w-3xl">
               文字を読む負担を感じさせないよう、主要な活動目的をシンプルな視覚的タイルでカード化しました。
@@ -206,7 +206,7 @@ export default function About({ onNavigate }: AboutProps) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {/* 1 */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-5 hover:border-[#CD9535]/50 hover:shadow-xs transition-all" data-gsap-card>
+            <div className="bg-white border border-stone-200 rounded-2xl p-5 hover:border-[#CD9535]/50 hover:shadow-xs transition-all">
               <div className="flex items-center gap-3 mb-3">
                 <span className="w-8 h-8 rounded-full bg-[#00204A]/5 text-[#CD9535] flex items-center justify-center font-bold text-sm">
                   01
@@ -219,7 +219,7 @@ export default function About({ onNavigate }: AboutProps) {
             </div>
 
             {/* 2 */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-5 hover:border-[#CD9535]/50 hover:shadow-xs transition-all" data-gsap-card>
+            <div className="bg-white border border-stone-200 rounded-2xl p-5 hover:border-[#CD9535]/50 hover:shadow-xs transition-all">
               <div className="flex items-center gap-3 mb-3">
                 <span className="w-8 h-8 rounded-full bg-[#00204A]/5 text-[#CD9535] flex items-center justify-center font-bold text-sm">
                   02
@@ -232,7 +232,7 @@ export default function About({ onNavigate }: AboutProps) {
             </div>
 
             {/* 3 */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-5 hover:border-[#CD9535]/50 hover:shadow-xs transition-all" data-gsap-card>
+            <div className="bg-white border border-stone-200 rounded-2xl p-5 hover:border-[#CD9535]/50 hover:shadow-xs transition-all">
               <div className="flex items-center gap-3 mb-3">
                 <span className="w-8 h-8 rounded-full bg-[#00204A]/5 text-[#CD9535] flex items-center justify-center font-bold text-sm">
                   03
@@ -245,7 +245,7 @@ export default function About({ onNavigate }: AboutProps) {
             </div>
 
             {/* 4 */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-5 hover:border-[#CD9535]/50 hover:shadow-xs transition-all" data-gsap-card>
+            <div className="bg-white border border-stone-200 rounded-2xl p-5 hover:border-[#CD9535]/50 hover:shadow-xs transition-all">
               <div className="flex items-center gap-3 mb-3">
                 <span className="w-8 h-8 rounded-full bg-[#00204A]/5 text-[#CD9535] flex items-center justify-center font-bold text-sm">
                   04
@@ -258,7 +258,7 @@ export default function About({ onNavigate }: AboutProps) {
             </div>
 
             {/* 5 */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-5 hover:border-[#CD9535]/50 hover:shadow-xs transition-all" data-gsap-card>
+            <div className="bg-white border border-stone-200 rounded-2xl p-5 hover:border-[#CD9535]/50 hover:shadow-xs transition-all">
               <div className="flex items-center gap-3 mb-3">
                 <span className="w-8 h-8 rounded-full bg-[#00204A]/5 text-[#CD9535] flex items-center justify-center font-bold text-sm">
                   05
@@ -271,7 +271,7 @@ export default function About({ onNavigate }: AboutProps) {
             </div>
 
             {/* 6 */}
-            <div className="bg-white border border-stone-200 rounded-2xl p-5 hover:border-[#CD9535]/50 hover:shadow-xs transition-all" data-gsap-card>
+            <div className="bg-white border border-stone-200 rounded-2xl p-5 hover:border-[#CD9535]/50 hover:shadow-xs transition-all">
               <div className="flex items-center gap-3 mb-3">
                 <span className="w-8 h-8 rounded-full bg-[#00204A]/5 text-[#CD9535] flex items-center justify-center font-bold text-sm">
                   06
@@ -288,7 +288,7 @@ export default function About({ onNavigate }: AboutProps) {
         {/* =========================================================================
             02. PRESIDENT'S GREETING (会長挨拶)
             ========================================================================= */}
-        <div className="relative py-12 md:py-16 border-t border-stone-200/40" id="presidents-greeting" data-gsap-section>
+        <div className="relative py-12 md:py-16 border-t border-stone-200/40" id="presidents-greeting">
           
           {/* Subtle Tower Line Sketch SVG overlay (Right absolute position, matches the design perfectly) */}
           <div className="absolute right-0 bottom-6 w-[280px] h-[340px] text-[#CD9535]/10 pointer-events-none select-none z-0 hidden lg:block">
@@ -310,20 +310,20 @@ export default function About({ onNavigate }: AboutProps) {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start relative z-10">
             
             {/* Left photo column (4 cols) */}
-            <div className="lg:col-span-4 flex flex-col items-center lg:items-start text-center lg:text-left" data-gsap-title>
+            <div className="lg:col-span-4 flex flex-col items-center lg:items-start text-center lg:text-left">
               {/* Label */}
               <div className="flex items-baseline gap-3 mb-6">
                 <span className="text-4xl sm:text-5xl font-mono font-bold text-[#CD9535]/65 leading-none">02</span>
                 <div>
                   <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#00204A] tracking-wider relative pb-1">
                     会長挨拶
-                    <span className="absolute bottom-0 left-0 w-12 h-[2.5px] bg-[#CD9535]" data-gsap-line />
+                    <span className="absolute bottom-0 left-0 w-12 h-[2.5px] bg-[#CD9535]" />
                   </h2>
                 </div>
               </div>
 
               {/* Portrait container holding simulated picture of Ohwada Kazuo */}
-              <div className="relative group w-full max-w-[280px] aspect-square lg:aspect-[4/5] rounded-2xl overflow-hidden shadow-lg border border-stone-200" data-gsap-media>
+              <div className="relative group w-full max-w-[280px] aspect-square lg:aspect-[4/5] rounded-2xl overflow-hidden shadow-lg border border-stone-200">
                 <img 
                   src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=800&auto=format&fit=crop"
                   alt="大和田 一雄 同窓会会長 温和なシニア男性の肖像"
@@ -335,7 +335,7 @@ export default function About({ onNavigate }: AboutProps) {
             </div>
 
             {/* Right text description column (8 cols) */}
-            <div className="lg:col-span-8 flex flex-col justify-start text-left pt-2 lg:pt-14" data-gsap-copy>
+            <div className="lg:col-span-8 flex flex-col justify-start text-left pt-2 lg:pt-14">
               <div className="space-y-5 text-[14.5px] text-stone-700 font-sans leading-relaxed tracking-wider">
                 <p>
                   令和４年１１月に開催されました第１６回総会におきまして、土田惣一会長（昭和４４年卒）の後を受けて第６代会長に選任されました、昭和４８年卒の大和田一雄です。
@@ -372,24 +372,24 @@ export default function About({ onNavigate }: AboutProps) {
         {/* =========================================================================
             03. CONSTITUTION (会則)
             ========================================================================= */}
-        <div className="relative py-12 md:py-16 border-t border-stone-200/40" id="bylaws" data-gsap-section>
+        <div className="relative py-12 md:py-16 border-t border-stone-200/40" id="bylaws">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             
             {/* Left informative section (7 cols) */}
             <div className="lg:col-span-7 flex flex-col text-left">
               {/* Title group */}
-              <div className="flex items-baseline gap-3 mb-6" data-gsap-title>
+              <div className="flex items-baseline gap-3 mb-6">
                 <span className="text-4xl sm:text-5xl font-mono font-bold text-[#CD9535]/65 leading-none">03</span>
                 <div>
                   <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#00204A] tracking-wider relative pb-1">
                     会則
-                    <span className="absolute bottom-0 left-0 w-12 h-[2.5px] bg-[#CD9535]" data-gsap-line />
+                    <span className="absolute bottom-0 left-0 w-12 h-[2.5px] bg-[#CD9535]" />
                   </h2>
                 </div>
               </div>
 
               {/* Description */}
-              <p className="text-stone-600 text-[14.5px] leading-relaxed tracking-wider font-sans mb-8" data-gsap-copy>
+              <p className="text-stone-600 text-[14.5px] leading-relaxed tracking-wider font-sans mb-8">
                 同窓会の目的・事業・会員・役員・会計など、運営の基本となる会則を定めています。
               </p>
 
@@ -406,7 +406,7 @@ export default function About({ onNavigate }: AboutProps) {
                 </div>
 
                 {/* Box Panel: Detailed Constitution indexes */}
-                <div className="bg-[#FAF9F5] border border-stone-200/60 rounded-2xl p-6 md:p-8" data-gsap-card>
+                <div className="bg-[#FAF9F5] border border-stone-200/60 rounded-2xl p-6 md:p-8">
                   <h3 className="font-serif font-bold text-sm text-[#00204A] border-b border-stone-200 pb-3 mb-4 tracking-wider">
                     会則の主な内容
                   </h3>
@@ -454,7 +454,7 @@ export default function About({ onNavigate }: AboutProps) {
 
             {/* Right Document Graphic Column (5 cols) */}
             <div className="lg:col-span-5 relative w-full pt-6 lg:pt-14 flex justify-center">
-              <div className="relative group w-full max-w-[340px] aspect-[4/3] rounded-2xl overflow-hidden shadow-lg border border-stone-100" data-gsap-media>
+              <div className="relative group w-full max-w-[340px] aspect-[4/3] rounded-2xl overflow-hidden shadow-lg border border-stone-100">
                 <img 
                   src="https://images.unsplash.com/photo-1450133064473-71024230f91b?q=80&w=800&auto=format&fit=crop"
                   alt="Constitution fountain pen sign document"
@@ -471,15 +471,15 @@ export default function About({ onNavigate }: AboutProps) {
         {/* =========================================================================
             04. ORGANIZATION & OFFICERS (組織・役員)
             ========================================================================= */}
-        <div className="relative py-12 md:py-16 border-t border-stone-200/40" id="organization-board" data-gsap-section>
+        <div className="relative py-12 md:py-16 border-t border-stone-200/40" id="organization-board">
           
           {/* Header Title group */}
-          <div className="flex items-baseline gap-3 mb-10 text-left" data-gsap-title>
+          <div className="flex items-baseline gap-3 mb-10 text-left">
             <span className="text-4xl sm:text-5xl font-mono font-bold text-[#CD9535]/65 leading-none">04</span>
             <div>
               <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#00204A] tracking-wider relative pb-1">
                 組織・役員
-                <span className="absolute bottom-0 left-0 w-12 h-[2.5px] bg-[#CD9535]" data-gsap-line />
+                <span className="absolute bottom-0 left-0 w-12 h-[2.5px] bg-[#CD9535]" />
               </h2>
             </div>
           </div>
@@ -490,7 +490,7 @@ export default function About({ onNavigate }: AboutProps) {
             <div className="flex flex-col text-left">
               
               {/* Flex header area holding small description and photo at top-right */}
-              <div className="flex items-start justify-between gap-4 mb-4" data-gsap-copy>
+              <div className="flex items-start justify-between gap-4 mb-4">
                 <div>
                   <span className="text-[13px] font-bold text-[#00204A] tracking-widest uppercase flex items-center gap-1.5 border-b border-stone-100 pb-2">
                     <Users className="w-4.5 h-4.5 text-[#CD9535]" />
@@ -499,7 +499,7 @@ export default function About({ onNavigate }: AboutProps) {
                 </div>
 
                 {/* Overlapping small board members group image */}
-                <div className="w-[100px] h-[65px] rounded-lg overflow-hidden border border-white shadow-md select-none transform rotate-2" data-gsap-media>
+                <div className="w-[100px] h-[65px] rounded-lg overflow-hidden border border-white shadow-md select-none transform rotate-2">
                   <img 
                     src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=400&auto=format&fit=crop"
                     alt="Board executives group"
@@ -514,7 +514,7 @@ export default function About({ onNavigate }: AboutProps) {
               </p>
 
               {/* Members listings stack container with beautiful scrollable viewport */}
-              <div className="border border-stone-200 rounded-2xl overflow-hidden divide-y divide-stone-100 bg-white shadow-xs max-h-[360px] overflow-y-auto scrollbar-thin" data-gsap-card>
+              <div className="border border-stone-200 rounded-2xl overflow-hidden divide-y divide-stone-100 bg-white shadow-xs max-h-[360px] overflow-y-auto scrollbar-thin">
                 {boardMembers.map((member, index) => (
                   <div key={index} className="flex items-center justify-between px-5 py-3 hover:bg-stone-50/50 transition-colors text-sm font-sans">
                     <span className="font-bold text-[#00204A] text-[11px] py-0.5 px-2 bg-stone-100 rounded-[4px] min-w-[90px] text-center">
@@ -544,19 +544,19 @@ export default function About({ onNavigate }: AboutProps) {
         {/* =========================================================================
             05. ANNUAL REPORTS (事業報告)
             ========================================================================= */}
-        <div className="relative py-12 md:py-16 border-t border-stone-200/40" id="annual-reports" data-gsap-section>
+        <div className="relative py-12 md:py-16 border-t border-stone-200/40" id="annual-reports">
           {/* Header Title group */}
-          <div className="flex items-baseline gap-3 mb-4 text-left" data-gsap-title>
+          <div className="flex items-baseline gap-3 mb-4 text-left">
             <span className="text-4xl sm:text-5xl font-mono font-bold text-[#CD9535]/65 leading-none">05</span>
             <div>
               <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#00204A] tracking-wider relative pb-1">
                 事業報告
-                <span className="absolute bottom-0 left-0 w-12 h-[2.5px] bg-[#CD9535]" data-gsap-line />
+                <span className="absolute bottom-0 left-0 w-12 h-[2.5px] bg-[#CD9535]" />
               </h2>
             </div>
           </div>
 
-          <p className="text-stone-600 text-[14.5px] leading-relaxed tracking-wider font-sans mb-10 text-left max-w-xl" data-gsap-copy>
+          <p className="text-stone-600 text-[14.5px] leading-relaxed tracking-wider font-sans mb-10 text-left max-w-xl">
             同窓会のさまざまな活動について、事業報告書を公開しています。
           </p>
 
@@ -612,7 +612,7 @@ export default function About({ onNavigate }: AboutProps) {
                       className="space-y-3.5"
                     >
                       {/* Personal Info Policy Change Announcement */}
-                      <div className="bg-amber-50/40 border border-[#CD9535]/30 rounded-2xl p-5 md:p-6 mb-6" data-gsap-card>
+                      <div className="bg-amber-50/40 border border-[#CD9535]/30 rounded-2xl p-5 md:p-6 mb-6">
                         <span className="text-[10px] font-bold text-[#CD9535] tracking-widest uppercase block mb-1.5 font-sans">重要なお知らせ</span>
                         <h4 className="font-serif font-bold text-[#00204A] text-sm sm:text-base mb-3 leading-snug">
                           個人情報の取扱いに関する基本方針の改正について
@@ -638,7 +638,6 @@ export default function About({ onNavigate }: AboutProps) {
 
                       {/* Document Card 1 */}
                       <div 
-                        data-gsap-card
                         onClick={() => handleDownload('2024年度 事業報告書.pdf')}
                         className="bg-stone-50 hover:bg-stone-100/60 border border-stone-200/80 rounded-xl p-4 flex items-center justify-between transition-colors cursor-pointer group"
                       >
@@ -667,7 +666,6 @@ export default function About({ onNavigate }: AboutProps) {
 
                       {/* Document Card 2 */}
                       <div 
-                        data-gsap-card
                         onClick={() => handleDownload('2023年度 事業報告書.pdf')}
                         className="bg-stone-50 hover:bg-stone-100/60 border border-stone-200/80 rounded-xl p-4 flex items-center justify-between transition-colors cursor-pointer group"
                       >
@@ -695,7 +693,6 @@ export default function About({ onNavigate }: AboutProps) {
 
                       {/* Document Card 3 */}
                       <div 
-                        data-gsap-card
                         onClick={() => handleDownload('2022年度 事業報告書.pdf')}
                         className="bg-stone-50 hover:bg-stone-100/60 border border-stone-200/80 rounded-xl p-4 flex items-center justify-between transition-colors cursor-pointer group"
                       >
@@ -734,7 +731,6 @@ export default function About({ onNavigate }: AboutProps) {
                     >
                       {/* Document Card Finance */}
                       <div 
-                        data-gsap-card
                         onClick={() => handleDownload('2024年度 決算報告書.pdf')}
                         className="bg-stone-50 hover:bg-stone-100/60 border border-stone-200/80 rounded-xl p-4 flex items-center justify-between transition-colors cursor-pointer group"
                       >
@@ -757,7 +753,6 @@ export default function About({ onNavigate }: AboutProps) {
 
                       {/* Document Card Finance 2 */}
                       <div 
-                        data-gsap-card
                         onClick={() => handleDownload('2023年度 決算報告書.pdf')}
                         className="bg-stone-50 hover:bg-stone-100/60 border border-stone-200/80 rounded-xl p-4 flex items-center justify-between transition-colors cursor-pointer group"
                       >
@@ -791,7 +786,6 @@ export default function About({ onNavigate }: AboutProps) {
                     >
                       {/* Document Card Audit */}
                       <div 
-                        data-gsap-card
                         onClick={() => handleDownload('2024年度 監査報告書.pdf')}
                         className="bg-stone-50 hover:bg-stone-100/60 border border-stone-200/80 rounded-xl p-4 flex items-center justify-between transition-colors cursor-pointer group"
                       >
@@ -814,7 +808,6 @@ export default function About({ onNavigate }: AboutProps) {
 
                       {/* Document Card Audit 2 */}
                       <div 
-                        data-gsap-card
                         onClick={() => handleDownload('2023年度 監査報告書.pdf')}
                         className="bg-stone-50 hover:bg-stone-100/60 border border-stone-200/80 rounded-xl p-4 flex items-center justify-between transition-colors cursor-pointer group"
                       >
@@ -852,7 +845,7 @@ export default function About({ onNavigate }: AboutProps) {
 
             {/* Right Audit Graphic Column (5 cols) */}
             <div className="lg:col-span-5 relative w-full pt-6 lg:pt-14 flex justify-center">
-              <div className="relative group w-full max-w-[340px] aspect-[4/5] rounded-2xl overflow-hidden shadow-lg border border-stone-100" data-gsap-media>
+              <div className="relative group w-full max-w-[340px] aspect-[4/5] rounded-2xl overflow-hidden shadow-lg border border-stone-100">
                 <img 
                   src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=800&auto=format&fit=crop"
                   alt="Annual accounts reports charts with calculators"
@@ -869,25 +862,25 @@ export default function About({ onNavigate }: AboutProps) {
         {/* =========================================================================
             06. MEMBERSHIP (入会・退会について)
             ========================================================================= */}
-        <div className="relative py-12 md:py-16 border-t border-stone-200/40 text-left" id="membership" data-gsap-section>
+        <div className="relative py-12 md:py-16 border-t border-stone-200/40 text-left" id="membership">
           {/* Header Title group */}
-          <div className="flex items-baseline gap-3 mb-6" data-gsap-title>
+          <div className="flex items-baseline gap-3 mb-6">
             <span className="text-4xl sm:text-5xl font-mono font-bold text-[#CD9535]/65 leading-none">06</span>
             <div>
               <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#00204A] tracking-wider relative pb-1">
                 入会・退会について
-                <span className="absolute bottom-0 left-0 w-12 h-[2.5px] bg-[#CD9535]" data-gsap-line />
+                <span className="absolute bottom-0 left-0 w-12 h-[2.5px] bg-[#CD9535]" />
               </h2>
             </div>
           </div>
 
-          <p className="text-stone-700 text-sm sm:text-base leading-relaxed tracking-wider font-sans mb-10 max-w-3xl" data-gsap-copy>
+          <p className="text-stone-700 text-sm sm:text-base leading-relaxed tracking-wider font-sans mb-10 max-w-3xl">
             「文理・人文学部同窓会」への入会のご案内、会員の退会、および物故会員（ご逝去）に関する届け出についてご案内いたします。
           </p>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
             {/* Admission details */}
-            <div className="bg-[#FAF9F5] border border-stone-200/60 rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-xs" data-gsap-card>
+            <div className="bg-[#FAF9F5] border border-stone-200/60 rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-xs">
               <div>
                 <div className="flex items-center gap-3 mb-5 border-b border-stone-200/50 pb-4">
                   <div className="p-2.5 bg-[#00204A] text-[#CD9535] rounded-xl flex-shrink-0">
@@ -913,7 +906,7 @@ export default function About({ onNavigate }: AboutProps) {
             </div>
 
             {/* Withdrawal details */}
-            <div className="bg-white border border-stone-200/80 rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-xs" data-gsap-card>
+            <div className="bg-white border border-stone-200/80 rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-xs">
               <div>
                 <div className="flex items-center gap-3 mb-5 border-b border-stone-200/50 pb-4">
                   <div className="p-2.5 bg-stone-100 text-stone-600 rounded-xl flex-shrink-0">
@@ -970,7 +963,7 @@ export default function About({ onNavigate }: AboutProps) {
           </div>
 
           {/* Inline Contact Info of Secretariat */}
-          <div className="bg-[#00204A] text-white rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-md border border-white/5" data-gsap-card>
+          <div className="bg-[#00204A] text-white rounded-3xl p-6 sm:p-8 relative overflow-hidden shadow-md border border-white/5">
             <div className="absolute right-[-40px] bottom-[-40px] w-48 h-48 rounded-full border-12 border-[#CD9535]/10 pointer-events-none select-none" />
             
             <div className="relative z-10 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
@@ -1024,19 +1017,19 @@ export default function About({ onNavigate }: AboutProps) {
         {/* =========================================================================
             07. BRANCHES (地域支部・職域支部)
             ========================================================================= */}
-        <div className="relative py-12 md:py-16 border-t border-stone-200/40 text-left" id="branches" data-gsap-section>
+        <div className="relative py-12 md:py-16 border-t border-stone-200/40 text-left" id="branches">
           {/* Header Title group */}
-          <div className="flex items-baseline gap-3 mb-6" data-gsap-title>
+          <div className="flex items-baseline gap-3 mb-6">
             <span className="text-4xl sm:text-5xl font-mono font-bold text-[#CD9535]/65 leading-none">07</span>
             <div>
               <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#00204A] tracking-wider relative pb-1">
                 地域支部・職域支部
-                <span className="absolute bottom-0 left-0 w-12 h-[2.5px] bg-[#CD9535]" data-gsap-line />
+                <span className="absolute bottom-0 left-0 w-12 h-[2.5px] bg-[#CD9535]" />
               </h2>
             </div>
           </div>
 
-          <p className="text-stone-700 text-sm sm:text-base leading-relaxed tracking-wider font-sans mb-8 max-w-3xl" data-gsap-copy>
+          <p className="text-stone-700 text-sm sm:text-base leading-relaxed tracking-wider font-sans mb-8 max-w-3xl">
             同窓生の皆様の各地域かつ各職場でのネットワーク強化と、学年・学科を超えた親睦を深めることを目的として、以下の支部が置かれております。<br />
             <span className="text-stone-500 text-xs sm:text-[13px] block mt-2">※支部等ホームページのリンク登録や更新、お問い合わせ等は、同窓会事務局までお知らせください。</span>
           </p>
@@ -1044,7 +1037,7 @@ export default function About({ onNavigate }: AboutProps) {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             {/* 地域支部 (Regional) */}
-            <div className="bg-[#FAF9F5] border border-stone-200/60 rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-xs" data-gsap-card>
+            <div className="bg-[#FAF9F5] border border-stone-200/60 rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-xs">
               <div>
                 <div className="flex items-center gap-3 mb-6 border-b border-stone-200/50 pb-4">
                   <div className="p-2.5 bg-[#00204A] text-[#CD9535] rounded-xl flex-shrink-0">
@@ -1094,7 +1087,7 @@ export default function About({ onNavigate }: AboutProps) {
             </div>
 
             {/* 職域支部 (Professional/Occupational) */}
-            <div className="bg-white border border-stone-200/80 rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-xs" data-gsap-card>
+            <div className="bg-white border border-stone-200/80 rounded-2xl p-6 sm:p-8 flex flex-col justify-between shadow-xs">
               <div>
                 <div className="flex items-center gap-3 mb-6 border-b border-stone-200/50 pb-4">
                   <div className="p-2.5 bg-stone-100 text-stone-600 rounded-xl flex-shrink-0">
@@ -1152,23 +1145,23 @@ export default function About({ onNavigate }: AboutProps) {
         {/* =========================================================================
             08. COMPLIANCE & PRIVACY (法令順守・個人情報保護方針)
             ========================================================================= */}
-        <div className="relative py-12 md:py-16 border-t border-stone-200/40 text-left" id="privacy" data-gsap-section>
+        <div className="relative py-12 md:py-16 border-t border-stone-200/40 text-left" id="privacy">
           {/* Header Title group */}
-          <div className="flex items-baseline gap-3 mb-6" data-gsap-title>
+          <div className="flex items-baseline gap-3 mb-6">
             <span className="text-4xl sm:text-5xl font-mono font-bold text-[#CD9535]/65 leading-none">08</span>
             <div>
               <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#00204A] tracking-wider relative pb-1">
                 法令順守
-                <span className="absolute bottom-0 left-0 w-12 h-[2.5px] bg-[#CD9535]" data-gsap-line />
+                <span className="absolute bottom-0 left-0 w-12 h-[2.5px] bg-[#CD9535]" />
               </h2>
             </div>
           </div>
 
-          <p className="text-stone-700 text-sm sm:text-base leading-relaxed tracking-wider font-sans mb-8 max-w-3xl" data-gsap-copy>
+          <p className="text-stone-700 text-sm sm:text-base leading-relaxed tracking-wider font-sans mb-8 max-w-3xl">
             「個人情報の保護に関する法律（個人情報保護法）」に基づき、会員の皆様の個人情報を適正に管理し、本同窓会の目的および母校の発展に寄与する活動に活用してまいります。
           </p>
 
-          <div className="bg-stone-50 border border-stone-200/60 rounded-2xl p-6 sm:p-8 space-y-6" data-gsap-card>
+          <div className="bg-stone-50 border border-stone-200/60 rounded-2xl p-6 sm:p-8 space-y-6">
             <div>
               <h3 className="font-serif font-bold text-base text-[#00204A] border-b border-stone-200/80 pb-2.5 mb-3.5 tracking-wider">
                 個人情報の取扱いに関する基本方針
@@ -1180,14 +1173,14 @@ export default function About({ onNavigate }: AboutProps) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-              <div className="bg-white border border-stone-200/50 rounded-xl p-5 shadow-xs" data-gsap-card>
+              <div className="bg-white border border-stone-200/50 rounded-xl p-5 shadow-xs">
                 <h4 className="font-serif font-bold text-sm text-[#00204A] mb-2">① 共同利用の目的</h4>
                 <p className="text-stone-600 text-[12.5px] leading-relaxed">
                   大学を応援する「イバサス」による茨城大学の支援活動、同窓会会員名簿の適正な維持、会員相互の各種連絡・親睦・学術研究支援等の推進。
                 </p>
               </div>
 
-              <div className="bg-white border border-stone-200/50 rounded-xl p-5 shadow-xs" data-gsap-card>
+              <div className="bg-white border border-stone-200/50 rounded-xl p-5 shadow-xs">
                 <h4 className="font-serif font-bold text-sm text-[#00204A] mb-2">② 共同利用する情報の範囲</h4>
                 <p className="text-stone-600 text-[12.5px] leading-relaxed">
                   氏名、生年月日、卒業年次、学部、学科、所属（研究科）、現住所、連絡先電話番号・メールアドレス等、活動目的遂行上不可欠な情報。
@@ -1200,7 +1193,7 @@ export default function About({ onNavigate }: AboutProps) {
         {/* =========================================================================
             BOTTOM CONTACT BANNER (お問い合せバナー)
             ========================================================================= */}
-        <div className="mt-12 md:mt-16 bg-[#FAF9F5] border border-[#CD9535]/25 rounded-2xl p-5 md:p-6 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6 text-left relative z-10" data-gsap-section data-gsap-card>
+        <div className="mt-12 md:mt-16 bg-[#FAF9F5] border border-[#CD9535]/25 rounded-2xl p-5 md:p-6 shadow-xs flex flex-col md:flex-row items-center justify-between gap-6 text-left relative z-10">
           <div className="flex items-center gap-4">
             
             {/* Letter Envelope Gold Icon bubble */}
