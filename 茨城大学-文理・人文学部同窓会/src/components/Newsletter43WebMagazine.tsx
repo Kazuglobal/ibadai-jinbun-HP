@@ -1,13 +1,11 @@
 import React from 'react';
-import { motion } from 'motion/react';
 import {
   ArrowRight,
   BookOpen,
-  CalendarDays,
   ChevronLeft,
   ChevronRight,
   Clock,
-  FileText,
+  Menu,
   Minus,
   Plus,
   Quote,
@@ -152,17 +150,23 @@ const articles: MagazineArticle[] = [
   },
 ];
 
-const issueHighlights = [
-  { articleId: 'memory', label: '巻頭', title: '半世紀の記憶', description: '茨城大学と同窓会の歩みを、個人の記憶からたどる。' },
-  { articleId: 'dean', label: '現在', title: '学部の再構築', description: '新学部長が語る、対面とテクノロジーのこれから。' },
-  { articleId: 'iop', label: '現場', title: '子どもの居場所', description: '学生が地域活動で見つめた第三の居場所の意味。' },
-];
+const fontScales = [0.875, 1, 1.125, 1.25];
+
+function changeFontScale(current: number, direction: -1 | 1) {
+  const nearestIndex = fontScales.reduce(
+    (bestIndex, scale, index) =>
+      Math.abs(scale - current) < Math.abs(fontScales[bestIndex] - current) ? index : bestIndex,
+    0,
+  );
+  return fontScales[Math.min(fontScales.length - 1, Math.max(0, nearestIndex + direction))];
+}
 
 export default function Newsletter43WebMagazine() {
   const [activeArticleId, setActiveArticleId] = React.useState(articles[0].id);
   const [fontScale, setFontScale] = React.useState(1);
   const articleTopRef = React.useRef<HTMLDivElement>(null);
   const readerRef = React.useRef<HTMLDivElement>(null);
+  const timelineRef = React.useRef<HTMLDivElement>(null);
   const activeIndex = articles.findIndex((article) => article.id === activeArticleId);
   const activeArticle = articles[activeIndex] ?? articles[0];
   const readingProgress = ((activeIndex + 1) / articles.length) * 100;
@@ -199,172 +203,144 @@ export default function Newsletter43WebMagazine() {
   };
 
   return (
-    <section id="newsletter-43" className="relative overflow-hidden bg-[#F8F1E6] py-10 text-[#14213D] sm:py-14 lg:py-20 xl:py-24">
-      <div className="absolute inset-x-0 top-0 h-px bg-[#D7C8AA]" aria-hidden="true" />
-      <div className="absolute right-0 top-24 hidden h-[520px] w-[38vw] border-y border-l border-[#D7C8AA]/70 bg-[#FFFCF6]/55 xl:block" aria-hidden="true" />
-      <div className="absolute bottom-24 left-0 hidden h-[300px] w-[22vw] border-y border-r border-[#D7C8AA]/60 bg-[#EAF0EA]/70 xl:block" aria-hidden="true" />
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <section id="newsletter-43" className="relative bg-[#F8F4EC] pb-28 pt-6 text-[#14213D] sm:pb-32 sm:pt-10">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-3 flex items-center justify-between gap-3">
           <button
             type="button"
             onClick={goHome}
-            className="inline-flex h-11 w-full items-center justify-center gap-2 border border-[#D7C8AA] bg-[#FFFCF6] px-5 text-sm font-bold text-stone-600 transition-colors hover:border-[#B57A24] hover:text-[#14213D] sm:w-fit"
+            className="inline-flex min-h-11 items-center gap-2 px-1 text-sm font-bold text-stone-600 transition-colors hover:text-[#14213D]"
           >
             <ChevronLeft className="h-4 w-4" />
             ホームへ戻る
           </button>
-          <a
-            href="#newsletter-reader"
-            className="inline-flex h-11 w-full items-center justify-center gap-2 bg-[#14213D] px-5 text-sm font-bold text-white transition-colors hover:bg-[#B57A24] sm:w-fit"
+          <button
+            type="button"
+            onClick={() => timelineRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            className="inline-flex min-h-11 items-center gap-2 px-1 text-sm font-bold text-[#14213D]"
           >
-            記事一覧へ
-            <ArrowRight className="h-4 w-4" />
-          </a>
+            <Menu className="h-5 w-5" />
+            目次
+          </button>
         </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 18 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.5 }}
-          className="relative grid gap-6 lg:gap-8 xl:grid-cols-[420px_1fr]"
-        >
-          <aside className="relative min-h-[520px] overflow-hidden rounded-lg bg-[#111827] text-white shadow-[0_24px_70px_rgba(20,33,61,0.22)] sm:min-h-[560px] xl:min-h-[620px]">
-            <img src={lunchImage} alt="会報第43号の表紙ビジュアル" className="absolute inset-0 h-full w-full object-cover opacity-70" />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-[#111827]/35 to-[#111827]/92" aria-hidden="true" />
-            <div className="absolute left-5 top-5 h-[calc(100%-40px)] w-[calc(100%-40px)] border border-white/35" aria-hidden="true" />
-            <div className="relative flex min-h-[520px] flex-col justify-between p-5 sm:min-h-[560px] sm:p-8 xl:min-h-[620px]">
-              <div>
-                <div className="flex items-center justify-between gap-4 border-y border-white/50 py-3 text-[10px] font-black tracking-[0.16em] text-white/90 sm:text-[11px] sm:tracking-[0.22em]">
-                  <span>IBARAKI</span>
-                  <span>WEB MAGAZINE</span>
-                </div>
-                <h2 className="mt-8 font-serif text-[44px] font-bold leading-none text-white sm:text-[58px] xl:text-[68px]">
-                  同窓会報
-                  <span className="mt-3 block text-[70px] text-[#E0A23A] sm:text-[92px] xl:text-[104px]">43</span>
-                </h2>
-                <p className="mt-5 max-w-[285px] font-serif text-[16px] font-bold leading-8 text-[#FFF8EA] sm:text-[18px]">
-                  茨城大学文理・人文学部同窓会 会報 第43号
-                </p>
-                <div className="mt-7 grid grid-cols-[58px_1fr] gap-4 border-y border-white/30 py-4 sm:mt-8 sm:grid-cols-[72px_1fr]">
-                  <p className="font-serif text-[30px] leading-none text-[#E0A23A] sm:text-[38px]">特集</p>
-                  <p className="text-[12px] font-bold leading-6 tracking-[0.12em] text-white/85">
-                    記憶、学部の現在、地域で学ぶ学生の声を一つの流れで読む。
-                  </p>
-                </div>
-              </div>
-
-              <div className="space-y-5">
-                <div className="grid grid-cols-2 gap-3 border-y border-white/30 py-5 text-sm">
-                  <div>
-                    <p className="text-[10px] font-black tracking-[0.2em] text-[#E0A23A]">ISSUE</p>
-                    <p className="mt-1 font-serif text-2xl font-bold">2026.06</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] font-black tracking-[0.2em] text-[#E0A23A]">PAGES</p>
-                    <p className="mt-1 font-serif text-2xl font-bold">08</p>
-                  </div>
-                </div>
-                <a
-                  href="#newsletter-reader"
-                  className="inline-flex h-12 w-full items-center justify-center gap-2 bg-[#E0A23A] px-5 text-sm font-black tracking-[0.16em] text-[#111827] transition-colors hover:bg-white"
-                >
-                  読み始める
-                  <ArrowRight className="h-4 w-4" />
-                </a>
-              </div>
-            </div>
-          </aside>
-
-          <div className="relative flex min-w-0 flex-col justify-between rounded-lg border border-[#D7C8AA] bg-[#FFFCF6] p-5 shadow-sm sm:p-6 lg:p-8 xl:p-10">
-            <div className="absolute right-8 top-8 hidden h-28 w-24 rotate-3 border border-[#D7C8AA] bg-[#F8F1E6] p-3 shadow-sm xl:block" aria-hidden="true">
-              <div className="h-full border border-[#D7C8AA] bg-white" />
-            </div>
+        <div className="overflow-hidden border border-[#DED4C2] bg-[#FFFCF7] shadow-[0_14px_42px_rgba(20,33,61,0.08)]">
+          <div className="grid grid-cols-[minmax(0,1fr)_100px] items-center gap-3 p-4 sm:grid-cols-[minmax(0,1fr)_220px] sm:gap-8 sm:p-8 lg:grid-cols-[1fr_330px] lg:gap-12 lg:p-12">
             <div>
-              <div className="flex flex-wrap items-center gap-3 text-[11px] font-black tracking-[0.18em] text-[#B57A24]">
-                <span className="inline-flex items-center gap-2 border border-[#D7C8AA] px-3 py-2">
-                  <BookOpen className="h-4 w-4" />
-                  WEB MAGAZINE
-                </span>
-                <span className="inline-flex items-center gap-2 border border-[#D7C8AA] px-3 py-2">
-                  <CalendarDays className="h-4 w-4" />
-                  令和8年6月発行
-                </span>
+              <div className="flex items-end gap-2">
+                <span className="text-[10px] font-black tracking-[0.2em] text-[#14213D] sm:text-[12px] sm:tracking-[0.24em]">WEB MAGAZINE</span>
+                <span className="font-serif text-3xl leading-none text-[#B87816] sm:text-5xl">43</span>
               </div>
-
-              <h3 className="mt-8 max-w-3xl font-serif text-[34px] font-bold leading-tight text-[#14213D] sm:text-4xl lg:text-5xl xl:text-6xl">
-                43号を、読むほど深まるWEBマガジンへ。
-              </h3>
-              <p className="mt-6 max-w-3xl text-base font-medium leading-8 text-stone-600">
-                巻頭言、学部長メッセージ、学生レポート、総会案内、理事会記録、編集後記を、スマートフォンでも読みやすい章立てに再編集しました。
+              <p className="mt-2 text-xs font-bold text-stone-600 sm:mt-3 sm:text-sm">令和8年6月発行</p>
+              <h2 className="mt-4 max-w-xl font-serif text-[26px] font-bold leading-[1.45] tracking-[0.01em] text-[#14213D] sm:mt-6 sm:text-5xl lg:text-6xl">
+                記憶から、
+                <br />
+                現在と地域へ。
+              </h2>
+              <p className="mt-4 hidden max-w-lg text-[15px] font-medium leading-8 text-stone-600 min-[430px]:block sm:text-base">
+                学部の歩み、今、そして地域で学ぶ学生の声をつなぐ、6つの物語。
               </p>
+              <button
+                type="button"
+                onClick={() => selectArticle(articles[0].id)}
+                className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#062B59] px-3 text-xs font-bold text-white shadow-[0_8px_20px_rgba(6,43,89,0.18)] transition-colors hover:bg-[#B87816] sm:mt-7 sm:min-h-14 sm:w-auto sm:gap-3 sm:px-7 sm:text-base"
+              >
+                最初の記事を読む
+                <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
+              </button>
             </div>
-
-            <div className="mt-10 grid gap-4 md:grid-cols-3 xl:grid-cols-3">
-              {issueHighlights.map((item) => (
-                <button
-                  key={item.title}
-                  type="button"
-                  onClick={() => {
-                    selectArticle(item.articleId);
-                  }}
-                  className="group border border-[#D7C8AA] bg-[#F8F1E6] p-5 text-left transition-colors hover:border-[#B57A24] hover:bg-white"
-                >
-                  <p className="text-[10px] font-black tracking-[0.2em] text-[#B57A24]">{item.label}</p>
-                  <p className="mt-3 font-serif text-2xl font-bold text-[#14213D]">{item.title}</p>
-                  <p className="mt-3 text-sm font-medium leading-6 text-stone-600">{item.description}</p>
-                  <span className="mt-4 inline-flex items-center gap-2 text-xs font-black tracking-[0.14em] text-[#B57A24]">
-                    READ
-                    <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
-                  </span>
-                </button>
-              ))}
+            <div className="mx-auto w-full max-w-[300px]">
+              <div className="relative aspect-[3/4] overflow-hidden bg-[#111827] shadow-[0_16px_32px_rgba(20,33,61,0.2)]">
+                <img src={lunchImage} alt="会報第43号の表紙ビジュアル" className="absolute inset-0 h-full w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-b from-[#071C39]/15 via-[#071C39]/30 to-[#071C39]/90" aria-hidden="true" />
+                <div className="relative flex h-full flex-col justify-between p-2.5 text-white sm:p-5">
+                  <div className="flex justify-between text-[5px] font-black tracking-[0.1em] sm:text-[9px] sm:tracking-[0.18em]">
+                    <span>IBARAKI</span>
+                    <span>WEB MAGAZINE</span>
+                  </div>
+                  <div>
+                    <p className="font-serif text-sm font-bold sm:text-3xl">同窓会報</p>
+                    <p className="font-serif text-4xl leading-none text-[#E4A52E] sm:text-7xl">43</p>
+                    <p className="mt-2 hidden border-t border-white/40 pt-2 text-xs font-bold leading-6 sm:block">
+                      記憶、学部の現在、地域で学ぶ学生の声を一つの流れで読む。
+                    </p>
+                    <div className="mt-2 flex gap-2 text-[7px] font-bold sm:mt-4 sm:gap-8 sm:text-xs">
+                      <span>2026.06</span>
+                      <span>08 PAGES</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
-        </motion.div>
+        </div>
 
-        <div ref={readerRef} id="newsletter-reader" className="mt-10 scroll-mt-28 grid gap-6 xl:grid-cols-[300px_1fr] xl:gap-8">
-          <nav className="xl:sticky xl:top-28 xl:self-start">
-            <div className="rounded-lg border border-[#D7C8AA] bg-[#FFFCF6] p-5 shadow-sm">
-              <div className="flex items-center justify-between gap-3">
-                <h4 className="font-serif text-2xl font-bold">Contents</h4>
-                <FileText className="h-5 w-5 text-[#B57A24]" />
-              </div>
-              <div className="mt-5 h-2 overflow-hidden bg-[#E8DDC5]" aria-label="記事位置">
-                <div className="h-full bg-[#14213D] transition-all duration-300" style={{ width: `${readingProgress}%` }} />
-              </div>
-              <p className="mt-2 text-[10px] font-black tracking-[0.16em] text-stone-500">
-                記事 {activeIndex + 1}/{articles.length}
-              </p>
-              <div className="mt-5 space-y-2">
-                {articles.map((article) => (
+        <div ref={timelineRef} className="scroll-mt-24 py-8 sm:py-16">
+          <div className="mb-5 flex items-end justify-between gap-4 border-b border-[#D8CDBA] pb-4 sm:mb-8 sm:pb-5">
+            <div>
+              <p className="text-[11px] font-black tracking-[0.22em] text-[#B87816]">CONTENTS</p>
+              <h3 className="mt-2 font-serif text-[28px] font-bold sm:text-4xl">6つの物語をたどる</h3>
+            </div>
+            <p className="text-xs font-bold text-stone-500">全6記事</p>
+          </div>
+
+          <div className="relative">
+            <div className="absolute bottom-3 left-[46px] top-3 w-px bg-[#C98B23] sm:left-[68px]" aria-hidden="true" />
+            <div className="space-y-5 sm:space-y-7">
+              {articles.map((article, index) => {
+                const image =
+                  article.id === 'memory'
+                    ? '/newsletters/41/image-01.webp'
+                    : article.id === 'dean'
+                      ? hasuiImage
+                      : article.id === 'iop'
+                        ? lunchImage
+                        : undefined;
+
+                return (
                   <button
                     key={article.id}
                     type="button"
                     onClick={() => selectArticle(article.id)}
-                    className={`grid w-full grid-cols-[42px_1fr] gap-3 border p-3 text-left transition-colors ${
-                      activeArticleId === article.id
-                        ? 'border-[#B57A24] bg-[#FFF4DC] text-[#14213D]'
-                        : 'border-[#E3D7BF] bg-white text-stone-600 hover:border-[#B57A24]/60'
-                    }`}
+                    className="group relative grid w-full grid-cols-[74px_1fr] gap-4 text-left sm:grid-cols-[112px_1fr] sm:gap-7"
                   >
-                    <span className="font-serif text-xl font-bold text-[#B57A24]">{article.page}</span>
-                    <span className="min-w-0">
-                      <span className="block text-[10px] font-black tracking-[0.14em] text-[#B57A24]">{article.label}</span>
-                      <span className="mt-1 block text-sm font-bold leading-5">{article.title}</span>
-                      <span className="mt-2 flex items-center gap-1.5 text-[10px] font-bold text-stone-400">
-                        <Clock className="h-3 w-3" />
+                    <span className="relative z-10 block bg-[#F8F4EC] py-2">
+                      <span className="block font-serif text-[38px] font-bold leading-none text-[#062B59] sm:text-6xl">{article.page}</span>
+                      <span className="mt-3 block text-[11px] font-black leading-5 text-[#B87816] sm:text-sm">{article.label}</span>
+                      <span className="mt-3 flex items-center gap-1 text-[10px] font-bold text-stone-500 sm:text-xs">
+                        <Clock className="h-3.5 w-3.5" />
                         {article.readTime}
                       </span>
                     </span>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </nav>
 
-          <article className="min-w-0 rounded-lg border border-[#D7C8AA] bg-[#FFFCF6] shadow-sm">
-            <div ref={articleTopRef} className="scroll-mt-28 border-b border-[#D7C8AA] p-5 sm:p-8" style={{ borderTop: `6px solid ${activeArticle.accent}` }}>
+                    <span className="overflow-hidden border border-[#E2D8C8] bg-[#FFFCF7] shadow-[0_8px_22px_rgba(20,33,61,0.07)] transition-transform group-hover:-translate-y-0.5">
+                      <span className={`grid ${image ? 'md:grid-cols-2' : ''}`}>
+                        {image && index % 2 === 0 && (
+                          <img src={image} alt="" className="h-44 w-full object-cover object-top sm:h-52 md:h-72" />
+                        )}
+                        <span className="flex min-h-[170px] flex-col justify-center p-5 sm:p-7">
+                          <span className="font-serif text-[23px] font-bold leading-[1.45] text-[#14213D] sm:text-3xl">{article.title}</span>
+                          <span className="mt-3 line-clamp-2 text-sm font-medium leading-7 text-stone-600">{article.deck}</span>
+                          <span className="mt-5 inline-flex items-center gap-3 text-xs font-black tracking-[0.18em] text-[#B87816]">
+                            READ
+                            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                          </span>
+                        </span>
+                        {image && index % 2 === 1 && (
+                          <img src={image} alt="" className="h-44 w-full object-cover object-top sm:h-52 md:h-72" />
+                        )}
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+
+        <div ref={readerRef} id="newsletter-reader" className="scroll-mt-24">
+          <article className="overflow-hidden border border-[#D7C8AA] bg-[#FFFCF7] shadow-[0_12px_34px_rgba(20,33,61,0.08)]">
+            <div ref={articleTopRef} className="scroll-mt-24 border-b border-[#D7C8AA] p-5 sm:p-8" style={{ borderTop: `6px solid ${activeArticle.accent}` }}>
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-3">
                   <span className="font-serif text-4xl font-bold sm:text-5xl" style={{ color: activeArticle.accent }}>{activeArticle.page}</span>
@@ -379,19 +355,30 @@ export default function Newsletter43WebMagazine() {
                 </div>
 
                 <div className="flex w-full items-center justify-between gap-2 border border-[#D7C8AA] bg-white px-3 py-2 sm:w-auto">
-                  <span className="mr-1 text-xs font-bold text-stone-500">文字サイズ</span>
+                  <span className="mr-1 text-xs font-bold text-stone-500">
+                    文字サイズ
+                    <span className="ml-1 text-[#B87816]">{Math.round(fontScale * 100)}%</span>
+                  </span>
                   <button
                     type="button"
-                    onClick={() => setFontScale((value) => Math.max(0.92, value - 0.08))}
-                    className="flex h-8 w-8 items-center justify-center border border-[#D7C8AA] bg-[#FFFCF6] text-stone-600 hover:text-[#14213D]"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setFontScale((value) => changeFontScale(value, -1));
+                    }}
+                    disabled={fontScale <= 0.875}
+                    className="flex h-11 w-11 items-center justify-center border border-[#D7C8AA] bg-[#FFFCF6] text-stone-600 hover:text-[#14213D] disabled:cursor-not-allowed disabled:opacity-35"
                     aria-label="本文を小さくする"
                   >
                     <Minus className="h-4 w-4" />
                   </button>
                   <button
                     type="button"
-                    onClick={() => setFontScale((value) => Math.min(1.16, value + 0.08))}
-                    className="flex h-8 w-8 items-center justify-center border border-[#D7C8AA] bg-[#FFFCF6] text-stone-600 hover:text-[#14213D]"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setFontScale((value) => changeFontScale(value, 1));
+                    }}
+                    disabled={fontScale >= 1.25}
+                    className="flex h-11 w-11 items-center justify-center border border-[#D7C8AA] bg-[#FFFCF6] text-stone-600 hover:text-[#14213D] disabled:cursor-not-allowed disabled:opacity-35"
                     aria-label="本文を大きくする"
                   >
                     <Plus className="h-4 w-4" />
@@ -405,7 +392,7 @@ export default function Newsletter43WebMagazine() {
               <p className="mt-5 max-w-3xl text-[15px] font-medium leading-8 text-stone-600 sm:text-base">{activeArticle.deck}</p>
             </div>
 
-            <div className="grid gap-8 p-5 sm:p-8 xl:grid-cols-[280px_1fr]">
+            <div className="grid gap-8 p-5 sm:p-8 lg:grid-cols-[260px_1fr]">
               <div>
                 <aside className="border-l-4 bg-[#F8F1E6] p-5" style={{ borderColor: activeArticle.accent }}>
                   <Quote className="h-5 w-5" style={{ color: activeArticle.accent }} />
@@ -445,6 +432,32 @@ export default function Newsletter43WebMagazine() {
           </article>
         </div>
 
+        <div className="fixed bottom-4 left-1/2 z-40 flex w-[calc(100%-24px)] max-w-xl -translate-x-1/2 items-center gap-3 rounded-full bg-[#062B59] px-4 py-3 text-white shadow-[0_12px_30px_rgba(6,43,89,0.28)] sm:bottom-6 sm:px-6 lg:hidden">
+          <button
+            type="button"
+            onClick={() => timelineRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            className="flex min-h-11 shrink-0 items-center gap-2 px-1 text-xs font-bold sm:text-sm"
+          >
+            <BookOpen className="h-5 w-5 text-[#E4A52E]" />
+            全6記事
+          </button>
+          <div className="min-w-0 flex-1">
+            <p className="text-center text-[10px] font-bold tracking-[0.08em] text-white/80">
+              記事 {activeIndex + 1} / {articles.length}
+            </p>
+            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-white/25" aria-label="記事位置">
+              <div className="h-full rounded-full bg-[#E4A52E] transition-all duration-300" style={{ width: `${readingProgress}%` }} />
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => timelineRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            className="flex min-h-11 shrink-0 items-center gap-2 px-1 text-xs font-bold sm:text-sm"
+          >
+            <Menu className="h-5 w-5 text-[#E4A52E]" />
+            目次
+          </button>
+        </div>
       </div>
     </section>
   );
