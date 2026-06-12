@@ -22,8 +22,20 @@ interface ChatMessage {
   content: string;
 }
 
-export default function ChatAssistant() {
-  const [isOpen, setIsOpen] = useState(false);
+interface ChatAssistantProps {
+  isOpen?: boolean;
+  onOpenChange?: (isOpen: boolean) => void;
+}
+
+export default function ChatAssistant({ isOpen: controlledIsOpen, onOpenChange }: ChatAssistantProps = {}) {
+  const [internalIsOpen, setInternalIsOpen] = useState(false);
+  const isOpen = controlledIsOpen ?? internalIsOpen;
+  const setIsOpen = (nextIsOpen: boolean) => {
+    if (controlledIsOpen === undefined) {
+      setInternalIsOpen(nextIsOpen);
+    }
+    onOpenChange?.(nextIsOpen);
+  };
   const [inputMessage, setInputMessage] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -188,7 +200,7 @@ export default function ChatAssistant() {
                   <h3 className="font-bold text-sm tracking-wide leading-tight">茨大同窓会 AIコンシェルジュ</h3>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping" />
-                    <span className="text-[10px] text-stone-200 uppercase tracking-widest font-semibold">Gemini 3.5 AI Active</span>
+                    <span className="text-[10px] text-stone-200 uppercase tracking-widest font-semibold">Gemini Flash-Lite Active</span>
                   </div>
                 </div>
               </div>
