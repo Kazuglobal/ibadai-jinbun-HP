@@ -33,6 +33,24 @@ type PinchStart = {
   scrollTop: number;
 };
 
+type PdfDocument = Awaited<ReturnType<typeof loadPdfDocument>>;
+
+let pdfDocumentPromise: Promise<import('pdfjs-dist').PDFDocumentProxy> | null = null;
+
+async function loadPdfDocument() {
+  if (!pdfDocumentPromise) {
+    pdfDocumentPromise = Promise.all([
+      import('pdfjs-dist'),
+      import('pdfjs-dist/build/pdf.worker.min.mjs?url'),
+    ]).then(([pdfjs, worker]) => {
+      pdfjs.GlobalWorkerOptions.workerSrc = worker.default;
+      return pdfjs.getDocument({ url: '/newsletters/43/newsletter-43.pdf' }).promise;
+    });
+  }
+
+  return pdfDocumentPromise;
+}
+
 const getTouchDistance = (touches: TouchList) =>
   Math.hypot(
     touches[0].clientX - touches[1].clientX,
@@ -54,6 +72,93 @@ const BookPage = React.forwardRef<HTMLDivElement, PageProps>(({ index, src }, re
 ));
 
 BookPage.displayName = 'BookPage';
+
+function HighResolutionPdfPage({ pageIndex, zoom }: { pageIndex: number; zoom: number }) {
+  const canvasRef = React.useRef<HTMLCanvasElement | null>(null);
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const [containerWidth, setContainerWidth] = React.useState(0);
+  const [isRendering, setIsRendering] = React.useState(true);
+
+  React.useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const updateWidth = () => setContainerWidth(container.clientWidth);
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, []);
+
+  React.useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || containerWidth === 0) return;
+
+    let active = true;
+    let renderTask: ReturnType<
+      Awaited<ReturnType<PdfDocument['getPage']>>['render']
+    > | null = null;
+    setIsRendering(true);
+
+    void loadPdfDocument()
+      .then((pdf) => pdf.getPage(pageIndex + 1))
+      .then((page) => {
+        if (!active) return;
+
+        const unscaledViewport = page.getViewport({ scale: 1 });
+        const renderScale = (containerWidth / unscaledViewport.width) * zoom;
+        const viewport = page.getViewport({ scale: renderScale });
+        const outputScale = Math.min(window.devicePixelRatio || 1, 2);
+        const context = canvas.getContext('2d', { alpha: false });
+        if (!context) return;
+
+        canvas.width = Math.floor(viewport.width * outputScale);
+        canvas.height = Math.floor(viewport.height * outputScale);
+        canvas.style.width = `${containerWidth}px`;
+        canvas.style.height = `${(containerWidth * unscaledViewport.height) / unscaledViewport.width}px`;
+
+        renderTask = page.render({
+          canvas,
+          canvasContext: context,
+          viewport,
+          transform:
+            outputScale === 1 ? undefined : [outputScale, 0, 0, outputScale, 0, 0],
+        });
+        return renderTask.promise;
+      })
+      .then(() => {
+        if (active) setIsRendering(false);
+      })
+      .catch((error: unknown) => {
+        if (
+          active &&
+          (!(error instanceof Error) || error.name !== 'RenderingCancelledException')
+        ) {
+          console.error('PDF page rendering failed', error);
+        }
+      });
+
+    return () => {
+      active = false;
+      renderTask?.cancel();
+    };
+  }, [containerWidth, pageIndex, zoom]);
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative aspect-[520/735] w-[min(520px,calc(100vw-6rem))] overflow-hidden bg-white shadow-[0_22px_55px_rgba(0,0,0,0.34)]"
+      aria-label={`同窓会報第43号 ${pageIndex + 1}ページの高解像度表示`}
+    >
+      <canvas ref={canvasRef} className="block h-full w-full bg-white" />
+      {isRendering && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/80 text-xs font-bold text-[#07172C]">
+          高精細な紙面を読み込んでいます...
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function NewsletterPageFlipBookClient() {
   const bookRef = React.useRef<PageFlipApi | null>(null);
@@ -136,11 +241,21 @@ export default function NewsletterPageFlipBookClient() {
   }, [changeZoom]);
 
   const flipPrevious = React.useCallback(() => {
-    if (!isFlipping && pageIndex > 0) bookRef.current?.pageFlip().flipPrev('bottom');
+    if (isFlipping || pageIndex === 0) return;
+    if (zoomRef.current > MIN_ZOOM) {
+      setPageIndex((current) => Math.max(0, current - 1));
+      return;
+    }
+    bookRef.current?.pageFlip().flipPrev('bottom');
   }, [isFlipping, pageIndex]);
 
   const flipNext = React.useCallback(() => {
-    if (!isFlipping && pageIndex < pages.length - 1) bookRef.current?.pageFlip().flipNext('bottom');
+    if (isFlipping || pageIndex === pages.length - 1) return;
+    if (zoomRef.current > MIN_ZOOM) {
+      setPageIndex((current) => Math.min(pages.length - 1, current + 1));
+      return;
+    }
+    bookRef.current?.pageFlip().flipNext('bottom');
   }, [isFlipping, pageIndex]);
 
   React.useEffect(() => {
@@ -172,6 +287,10 @@ export default function NewsletterPageFlipBookClient() {
 
   const selectPage = (index: number) => {
     if (isFlipping || index === pageIndex) return;
+    if (zoom > MIN_ZOOM) {
+      setPageIndex(index);
+      return;
+    }
     bookRef.current?.pageFlip().flip(index, index > pageIndex ? 'bottom' : 'top');
   };
 
@@ -250,38 +369,42 @@ export default function NewsletterPageFlipBookClient() {
                 transformOrigin: 'center center',
               }}
             >
-              <HTMLFlipBook
-                ref={bookRef}
-                width={520}
-                height={735}
-                size="stretch"
-                minWidth={300}
-                maxWidth={560}
-                minHeight={424}
-                maxHeight={790}
-                startPage={0}
-                drawShadow
-                flippingTime={850}
-                usePortrait
-                startZIndex={0}
-                autoSize
-                maxShadowOpacity={0.18}
-                showCover
-                mobileScrollSupport={zoom === MIN_ZOOM}
-                clickEventForward
-                useMouseEvents={zoom === MIN_ZOOM}
-                swipeDistance={30}
-                showPageCorners={zoom === MIN_ZOOM}
-                disableFlipByClick={zoom > MIN_ZOOM}
-                className="newsletter-pageflip"
-                style={{}}
-                onFlip={(event) => setPageIndex(Number(event.data))}
-                onChangeState={(event) => setIsFlipping(event.data === 'flipping')}
-              >
-                {pages.map((page, index) => (
-                  <BookPage key={page} index={index} src={page} />
-                ))}
-              </HTMLFlipBook>
+              {zoom > MIN_ZOOM ? (
+                <HighResolutionPdfPage pageIndex={pageIndex} zoom={zoom} />
+              ) : (
+                <HTMLFlipBook
+                  ref={bookRef}
+                  width={520}
+                  height={735}
+                  size="stretch"
+                  minWidth={300}
+                  maxWidth={560}
+                  minHeight={424}
+                  maxHeight={790}
+                  startPage={pageIndex}
+                  drawShadow
+                  flippingTime={850}
+                  usePortrait
+                  startZIndex={0}
+                  autoSize
+                  maxShadowOpacity={0.18}
+                  showCover
+                  mobileScrollSupport
+                  clickEventForward
+                  useMouseEvents
+                  swipeDistance={30}
+                  showPageCorners
+                  disableFlipByClick={false}
+                  className="newsletter-pageflip"
+                  style={{}}
+                  onFlip={(event) => setPageIndex(Number(event.data))}
+                  onChangeState={(event) => setIsFlipping(event.data === 'flipping')}
+                >
+                  {pages.map((page, index) => (
+                    <BookPage key={page} index={index} src={page} />
+                  ))}
+                </HTMLFlipBook>
+              )}
             </div>
           </div>
         </div>
