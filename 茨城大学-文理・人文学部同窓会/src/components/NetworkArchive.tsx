@@ -116,6 +116,8 @@ const COVERS_DATA: CoverData[] = [
 export default function NetworkArchive() {
   const [activeCoverIndex, setActiveCoverIndex] = React.useState(0);
   const [isCoverAutoPaused, setIsCoverAutoPaused] = React.useState(false);
+  const coverSwipeStart = React.useRef<{ x: number; y: number } | null>(null);
+  const didCoverSwipe = React.useRef(false);
   const activeCover = COVERS_DATA[activeCoverIndex];
 
   React.useEffect(() => {
@@ -132,6 +134,30 @@ export default function NetworkArchive() {
 
   const moveCover = (direction: number) => {
     setActiveCoverIndex((current) => (current + direction + COVERS_DATA.length) % COVERS_DATA.length);
+  };
+
+  const finishCoverSwipe = (clientX: number, clientY: number) => {
+    const start = coverSwipeStart.current;
+    coverSwipeStart.current = null;
+
+    if (!start) {
+      setIsCoverAutoPaused(false);
+      return;
+    }
+
+    const offsetX = clientX - start.x;
+    const offsetY = clientY - start.y;
+    const isHorizontalSwipe = Math.abs(offsetX) > 45 && Math.abs(offsetX) > Math.abs(offsetY) * 1.15;
+
+    if (isHorizontalSwipe) {
+      didCoverSwipe.current = true;
+      moveCover(offsetX < 0 ? 1 : -1);
+      window.setTimeout(() => {
+        didCoverSwipe.current = false;
+      }, 0);
+    }
+
+    setIsCoverAutoPaused(false);
   };
 
   const getCoverOffset = (index: number) => {
@@ -201,10 +227,12 @@ export default function NetworkArchive() {
               <div className="my-6">
                 <div
                   className="relative overflow-hidden rounded-3xl border border-stone-200/60 bg-white/55 px-3 py-5 shadow-inner sm:px-6 sm:py-7"
-                  onPointerEnter={() => setIsCoverAutoPaused(true)}
-                  onPointerLeave={() => setIsCoverAutoPaused(false)}
-                  onFocusCapture={() => setIsCoverAutoPaused(true)}
-                  onBlurCapture={() => setIsCoverAutoPaused(false)}
+                  onPointerEnter={(event) => {
+                    if (event.pointerType === 'mouse') setIsCoverAutoPaused(true);
+                  }}
+                  onPointerLeave={(event) => {
+                    if (event.pointerType === 'mouse') setIsCoverAutoPaused(false);
+                  }}
                 >
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div className="text-left">
@@ -238,16 +266,17 @@ export default function NetworkArchive() {
 
                   <motion.div
                     className="relative h-[330px] cursor-grab overflow-hidden rounded-2xl [touch-action:pan-y] sm:h-[395px]"
-                    drag="x"
-                    dragConstraints={{ left: 0, right: 0 }}
-                    dragElastic={0.08}
-                    onDragStart={() => setIsCoverAutoPaused(true)}
-                    onDragEnd={(_, info) => {
-                      if (info.offset.x < -45 || info.velocity.x < -300) moveCover(1);
-                      if (info.offset.x > 45 || info.velocity.x > 300) moveCover(-1);
+                    onPointerDown={(event) => {
+                      coverSwipeStart.current = { x: event.clientX, y: event.clientY };
+                      didCoverSwipe.current = false;
+                      setIsCoverAutoPaused(true);
+                      event.currentTarget.setPointerCapture(event.pointerId);
+                    }}
+                    onPointerUp={(event) => finishCoverSwipe(event.clientX, event.clientY)}
+                    onPointerCancel={() => {
+                      coverSwipeStart.current = null;
                       setIsCoverAutoPaused(false);
                     }}
-                    whileTap={{ cursor: 'grabbing' }}
                   >
                     <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-14 bg-linear-to-r from-white/80 to-transparent" />
                     <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-14 bg-linear-to-l from-white/80 to-transparent" />
@@ -262,6 +291,8 @@ export default function NetworkArchive() {
                           key={item.id}
                           type="button"
                           onClick={() => {
+                            if (didCoverSwipe.current) return;
+
                             if (isActive) {
                               openNewsletter(item);
                               return;

@@ -4,7 +4,6 @@ import {
   Home, 
   Newspaper, 
   BookOpen, 
-  UserCheck, 
   MessageSquare 
 } from 'lucide-react';
 
@@ -38,14 +37,6 @@ export default function MobileBottomNav({ currentView, onNavigate, onOpenChat }:
       icon: <BookOpen className="w-5 h-5" />,
       onClick: () => {
         onNavigate('home', '#stories-section');
-      },
-      badge: false,
-    },
-    {
-      label: '手続き',
-      icon: <UserCheck className="w-5 h-5" />,
-      onClick: () => {
-        onNavigate('home', '#update-section');
       },
       badge: false,
     },

@@ -38,7 +38,10 @@ export default function NewsletterArticleBody({
   const photosByParagraph = groupPhotosByParagraph(body.length, photos);
 
   return (
-    <div className="space-y-6 text-stone-700" style={{ fontSize: `${fontScale}rem`, lineHeight: 1.95 }}>
+    <div
+      className="space-y-6 text-stone-700 transition-[font-size] duration-200"
+      style={{ fontSize: `${fontScale}rem`, lineHeight: 1.95 }}
+    >
       {body.map((paragraph, index) => {
         const paragraphPhotos = photosByParagraph.get(index) ?? [];
 
