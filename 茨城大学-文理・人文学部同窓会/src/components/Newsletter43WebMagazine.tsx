@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Clock,
+  FileText,
   Menu,
   Minus,
   Plus,
@@ -17,6 +18,7 @@ import homeworkImage from '../data/newsletter43/homework.jpg';
 import jumpRopeImage from '../data/newsletter43/jump-rope.jpg';
 import lunchImage from '../data/newsletter43/lunch.jpg';
 import NewsletterArticleBody, { type NewsletterArticlePhoto } from './NewsletterArticleBody';
+import NewsletterPdfFlipbook from './NewsletterPdfFlipbook';
 
 type MagazineArticle = {
   id: string;
@@ -164,6 +166,7 @@ function changeFontScale(current: number, direction: -1 | 1) {
 export default function Newsletter43WebMagazine() {
   const [activeArticleId, setActiveArticleId] = React.useState(articles[0].id);
   const [fontScale, setFontScale] = React.useState(1);
+  const [isPdfOpen, setIsPdfOpen] = React.useState(false);
   const articleTopRef = React.useRef<HTMLDivElement>(null);
   const readerRef = React.useRef<HTMLDivElement>(null);
   const timelineRef = React.useRef<HTMLDivElement>(null);
@@ -240,14 +243,24 @@ export default function Newsletter43WebMagazine() {
               <p className="mt-4 hidden max-w-lg text-[15px] font-medium leading-8 text-stone-600 min-[430px]:block sm:text-base">
                 学部の歩み、今、そして地域で学ぶ学生の声をつなぐ、6つの物語。
               </p>
-              <button
-                type="button"
-                onClick={() => selectArticle(articles[0].id)}
-                className="mt-4 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[#062B59] px-3 text-xs font-bold text-white shadow-[0_8px_20px_rgba(6,43,89,0.18)] transition-colors hover:bg-[#B87816] sm:mt-7 sm:min-h-14 sm:w-auto sm:gap-3 sm:px-7 sm:text-base"
-              >
-                最初の記事を読む
-                <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
-              </button>
+              <div className="mt-4 grid gap-2 sm:mt-7 sm:flex sm:flex-wrap sm:gap-3">
+                <button
+                  type="button"
+                  onClick={() => selectArticle(articles[0].id)}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#062B59] px-3 text-xs font-bold text-white shadow-[0_8px_20px_rgba(6,43,89,0.18)] transition-colors hover:bg-[#B87816] sm:min-h-14 sm:gap-3 sm:px-7 sm:text-base"
+                >
+                  最初の記事を読む
+                  <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsPdfOpen(true)}
+                  className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border border-[#B87816] bg-[#FFFCF7] px-3 text-xs font-bold text-[#14213D] transition-colors hover:bg-[#B87816] hover:text-white sm:min-h-14 sm:gap-3 sm:px-7 sm:text-base"
+                >
+                  <FileText className="h-4 w-4 sm:h-5 sm:w-5" />
+                  PDFをめくって読む
+                </button>
+              </div>
             </div>
             <div className="mx-auto w-full max-w-[300px]">
               <div className="relative aspect-[3/4] overflow-hidden bg-[#111827] shadow-[0_16px_32px_rgba(20,33,61,0.2)]">
@@ -459,6 +472,7 @@ export default function Newsletter43WebMagazine() {
           </button>
         </div>
       </div>
+      <NewsletterPdfFlipbook isOpen={isPdfOpen} onClose={() => setIsPdfOpen(false)} />
     </section>
   );
 }
