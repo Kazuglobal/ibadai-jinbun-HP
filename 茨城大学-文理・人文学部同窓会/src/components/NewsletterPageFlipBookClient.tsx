@@ -106,9 +106,9 @@ function HighResolutionPdfPage({ pageIndex, zoom }: { pageIndex: number; zoom: n
         if (!active) return;
 
         const unscaledViewport = page.getViewport({ scale: 1 });
-        const renderScale = (containerWidth / unscaledViewport.width) * zoom;
+        const renderScale = containerWidth / unscaledViewport.width;
         const viewport = page.getViewport({ scale: renderScale });
-        const outputScale = Math.min(window.devicePixelRatio || 1, 2);
+        const outputScale = Math.min(Math.max(window.devicePixelRatio || 1, 2), 3);
         const context = canvas.getContext('2d', { alpha: false });
         if (!context) return;
 
@@ -147,7 +147,11 @@ function HighResolutionPdfPage({ pageIndex, zoom }: { pageIndex: number; zoom: n
   return (
     <div
       ref={containerRef}
-      className="relative aspect-[520/735] w-[min(520px,calc(100vw-6rem))] overflow-hidden bg-white shadow-[0_22px_55px_rgba(0,0,0,0.34)]"
+      className="relative aspect-[520/735] shrink-0 overflow-hidden bg-white shadow-[0_22px_55px_rgba(0,0,0,0.34)]"
+      style={{
+        width: `${zoom * 100}%`,
+        maxWidth: `${520 * zoom}px`,
+      }}
       aria-label={`同窓会報第43号 ${pageIndex + 1}ページの高解像度表示`}
     >
       <canvas ref={canvasRef} className="block h-full w-full bg-white" />
@@ -356,22 +360,11 @@ export default function NewsletterPageFlipBookClient() {
           }
           onDoubleClick={() => changeZoom(zoom === MIN_ZOOM ? 1.75 : MIN_ZOOM)}
         >
-          <div
-            className="flex min-h-full min-w-full items-center justify-center"
-            style={{
-              width: `${zoom * 100}%`,
-              height: `${zoom * 100}%`,
-            }}
-          >
-            <div
-              style={{
-                transform: `scale(${zoom})`,
-                transformOrigin: 'center center',
-              }}
-            >
-              {zoom > MIN_ZOOM ? (
-                <HighResolutionPdfPage pageIndex={pageIndex} zoom={zoom} />
-              ) : (
+          <div className="flex min-h-full min-w-full items-center justify-center">
+            {zoom > MIN_ZOOM ? (
+              <HighResolutionPdfPage pageIndex={pageIndex} zoom={zoom} />
+            ) : (
+              <div>
                 <HTMLFlipBook
                   ref={bookRef}
                   width={520}
@@ -404,8 +397,8 @@ export default function NewsletterPageFlipBookClient() {
                     <BookPage key={page} index={index} src={page} />
                   ))}
                 </HTMLFlipBook>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
 
