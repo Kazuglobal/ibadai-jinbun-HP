@@ -11,6 +11,10 @@ dotenv.config();
 const app = express();
 const PORT = 3000;
 const GEMINI_CHAT_MODEL = process.env.GEMINI_CHAT_MODEL || "gemini-2.5-flash-lite";
+const STORIES_GEMINI_MODEL = process.env.STORIES_GEMINI_MODEL || "gemini-2.5-flash-lite";
+const SLACK_STORIES_WEBHOOK_URL = process.env.SLACK_STORIES_WEBHOOK_URL || "";
+const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || "";
+const SLACK_STORIES_CHANNEL_ID = process.env.SLACK_STORIES_CHANNEL_ID || "";
 const CHAT_MONTHLY_BUDGET_JPY = getPositiveEnvNumber("CHAT_MONTHLY_BUDGET_JPY", 1000);
 const CHAT_USD_JPY_RATE = getPositiveEnvNumber("CHAT_USD_JPY_RATE", 160);
 const GEMINI_INPUT_USD_PER_1M = getPositiveEnvNumber("GEMINI_INPUT_USD_PER_1M", 0.1);
@@ -21,7 +25,8 @@ const REDIS_REST_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_
 const REDIS_REST_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || "";
 const CHAT_ANALYTICS_FILE = path.join(process.cwd(), "data", "chat-analytics.json");
 
-app.use(express.json());
+app.set("trust proxy", process.env.NODE_ENV === "production" ? 1 : false);
+app.use(express.json({ limit: "9mb" }));
 app.use(express.urlencoded({ extended: false }));
 
 interface ChatAnalyticsRecord {
@@ -418,6 +423,420 @@ function getGemini() {
   }
   return aiClient;
 }
+
+type StoryInterviewItem = {
+  question: string;
+  answer: string;
+};
+
+type StoryPhoto = {
+  name: string;
+  type: string;
+  dataUrl: string;
+};
+
+const storyInterviewRequests = new Map<string, { count: number; resetAt: number }>();
+const storySubmissionRequests = new Map<string, { count: number; resetAt: number }>();
+
+function getSafeText(value: unknown, maxLength = 2000) {
+  return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
+}
+
+function getSafeHttpUrl(value: unknown) {
+  const text = getSafeText(value, 1000);
+  if (!text) return "";
+  try {
+    const url = new URL(text);
+    return url.protocol === "https:" || url.protocol === "http:" ? url.toString() : "";
+  } catch {
+    return "";
+  }
+}
+
+function escapeSlackText(value: unknown) {
+  return getSafeText(value, 5000)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+function storyInterviewRateAllowed(ip: string) {
+  const now = Date.now();
+  const existing = storyInterviewRequests.get(ip);
+  if (!existing || existing.resetAt <= now) {
+    storyInterviewRequests.set(ip, { count: 1, resetAt: now + 10 * 60 * 1000 });
+    return true;
+  }
+  existing.count += 1;
+  return existing.count <= 20;
+}
+
+function storySubmissionRateAllowed(ip: string) {
+  const now = Date.now();
+  const existing = storySubmissionRequests.get(ip);
+  if (!existing || existing.resetAt <= now) {
+    storySubmissionRequests.set(ip, { count: 1, resetAt: now + 60 * 60 * 1000 });
+    return true;
+  }
+  existing.count += 1;
+  return existing.count <= 3;
+}
+
+function decodeStoryPhoto(photo: StoryPhoto) {
+  const match = /^data:(image\/(?:jpeg|png|webp));base64,([a-zA-Z0-9+/=]+)$/.exec(photo.dataUrl || "");
+  if (!match) throw new Error("Unsupported photo format");
+  const buffer = Buffer.from(match[2], "base64");
+  if (buffer.length > 2 * 1024 * 1024) throw new Error("Photo exceeds 2MB");
+  const extensionByType: Record<string, string> = {
+    "image/jpeg": ".jpg",
+    "image/png": ".png",
+    "image/webp": ".webp",
+  };
+  const safeBaseName =
+    path.basename(getSafeText(photo.name, 120), path.extname(getSafeText(photo.name, 120)))
+      .replace(/[^a-zA-Z0-9._-]/g, "-")
+      .slice(0, 80) || `story-photo-${Date.now()}`;
+  return {
+    name: `${safeBaseName}${extensionByType[match[1]]}`,
+    type: match[1],
+    buffer,
+  };
+}
+
+async function slackApi(method: string, params: URLSearchParams) {
+  const response = await fetch(`https://slack.com/api/${method}`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${SLACK_BOT_TOKEN}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: params,
+  });
+  const data: any = await response.json().catch(() => ({}));
+  if (!response.ok || !data.ok) {
+    throw new Error(data.error || `Slack API ${method} failed`);
+  }
+  return data;
+}
+
+async function uploadStoryPhotoToSlack(photo: StoryPhoto) {
+  const decoded = decodeStoryPhoto(photo);
+  const upload = await slackApi(
+    "files.getUploadURLExternal",
+    new URLSearchParams({ filename: decoded.name, length: String(decoded.buffer.length) }),
+  );
+  const uploadResponse = await fetch(upload.upload_url, {
+    method: "POST",
+    headers: { "Content-Type": decoded.type },
+    body: decoded.buffer,
+  });
+  if (!uploadResponse.ok) throw new Error(`Slack photo upload failed: ${uploadResponse.status}`);
+
+  await slackApi(
+    "files.completeUploadExternal",
+    new URLSearchParams({
+      files: JSON.stringify([{ id: upload.file_id, title: decoded.name }]),
+      channel_id: SLACK_STORIES_CHANNEL_ID,
+    }),
+  );
+}
+
+async function sendStoryApplicationToSlack(text: string, photos: StoryPhoto[]) {
+  if (SLACK_BOT_TOKEN && SLACK_STORIES_CHANNEL_ID) {
+    await slackApi(
+      "chat.postMessage",
+      new URLSearchParams({
+        channel: SLACK_STORIES_CHANNEL_ID,
+        text,
+        unfurl_links: "false",
+        unfurl_media: "false",
+      }),
+    );
+    for (const photo of photos) {
+      await uploadStoryPhotoToSlack(photo);
+    }
+    return true;
+  }
+
+  if (SLACK_STORIES_WEBHOOK_URL) {
+    const response = await fetch(SLACK_STORIES_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    if (!response.ok) throw new Error(`Slack webhook failed: ${response.status}`);
+    return true;
+  }
+
+  return false;
+}
+
+function formatStoryApplicationForSlack(payload: any) {
+  const profile = payload.profile || {};
+  const links = payload.links || {};
+  const interview: StoryInterviewItem[] = Array.isArray(payload.interview) ? payload.interview : [];
+  const originalInterview: StoryInterviewItem[] = Array.isArray(payload.originalInterview)
+    ? payload.originalInterview
+    : [];
+  const photos: StoryPhoto[] = Array.isArray(payload.photos) ? payload.photos : [];
+  const linkLines = [
+    ["HP", getSafeHttpUrl(links.website)],
+    ["LinkedIn", getSafeHttpUrl(links.linkedin)],
+    ["Instagram", getSafeHttpUrl(links.instagram)],
+    ["Facebook", getSafeHttpUrl(links.facebook)],
+    ["X", getSafeHttpUrl(links.x)],
+  ].filter(([, value]) => value);
+
+  return [
+    "*新しいSTORIES掲載申請*",
+    "> 掲載前の審査が必要です。内容によっては掲載しない場合があります。",
+    "",
+    `*掲載名:* ${escapeSlackText(profile.name)}`,
+    `*連絡先:* ${escapeSlackText(profile.email)}`,
+    `*卒業年・専攻:* ${escapeSlackText(profile.gradYear)} / ${escapeSlackText(profile.major)}`,
+    `*所属・活動:* ${escapeSlackText(profile.affiliation)}`,
+    `*分野:* ${escapeSlackText(profile.category)}`,
+    `*写真:* ${photos.length}枚${SLACK_BOT_TOKEN && SLACK_STORIES_CHANNEL_ID ? "（別添）" : "（Webhook構成では本文のみ送信）"}`,
+    "",
+    "*インタビュー回答*",
+    ...interview.flatMap((item, index) => [
+      `*Q${index + 1}. ${escapeSlackText(item.question)}*`,
+      escapeSlackText(item.answer),
+    ]),
+    ...(originalInterview.length
+      ? [
+          "",
+          "*校正前の原文（確認用）*",
+          ...originalInterview.flatMap((item, index) => [
+            `*Q${index + 1} 原文*`,
+            escapeSlackText(item.answer),
+          ]),
+        ]
+      : []),
+    "",
+    `*同窓生特典:* ${escapeSlackText(payload.benefit) || "なし"}`,
+    ...(linkLines.length ? ["", "*HP・SNS*", ...linkLines.map(([label, value]) => `- *${label}:* ${value}`)] : []),
+  ].join("\n");
+}
+
+async function proofreadStoryApplication(payload: any) {
+  const interview: StoryInterviewItem[] = Array.isArray(payload.interview)
+    ? payload.interview.slice(0, 5).map((item: any) => ({
+        question: getSafeText(item?.question, 300),
+        answer: getSafeText(item?.answer, 2000),
+      }))
+    : [];
+  const benefit = getSafeText(payload.benefit, 2000);
+  const result: any = await getGemini().models.generateContent({
+    model: STORIES_GEMINI_MODEL,
+    contents: JSON.stringify({
+      answers: interview.map((item) => item.answer),
+      benefit,
+    }),
+    config: {
+      systemInstruction: `あなたは同窓会広報誌の日本語校正者です。
+入力されたインタビュー回答と同窓生特典を、掲載前の原稿として読みやすく校正してください。
+
+必ず守ること:
+- 氏名、固有名詞、組織名、数字、年月、役職、出来事などの事実を追加・削除・変更しない
+- 回答者が述べていない実績、感情、因果関係を創作しない
+- 誤字脱字、助詞、句読点、重複、読みにくい語順だけを自然な敬体に整える
+- 回答の意味、語り手の個性、情報量を維持する
+- 各回答を別々に校正し、結合や要約をしない
+- 特典が空欄なら空欄のまま返す
+- JSON以外の説明を返さない`,
+      responseMimeType: "application/json",
+      maxOutputTokens: 3000,
+      temperature: 0.15,
+    },
+  });
+  const parsed = JSON.parse(getSafeText(result.text, 12000));
+  if (!Array.isArray(parsed.answers) || parsed.answers.length !== interview.length) {
+    throw new Error("Invalid proofreading response");
+  }
+  const proofreadInterview = interview.map((item, index) => ({
+    question: item.question,
+    answer: getSafeText(parsed.answers[index], 2000) || item.answer,
+  }));
+
+  return {
+    ...payload,
+    originalInterview: interview,
+    interview: proofreadInterview,
+    benefit: benefit ? getSafeText(parsed.benefit, 2000) || benefit : "",
+  };
+}
+
+app.post("/api/stories/interview", async (req, res) => {
+  try {
+    if (!storyInterviewRateAllowed(req.ip || "unknown")) {
+      return res.status(429).json({ error: "短時間の利用回数が多いため、少し時間をおいてお試しください。" });
+    }
+
+    const profile = req.body?.profile || {};
+    const interview: StoryInterviewItem[] = Array.isArray(req.body?.interview)
+      ? req.body.interview.slice(0, 5).map((item: any) => ({
+          question: getSafeText(item?.question, 300),
+          answer: getSafeText(item?.answer, 2000),
+        }))
+      : [];
+
+    if (!getSafeText(profile.name, 100) || interview.some((item) => !item.question || !item.answer)) {
+      return res.status(400).json({ error: "基本情報とこれまでの回答を確認してください。" });
+    }
+
+    if (interview.length >= 5) {
+      return res.status(400).json({ error: "インタビューはすでに完了しています。" });
+    }
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({
+        error: "Gemini APIキーが未設定です。サーバー環境のGEMINI_API_KEYを設定してください。",
+        code: "GEMINI_NOT_CONFIGURED",
+      });
+    }
+
+    const transcript = interview
+      .map((item, index) => `Q${index + 1}: ${item.question}\nA${index + 1}: ${item.answer}`)
+      .join("\n\n") || "まだ回答はありません。";
+    const nextQuestionNumber = interview.length + 1;
+    const prompt = `次は全5問中の第${nextQuestionNumber}問です。
+
+掲載名: ${getSafeText(profile.name, 100)}
+卒業年・専攻: ${getSafeText(profile.gradYear, 100)} / ${getSafeText(profile.major, 150)}
+現在の所属・活動: ${getSafeText(profile.affiliation, 200)}
+活動分野: ${getSafeText(profile.category, 100)}
+
+これまでの回答:
+${transcript}
+
+この方への次の質問を1問だけ作成してください。`;
+
+    const result: any = await getGemini().models.generateContent({
+      model: STORIES_GEMINI_MODEL,
+      contents: prompt,
+      config: {
+        systemInstruction: `あなたは茨城大学 文理・人文学部同窓会「STORIES」の熟練インタビュアーです。
+同窓生の人柄、歩み、仕事・活動の価値、大学とのつながりが伝わる記事を作るため、温かく具体的な質問を一度に1問だけしてください。
+完成する記事は、サイトに表示されているサンプル記事と同じ構成・内容の深さにします。
+
+全5問の設計:
+1. 現在の仕事・活動の具体的な内容と、その仕事を選んだ理由
+2. 仕事・活動のやりがいが伝わる具体的な経験、転機、挑戦。第1問の回答にある固有の内容を必ず一つ拾って深掘りする
+3. 茨城大学で学んだこと、ゼミ・先生・仲間・課外活動などの思い出と、それが現在にどう生きているか
+4. 在学生・受験生へのメッセージ。大学で挑戦してほしいことや、社会に出て役立った学びを聞く
+5. 同窓生向けに提供できる割引、優待、相談、協力などの会員特典。質問文の中で、ない場合は「なし」でよいと必ず伝える
+
+サンプル記事との対応:
+- 第1問と第2問の回答から「この仕事を選んだ理由と、やりがい」の記事を作れる情報を集める
+- 第3問から「茨城大学での学びや学生時代の思い出」の記事を作れる情報を集める
+- 第4問から「在学生や受験生の皆さんへのメッセージ」の記事を作れる情報を集める
+- 回答から、一覧カードに使える短い紹介文と記事見出しを編集できるだけの具体性を得る
+- 第5問はサンプル記事の「会員限定特典」欄に対応する
+
+必ず守ること:
+- これまでの回答を読んで、固有の内容を拾った自然な聞き方にする
+- すでに答えた内容を繰り返し質問しない
+- 抽象的な回答には、出来事・役割・相手・変化などを一つだけ尋ねて具体化する
+- 一度に複数の論点を詰め込まず、回答しやすい一問にする
+- 誘導、誇張、事実の創作をしない
+- 個人情報や機密情報を過度に求めない
+- 日本語の質問文だけを返し、前置き・番号・解説・引用符は付けない
+- 100文字以内にする`,
+        temperature: 0.65,
+        maxOutputTokens: 160,
+      },
+    });
+    const question = getSafeText(result.text, 200);
+    if (!question) {
+      return res.status(502).json({
+        error: "Geminiから質問を生成できませんでした。もう一度お試しください。",
+        code: "GEMINI_EMPTY_RESPONSE",
+      });
+    }
+    res.json({
+      question,
+      model: STORIES_GEMINI_MODEL,
+    });
+  } catch (error: any) {
+    console.error("STORIES interview error:", error);
+    const status = Number(error?.status);
+    if (status === 401 || status === 403) {
+      return res.status(503).json({
+        error: "Gemini APIキーを確認できませんでした。サーバー設定をご確認ください。",
+        code: "GEMINI_AUTH_FAILED",
+      });
+    }
+    if (status === 429) {
+      return res.status(429).json({
+        error: "Geminiの利用上限に達しています。時間をおいてからお試しください。",
+        code: "GEMINI_RATE_LIMITED",
+      });
+    }
+    res.status(502).json({
+      error: "Geminiとの通信に失敗しました。時間をおいてからもう一度お試しください。",
+      code: "GEMINI_REQUEST_FAILED",
+    });
+  }
+});
+
+app.post("/api/stories/submit", async (req, res) => {
+  try {
+    if (!storySubmissionRateAllowed(req.ip || "unknown")) {
+      return res.status(429).json({ error: "申請回数が多いため、時間をおいてからお試しください。" });
+    }
+
+    const payload = req.body || {};
+    const profile = payload.profile || {};
+    const interview: StoryInterviewItem[] = Array.isArray(payload.interview)
+      ? payload.interview.slice(0, 5).map((item: any) => ({
+          question: getSafeText(item?.question, 300),
+          answer: getSafeText(item?.answer, 2000),
+        }))
+      : [];
+    const photos: StoryPhoto[] = Array.isArray(payload.photos) ? payload.photos.slice(0, 3) : [];
+
+    if (
+      !getSafeText(profile.name, 100) ||
+      !getSafeText(profile.email, 200) ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(getSafeText(profile.email, 200)) ||
+      !getSafeText(profile.gradYear, 100) ||
+      !getSafeText(profile.major, 150) ||
+      !getSafeText(profile.affiliation, 200) ||
+      interview.length !== 5 ||
+      interview.some((item) => !item.question || !item.answer) ||
+      payload.agreedToReviewTerms !== true
+    ) {
+      return res.status(400).json({ error: "必須情報、インタビュー回答、掲載審査への同意を確認してください。" });
+    }
+
+    for (const photo of photos) decodeStoryPhoto(photo);
+
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(503).json({ error: "現在、回答の文章を整える機能を利用できません。時間をおいてお試しください。" });
+    }
+
+    const proofreadPayload = await proofreadStoryApplication({ ...payload, interview });
+    const slackText = formatStoryApplicationForSlack(proofreadPayload);
+    const integrated = await sendStoryApplicationToSlack(slackText, photos);
+    if (!integrated && process.env.NODE_ENV === "production") {
+      return res.status(503).json({ error: "現在、掲載申請を受け付けられません。事務局へお問い合わせください。" });
+    }
+    if (!integrated) {
+      console.info("Slack STORIES integration is not configured. Development submission preview:\n", slackText);
+    }
+
+    res.json({
+      status: "success",
+      integrated,
+      proofread: true,
+      message: "掲載審査の申請を受け付けました。",
+    });
+  } catch (error: any) {
+    console.error("STORIES submission error:", error);
+    res.status(500).json({ error: "STORIES掲載申請を送信できませんでした。" });
+  }
+});
 
 // REST API for Chat Assistant
 app.post("/api/chat", async (req, res) => {
