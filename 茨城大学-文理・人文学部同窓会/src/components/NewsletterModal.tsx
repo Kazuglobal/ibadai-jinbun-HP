@@ -1,158 +1,126 @@
 import React, { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import {
-  ArrowRight,
-  BookOpen,
-  ChevronLeft,
-  ChevronRight,
-  ExternalLink,
-  FileDown,
-  Menu,
-  X,
-} from 'lucide-react';
+import { ArrowRight, BookOpen, X } from 'lucide-react';
 
-import activityImage from '../data/newsletter43/activity.jpg';
-import hasuiImage from '../data/newsletter43/hasui.jpg';
-import homeworkImage from '../data/newsletter43/homework.jpg';
-import jumpRopeImage from '../data/newsletter43/jump-rope.jpg';
+import newsletter43Cover from '../data/newsletter43/lunch.jpg';
 
 interface NewsletterModalProps {
   autoOpenReady?: boolean;
   onClose?: () => void;
 }
 
-type Article = {
-  id: number;
-  page: string;
-  category: string;
-  title: string;
-  subtitle: string;
-  writer: string;
-  image: string;
-  imageAlt: string;
-  body: string[];
-};
-
-const articles: Article[] = [
+const highlights = [
   {
-    id: 1,
-    page: '02',
+    page: 'P.02',
     category: '巻頭エッセイ',
     title: '茨城大学 半世紀の想い出',
-    subtitle: '巻頭記事を本文で読む',
-    writer: '木戸 之都子（人文・文10回卒）',
-    image: activityImage,
-    imageAlt: '茨城大学の活動風景',
-    body: [
-      '一人の卒業生の記憶から、人文学部と同窓会が重ねてきた時間が見えてくる巻頭記事です。',
-      '入学当時のキャンパス、人文図書室、古文書整理、名簿づくりまで、大学で過ごした時間が落ち着いた語り口でつづられています。',
-    ],
+    description: '学びの場と人のつながりを、卒業生の記憶からたどります。',
   },
   {
-    id: 2,
-    page: '06',
+    page: 'P.06',
     category: '学部長メッセージ',
     title: '同窓会の皆様へ',
-    subtitle: '母校の現在を本文で読む',
-    writer: '人文社会科学部長　蓮井 誠一郎',
-    image: hasuiImage,
-    imageAlt: '蓮井誠一郎 人文社会科学部長',
-    body: [
-      '人文社会科学部の現在と、教育・研究環境づくりへの思いが語られるメッセージです。',
-      'オンライン化が進む時代に、対面のつながりやカレッジの価値をどう再構築するかを考えます。',
-    ],
+    description: '人文社会科学部の現在と、これからの学びについて。',
   },
   {
-    id: 3,
-    page: '10',
+    page: 'P.10',
     category: '学生レポート',
-    title: 'ひたちなか市における子どもの居場所づくり',
-    subtitle: '地域の現場で学ぶ声を読む',
-    writer: '人文社会科学部4年　中塩 紗矢香',
-    image: homeworkImage,
-    imageAlt: '子どもが宿題をする活動風景',
-    body: [
-      '地域の居場所での実践から、子ども一人ひとりに寄り添う支援を考える学生レポートです。',
-      '大学での学びが地域の課題と結びつく瞬間を、在学生のまなざしから読むことができます。',
-    ],
-  },
-  {
-    id: 4,
-    page: '14',
-    category: '活動報告',
-    title: '総会・同窓会活動の記録',
-    subtitle: '支部、グループ、近況を読む',
-    writer: '茨城大学 文理・人文学部同窓会',
-    image: jumpRopeImage,
-    imageAlt: '同窓会報に掲載された活動風景',
-    body: [
-      '総会、支部・グループ、事務局からのお知らせを通じて、同窓会の現在地を確認できます。',
-      '冊子としての流れを残しながら、Web上でも次の記事へ移動しやすい構成にしています。',
-    ],
+    title: '子どもの居場所づくり',
+    description: '地域の現場で学ぶ学生の声と活動を紹介します。',
   },
 ];
 
-const pdfPages = ['表紙', '巻頭エッセイ', '学生レポート', '活動報告'];
-
-function TextLines({ rows = 5, compact = false }: { rows?: number; compact?: boolean }) {
-  return (
-    <div className={compact ? 'space-y-2.5' : 'space-y-3.5'} aria-hidden="true">
-      {Array.from({ length: rows }).map((_, index) => (
-        <span
-          key={index}
-          className={`block h-px bg-[#D3CBBF] ${index % 5 === 4 ? 'w-[72%]' : 'w-full'}`}
-        />
-      ))}
-    </div>
-  );
-}
+const covers = [
+  {
+    issue: '41',
+    image: '/newsletters/41/image-01.webp',
+    className:
+      'left-0 top-14 z-0 w-[42%] -rotate-[8deg] opacity-75 sm:left-2 sm:top-20 sm:w-[40%]',
+  },
+  {
+    issue: '42',
+    image: '/newsletters/42/image-01.webp',
+    className:
+      'left-[17%] top-8 z-10 w-[48%] -rotate-[3deg] opacity-90 sm:left-[18%] sm:top-12 sm:w-[46%]',
+  },
+  {
+    issue: '43',
+    image: newsletter43Cover,
+    className:
+      'right-0 top-0 z-20 w-[58%] rotate-0 sm:right-2 sm:w-[56%]',
+  },
+];
 
 export default function NewsletterModal({ autoOpenReady = true, onClose }: NewsletterModalProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedArticleId, setSelectedArticleId] = useState(1);
-  const [pdfPage, setPdfPage] = useState(1);
-
-  const selectedArticle = articles.find((article) => article.id === selectedArticleId) ?? articles[0];
 
   useEffect(() => {
     if (!autoOpenReady) return;
 
-    if (!(window as any).__hasShownNewsletterThisSession) {
+    if (!(window as Window & { __hasShownNewsletterThisSession?: boolean }).__hasShownNewsletterThisSession) {
       const timer = window.setTimeout(() => {
         setIsOpen(true);
-        (window as any).__hasShownNewsletterThisSession = true;
+        (window as Window & { __hasShownNewsletterThisSession?: boolean }).__hasShownNewsletterThisSession = true;
       }, 700);
       return () => window.clearTimeout(timer);
     }
   }, [autoOpenReady]);
 
   useEffect(() => {
-    const handleOpenNewsletter = () => {
-      setIsOpen(true);
-      setSelectedArticleId(1);
-    };
-
+    const handleOpenNewsletter = () => setIsOpen(true);
     window.addEventListener('open-newsletter', handleOpenNewsletter);
     return () => window.removeEventListener('open-newsletter', handleOpenNewsletter);
   }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+        onClose?.();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
 
   const handleClose = () => {
     setIsOpen(false);
     onClose?.();
   };
 
-  const goToNextArticle = () => {
-    setSelectedArticleId((current) => (current === articles.length ? 1 : current + 1));
+  const openWebMagazine = () => {
+    handleClose();
+    window.dispatchEvent(new CustomEvent('open-newsletter-issue', { detail: 43 }));
   };
 
-  const goToPreviousArticle = () => {
-    setSelectedArticleId((current) => (current === 1 ? articles.length : current - 1));
+  const openArchive = () => {
+    handleClose();
+    window.setTimeout(() => {
+      const archive = document.querySelector('#network-archive');
+      if (archive) {
+        archive.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        window.location.hash = 'network-archive';
+      }
+    }, 80);
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6" id="editorial-newsletter-modal">
+        <div
+          id="editorial-newsletter-modal"
+          className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-6 lg:p-8"
+        >
           <motion.button
             type="button"
             aria-label="会報ポップアップを閉じる"
@@ -160,244 +128,137 @@ export default function NewsletterModal({ autoOpenReady = true, onClose }: Newsl
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={handleClose}
-            className="absolute inset-0 bg-[#0F1115]/55 backdrop-blur-[2px]"
+            className="absolute inset-0 bg-[#06182D]/70 backdrop-blur-[2px]"
           />
 
-          <motion.div
+          <motion.section
             role="dialog"
             aria-modal="true"
             aria-labelledby="newsletter-modal-title"
-            initial={{ opacity: 0, scale: 0.985, y: 16 }}
+            initial={{ opacity: 0, scale: 0.97, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.985, y: 16 }}
-            transition={{ duration: 0.38, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-[394px] overflow-hidden rounded-[22px] border border-[#D6CDBD] bg-[#FCFAF7] text-[#00204A] shadow-[18px_20px_0_rgba(0,0,0,0.32),0_30px_90px_rgba(0,0,0,0.35)] lg:h-[770px] lg:max-w-[1390px] lg:rounded-[18px]"
+            exit={{ opacity: 0, scale: 0.97, y: 20 }}
+            transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+            className="relative max-h-[94vh] w-full max-w-[1180px] overflow-hidden rounded-[22px] border border-white/70 bg-[#FCFAF6] text-[#00204A] shadow-[0_32px_100px_rgba(0,18,43,0.42)] sm:rounded-[28px]"
           >
-            <div className="absolute inset-x-0 top-0 z-20 h-1.5 bg-[#CD9535]" aria-hidden="true" />
-
             <button
               type="button"
               onClick={handleClose}
-              className="absolute right-3 top-4 z-30 flex h-10 w-10 items-center justify-center rounded-full border border-stone-100 bg-white text-stone-600 shadow-sm transition-colors hover:border-[#00204A] hover:text-[#00204A] lg:right-6 lg:top-7 lg:h-12 lg:w-12"
+              className="absolute right-4 top-4 z-40 flex h-11 w-11 items-center justify-center rounded-full border border-[#00204A]/15 bg-white/95 text-[#00204A] shadow-sm transition-colors hover:bg-[#00204A] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9535] focus-visible:ring-offset-2 sm:right-6 sm:top-6"
               aria-label="閉じる"
             >
-              <X className="h-5 w-5 lg:h-6 lg:w-6" />
+              <X className="h-5 w-5" />
             </button>
 
-            {/* Desktop: faithful recreation of the generated desktop image. */}
-            <div className="hidden h-full lg:flex">
-              <aside className="flex w-[360px] flex-shrink-0 flex-col justify-between bg-[#00204A] px-8 pb-7 pt-16 text-white">
-                <div>
-                  <p className="text-[15px] font-bold tracking-[0.16em] text-[#CD9535]">最新会報</p>
-                  <h2 className="mt-8 font-serif text-[44px] font-bold leading-tight tracking-[0.04em] text-white">
-                    同窓会報
-                    <span className="mt-3 block text-[56px] text-[#CD9535]">第43号</span>
+            <div className="grid max-h-[calc(94vh-76px)] overflow-y-auto lg:min-h-[680px] lg:max-h-none lg:grid-cols-[47%_53%] lg:overflow-visible">
+              <div className="relative overflow-hidden bg-[#F2EEE5] px-5 pb-6 pt-16 sm:px-10 sm:pb-10 sm:pt-20 lg:px-12 lg:pb-12 lg:pt-16">
+                <div className="relative z-30">
+                  <p className="text-xs font-bold tracking-[0.22em] text-[#B57A24] sm:text-sm">
+                    最新号が届きました
+                  </p>
+                  <h2
+                    id="newsletter-modal-title"
+                    className="mt-2 font-serif text-[34px] font-bold leading-tight tracking-[0.04em] sm:text-[48px] lg:text-[52px]"
+                  >
+                    同窓会報 <span className="whitespace-nowrap">第43号</span>
                   </h2>
-                  <div className="mt-7 h-px w-24 bg-[#CD9535]" aria-hidden="true" />
-                  <p className="mt-5 max-w-[260px] font-serif text-[17px] font-bold leading-8 tracking-[0.08em] text-[#FAF9F5]">
-                    学びの記憶と人のつながりを、本文で読む。
-                  </p>
+                  <div className="mt-5 h-px w-16 bg-[#CD9535]" aria-hidden="true" />
                 </div>
 
-                <div>
-                  <div className="h-[286px] overflow-hidden bg-stone-200">
-                    <img src={jumpRopeImage} alt="同窓会報に掲載された活動風景" className="h-full w-full object-cover" />
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedArticleId(1)}
-                    className="mt-8 flex h-14 w-[245px] items-center justify-center gap-2 rounded-full bg-[#CD9535] px-6 text-sm font-bold tracking-[0.16em] text-white transition-colors hover:bg-white hover:text-[#00204A]"
-                  >
-                    本文を読む
-                  </button>
-                  <p className="mt-10 border-t border-white/25 pt-4 text-[11px] font-bold tracking-[0.16em] text-white/75">
-                    PDF / WEB READER
-                  </p>
-                </div>
-              </aside>
-
-              <div className="flex min-w-0 flex-1 flex-col">
-                <header className="px-12 pb-6 pt-14">
-                  <h3 id="newsletter-modal-title" className="max-w-[820px] font-serif text-[38px] font-bold leading-tight tracking-[0.05em] text-[#00204A]">
-                    会報第43号を、HPの中でそのまま読み進める
-                  </h3>
-                  <div className="mt-5 h-px w-20 bg-[#CD9535]" aria-hidden="true" />
-                  <p className="mt-5 max-w-[830px] text-[15px] font-medium leading-8 tracking-wide text-stone-600">
-                    短い要約ではなく、写真・目次・記事本文へ自然に進むポップアップ。既存HPの余白、濃紺、金の罫線、丸いCTAに合わせた読み物導線です。
-                  </p>
-                </header>
-
-                <div className="grid flex-1 grid-cols-[245px_1fr] gap-8 px-12">
-                  <nav className="h-[370px] rounded-[18px] border border-[#D8D2C5] bg-white p-7 shadow-sm">
-                    <h4 className="font-serif text-2xl font-bold text-[#00204A]">目次</h4>
-                    <div className="mt-7 space-y-5">
-                      {articles.map((article) => (
-                        <button
-                          key={article.id}
-                          type="button"
-                          onClick={() => setSelectedArticleId(article.id)}
-                          className="group flex w-full items-center justify-between text-left"
-                        >
-                          <span className="flex min-w-0 items-center gap-3">
-                            <span className="h-2 w-2 flex-shrink-0 bg-[#CD9535]" />
-                            <span className={`truncate text-sm font-bold tracking-wide transition-colors ${selectedArticleId === article.id ? 'text-[#00204A]' : 'text-stone-700 group-hover:text-[#00204A]'}`}>
-                              {article.category}
-                            </span>
-                          </span>
-                          <span className="font-mono text-xs text-stone-400">{article.page}</span>
-                        </button>
-                      ))}
-                    </div>
-                  </nav>
-
-                  <article className="h-[370px] rounded-[18px] border border-[#D8D2C5] bg-white p-7 shadow-sm">
-                    <div className="grid grid-cols-[240px_1fr] gap-8">
-                      <div className="h-[180px] overflow-hidden bg-stone-200">
-                        <img src={selectedArticle.image} alt={selectedArticle.imageAlt} className="h-full w-full object-cover" />
+                <div className="relative mx-auto mt-7 h-[285px] max-w-[430px] sm:mt-9 sm:h-[365px] lg:h-[395px]">
+                  {covers.map((cover) => (
+                    <div
+                      key={cover.issue}
+                      className={`absolute aspect-[3/4] overflow-hidden border border-white/80 bg-white shadow-[0_18px_38px_rgba(0,32,74,0.2)] ${cover.className}`}
+                    >
+                      <img
+                        src={cover.image}
+                        alt={`同窓会報 第${cover.issue}号`}
+                        className="h-full w-full object-cover"
+                      />
+                      <div className="absolute inset-x-0 bottom-0 bg-[#00204A]/92 px-3 py-2 text-white sm:px-4 sm:py-3">
+                        <p className="text-[9px] font-bold tracking-[0.14em] text-[#E8C172] sm:text-[10px]">
+                          IBARAKI ALUMNI
+                        </p>
+                        <p className="mt-0.5 font-serif text-sm font-bold sm:text-base">同窓会報 第{cover.issue}号</p>
                       </div>
-                      <div className="min-w-0">
-                        <h4 className="truncate font-serif text-[29px] font-bold leading-tight text-[#00204A]">
-                          {selectedArticle.title}
-                        </h4>
-                        <p className="mt-4 text-[14px] font-bold text-[#CD9535]">{selectedArticle.subtitle}</p>
-                        <div className="mt-7 max-w-[330px]">
-                          <TextLines rows={6} />
-                        </div>
+                      {cover.issue === '43' && (
+                        <span className="absolute left-0 top-0 bg-[#CD9535] px-3 py-2 text-[10px] font-black tracking-[0.16em] text-white sm:px-4 sm:text-xs">
+                          NEW
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+
+                <div className="relative z-30 mt-3 flex items-center justify-center gap-3 text-[11px] font-bold tracking-[0.12em] text-stone-500 sm:text-xs">
+                  <BookOpen className="h-4 w-4 text-[#CD9535]" />
+                  最新号から過去の会報までWEBで閲覧できます
+                </div>
+              </div>
+
+              <div className="flex flex-col px-5 pb-7 pt-8 sm:px-10 sm:pb-10 sm:pt-12 lg:px-12 lg:pb-12 lg:pt-16">
+                <div className="pr-12">
+                  <p className="font-serif text-xl font-bold tracking-[0.08em] sm:text-2xl">今号の見どころ</p>
+                  <p className="mt-3 max-w-xl text-sm font-medium leading-7 text-stone-600 sm:text-[15px]">
+                    学部の今、卒業生の記憶、地域で学ぶ学生の声を、読みやすいWEBマガジンでお届けします。
+                  </p>
+                </div>
+
+                <div className="mt-7 divide-y divide-[#D8D0C2] border-y border-[#D8D0C2] sm:mt-9">
+                  {highlights.map((highlight) => (
+                    <div
+                      key={highlight.page}
+                      className="grid grid-cols-[58px_1fr] gap-3 py-4 sm:grid-cols-[72px_1fr] sm:gap-5 sm:py-5"
+                    >
+                      <p className="font-serif text-xl font-bold text-[#B57A24] sm:text-2xl">{highlight.page}</p>
+                      <div>
+                        <p className="text-[10px] font-black tracking-[0.13em] text-[#B57A24] sm:text-xs">
+                          {highlight.category}
+                        </p>
+                        <h3 className="mt-1 font-serif text-base font-bold leading-6 sm:text-lg">
+                          {highlight.title}
+                        </h3>
+                        <p className="mt-1 text-xs font-medium leading-5 text-stone-500 sm:text-[13px]">
+                          {highlight.description}
+                        </p>
                       </div>
                     </div>
-
-                    <div className="mt-7">
-                      <TextLines rows={4} />
-                    </div>
-
-                    <div className="mt-7 flex justify-center">
-                      <a
-                        href="http://dousoukai.hum.ibaraki.ac.jp/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex h-[52px] min-w-[245px] items-center justify-center gap-2 rounded-full bg-[#00204A] px-8 text-sm font-bold tracking-[0.12em] text-white shadow-sm transition-colors hover:bg-[#CD9535]"
-                      >
-                        <BookOpen className="h-4 w-4" />
-                        記事を全文で読む
-                      </a>
-                    </div>
-                  </article>
+                  ))}
                 </div>
 
-                <footer className="mt-auto flex h-[70px] items-center justify-between border-t border-[#D8D2C5] px-8">
+                <div className="mt-auto pt-7 sm:pt-9">
                   <button
                     type="button"
-                    onClick={goToPreviousArticle}
-                    className="flex h-10 min-w-[170px] items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-bold text-stone-600 shadow-sm transition-colors hover:text-[#00204A]"
+                    onClick={openWebMagazine}
+                    className="group hidden min-h-14 w-full items-center justify-center gap-3 rounded-xl bg-[#002E63] px-5 text-sm font-bold tracking-[0.08em] text-white shadow-[0_12px_25px_rgba(0,46,99,0.2)] transition-colors hover:bg-[#CD9535] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9535] focus-visible:ring-offset-2 sm:min-h-16 sm:text-base lg:flex"
                   >
-                    <ChevronLeft className="h-4 w-4" />
-                    前のページ
+                    第43号 WEBマガジンを読む
+                    <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                   </button>
-                  <p className="text-xs font-bold tracking-wide text-stone-500">HPデザインに合わせた会報ポップアップ / Desktop</p>
                   <button
                     type="button"
-                    onClick={goToNextArticle}
-                    className="flex h-10 min-w-[180px] items-center justify-center gap-2 rounded-full bg-white px-5 text-sm font-bold text-stone-600 shadow-sm transition-colors hover:text-[#00204A]"
+                    onClick={openArchive}
+                    className="group mx-auto mt-4 flex min-h-11 items-center justify-center gap-2 px-4 text-sm font-bold text-[#00204A] underline decoration-[#CD9535] decoration-2 underline-offset-8 transition-colors hover:text-[#B57A24]"
                   >
-                    次のページ
-                    <ChevronRight className="h-4 w-4" />
+                    バックナンバーから選ぶ
+                    <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </button>
-                </footer>
+                </div>
               </div>
             </div>
 
-            {/* Mobile: faithful recreation of the generated mobile image. */}
-            <div className="max-h-[92vh] overflow-y-auto px-5 pb-7 pt-7 lg:hidden">
-              <div className="flex items-center gap-2 text-[11px] font-bold tracking-[0.14em] text-[#CD9535]">
-                <Menu className="h-4 w-4" />
-                最新会報 第43号
-              </div>
-
-              <h3 className="mt-5 font-serif text-[31px] font-bold leading-tight tracking-[0.04em] text-[#00204A]">
-                会報を本文で読む
-              </h3>
-              <p className="mt-4 max-w-[330px] text-[13px] font-medium leading-7 tracking-wide text-stone-600">
-                要約だけで終わらせず、写真、目次、本文へ進むスマホ用ポップアップ。
-              </p>
-
-              <div className="mt-6 h-40 overflow-hidden bg-stone-200">
-                <img src={selectedArticle.image} alt={selectedArticle.imageAlt} className="h-full w-full object-cover" />
-              </div>
-
-              <a
-                href="http://dousoukai.hum.ibaraki.ac.jp/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-6 flex h-[58px] w-full items-center justify-center gap-2 rounded-full bg-[#00204A] px-6 text-sm font-bold tracking-[0.12em] text-white shadow-sm transition-colors hover:bg-[#CD9535]"
+            <div className="border-t border-[#D8D0C2] bg-[#FCFAF6] p-3 lg:hidden">
+              <button
+                type="button"
+                onClick={openWebMagazine}
+                className="group flex min-h-13 w-full items-center justify-center gap-3 rounded-xl bg-[#002E63] px-4 text-sm font-bold tracking-[0.06em] text-white shadow-[0_10px_22px_rgba(0,46,99,0.2)] transition-colors hover:bg-[#CD9535] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#CD9535] focus-visible:ring-offset-2"
               >
-                この記事を全文で読む
-                <ArrowRight className="h-4 w-4" />
-              </a>
-
-              <h4 className="mt-10 font-serif text-[24px] font-bold text-[#00204A]">目次</h4>
-              <div className="mt-5 space-y-3">
-                {articles.map((article) => (
-                  <button
-                    key={article.id}
-                    type="button"
-                    onClick={() => setSelectedArticleId(article.id)}
-                    className={`flex h-[43px] w-full items-center justify-between rounded-xl border px-5 text-left transition-colors ${
-                      selectedArticleId === article.id ? 'border-[#CD9535]/60 bg-[#FAF4E8]' : 'border-[#D8D2C5] bg-white'
-                    }`}
-                  >
-                    <span className="flex min-w-0 items-center gap-3">
-                      <span className="h-2 w-2 flex-shrink-0 bg-[#CD9535]" />
-                      <span className="truncate text-sm font-bold tracking-wide text-stone-700">{article.category}</span>
-                    </span>
-                    <span className="text-xs font-bold text-[#CD9535]">読む</span>
-                  </button>
-                ))}
-              </div>
-
-              <div className="mt-5">
-                <TextLines rows={5} compact />
-              </div>
-
-              <div className="mt-5 flex items-center justify-between border-t border-[#D8D2C5] pt-4">
-                <div>
-                  <p className="text-[10px] font-bold tracking-[0.18em] text-[#CD9535]">PDF / WEB READER</p>
-                  <p className="text-xs font-bold text-[#00204A]">
-                    {pdfPages[pdfPage - 1]} <span className="font-mono text-stone-400">0{pdfPage}/04</span>
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    disabled={pdfPage === 1}
-                    onClick={() => setPdfPage((page) => Math.max(1, page - 1))}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-500 disabled:opacity-40"
-                    aria-label="PDF前ページ"
-                  >
-                    <ChevronLeft className="h-4 w-4" />
-                  </button>
-                  <button
-                    type="button"
-                    disabled={pdfPage === pdfPages.length}
-                    onClick={() => setPdfPage((page) => Math.min(pdfPages.length, page + 1))}
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 bg-white text-stone-500 disabled:opacity-40"
-                    aria-label="PDF次ページ"
-                  >
-                    <ChevronRight className="h-4 w-4" />
-                  </button>
-                  <a
-                    href="http://dousoukai.hum.ibaraki.ac.jp/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 bg-white text-[#00204A]"
-                    aria-label="会報サイトを見る"
-                  >
-                    <FileDown className="h-4 w-4" />
-                    <ExternalLink className="sr-only" />
-                  </a>
-                </div>
-              </div>
+                第43号 WEBマガジンを読む
+                <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
+              </button>
             </div>
-          </motion.div>
+          </motion.section>
         </div>
       )}
     </AnimatePresence>

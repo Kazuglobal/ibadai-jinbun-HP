@@ -8,3 +8,4 @@ coverage/
 !.env.example
 .playwright-mcp/
 hero-option-c-*.png
+data/chat-analytics.json

@@ -9,13 +9,24 @@ import {
   ChevronLeft,
   ChevronRight 
 } from 'lucide-react';
+import newsletter43Cover from '../data/newsletter43/lunch.jpg';
 
-const COVERS_DATA = [
+type CoverData = {
+  id: string;
+  numberText: string;
+  seasonText: string;
+  image?: string;
+  title: string;
+  date: string;
+  webMagazineReady: boolean;
+};
+
+const COVERS_DATA: CoverData[] = [
   {
     id: '43',
     numberText: '第43号',
     seasonText: '2026年 最新号',
-    image: 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?q=80&w=600&auto=format&fit=crop',
+    image: newsletter43Cover,
     title: '同窓会報 第43号',
     date: '2026年 最新号',
     webMagazineReady: true
@@ -23,44 +34,90 @@ const COVERS_DATA = [
   {
     id: '42',
     numberText: '第42号',
-    seasonText: '2026年 春号',
-    image: 'https://images.unsplash.com/photo-1507537297725-24a1c029d3ca?q=80&w=600&auto=format&fit=crop',
+    seasonText: '2025年 会報',
+    image: '/newsletters/42/image-01.webp',
     title: '同窓会報 第42号',
-    date: '2026年 春号',
-    webMagazineReady: false
+    date: '2025年6月',
+    webMagazineReady: true
+  },
+  {
+    id: '41',
+    numberText: '第41号',
+    seasonText: '2024年 会報',
+    image: '/newsletters/41/image-01.webp',
+    title: '同窓会報 第41号',
+    date: '2024年6月',
+    webMagazineReady: true
   },
   {
     id: '40',
     numberText: '第40号',
-    seasonText: '2024年 春号',
-    image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=600&auto=format&fit=crop',
+    seasonText: '2023年 会報',
+    image: '/newsletters/40/image-01.webp',
     title: '同窓会報 第40号',
-    date: '2024年 春号',
-    webMagazineReady: false
+    date: '2023年6月',
+    webMagazineReady: true
   },
   {
     id: '39',
     numberText: '第39号',
-    seasonText: '2023年 秋号',
-    image: 'https://images.unsplash.com/photo-1498243691581-b145c3f54a91?q=80&w=600&auto=format&fit=crop',
+    seasonText: '2022年 会報',
+    image: '/newsletters/39/image-01.webp',
     title: '同窓会報 第39号',
-    date: '2023年 秋号',
-    webMagazineReady: false
+    date: '2022年6月',
+    webMagazineReady: true
   },
   {
     id: '38',
     numberText: '第38号',
-    seasonText: '2023年 春号',
-    image: 'https://images.unsplash.com/photo-1524413840807-0c3cb6fa808d?q=80&w=600&auto=format&fit=crop',
+    seasonText: '2021年 会報',
     title: '同窓会報 第38号',
-    date: '2023年 春号',
-    webMagazineReady: false
+    date: '2021年6月',
+    webMagazineReady: true
+  },
+  {
+    id: '37',
+    numberText: '第37号',
+    seasonText: '2020年 会報',
+    image: '/newsletters/37/image-01.webp',
+    title: '同窓会報 第37号',
+    date: '2020年6月',
+    webMagazineReady: true
+  },
+  {
+    id: '36',
+    numberText: '第36号',
+    seasonText: '2019年 会報',
+    image: '/newsletters/36/image-01.webp',
+    title: '同窓会報 第36号',
+    date: '2019年6月',
+    webMagazineReady: true
+  },
+  {
+    id: '35',
+    numberText: '第35号',
+    seasonText: '2018年 会報',
+    image: '/newsletters/35/image-01.webp',
+    title: '同窓会報 第35号',
+    date: '2018年6月',
+    webMagazineReady: true
+  },
+  {
+    id: '34',
+    numberText: '第34号',
+    seasonText: '2017年 会報',
+    image: '/newsletters/34/image-01.webp',
+    title: '同窓会報 第34号',
+    date: '2017年6月',
+    webMagazineReady: true
   }
 ];
 
 export default function NetworkArchive() {
   const [activeCoverIndex, setActiveCoverIndex] = React.useState(0);
   const [isCoverAutoPaused, setIsCoverAutoPaused] = React.useState(false);
+  const coverSwipeStart = React.useRef<{ x: number; y: number } | null>(null);
+  const didCoverSwipe = React.useRef(false);
   const activeCover = COVERS_DATA[activeCoverIndex];
 
   React.useEffect(() => {
@@ -79,6 +136,30 @@ export default function NetworkArchive() {
     setActiveCoverIndex((current) => (current + direction + COVERS_DATA.length) % COVERS_DATA.length);
   };
 
+  const finishCoverSwipe = (clientX: number, clientY: number) => {
+    const start = coverSwipeStart.current;
+    coverSwipeStart.current = null;
+
+    if (!start) {
+      setIsCoverAutoPaused(false);
+      return;
+    }
+
+    const offsetX = clientX - start.x;
+    const offsetY = clientY - start.y;
+    const isHorizontalSwipe = Math.abs(offsetX) > 45 && Math.abs(offsetX) > Math.abs(offsetY) * 1.15;
+
+    if (isHorizontalSwipe) {
+      didCoverSwipe.current = true;
+      moveCover(offsetX < 0 ? 1 : -1);
+      window.setTimeout(() => {
+        didCoverSwipe.current = false;
+      }, 0);
+    }
+
+    setIsCoverAutoPaused(false);
+  };
+
   const getCoverOffset = (index: number) => {
     const rawOffset = index - activeCoverIndex;
     const half = Math.floor(COVERS_DATA.length / 2);
@@ -91,7 +172,7 @@ export default function NetworkArchive() {
   const openNewsletter = (cover = activeCover) => {
     if (!cover.webMagazineReady) return;
 
-    window.dispatchEvent(new CustomEvent('open-newsletter'));
+    window.dispatchEvent(new CustomEvent('open-newsletter-issue', { detail: Number(cover.id) }));
   };
 
   return (
@@ -146,10 +227,12 @@ export default function NetworkArchive() {
               <div className="my-6">
                 <div
                   className="relative overflow-hidden rounded-3xl border border-stone-200/60 bg-white/55 px-3 py-5 shadow-inner sm:px-6 sm:py-7"
-                  onPointerEnter={() => setIsCoverAutoPaused(true)}
-                  onPointerLeave={() => setIsCoverAutoPaused(false)}
-                  onFocusCapture={() => setIsCoverAutoPaused(true)}
-                  onBlurCapture={() => setIsCoverAutoPaused(false)}
+                  onPointerEnter={(event) => {
+                    if (event.pointerType === 'mouse') setIsCoverAutoPaused(true);
+                  }}
+                  onPointerLeave={(event) => {
+                    if (event.pointerType === 'mouse') setIsCoverAutoPaused(false);
+                  }}
                 >
                   <div className="mb-4 flex items-center justify-between gap-3">
                     <div className="text-left">
@@ -183,16 +266,17 @@ export default function NetworkArchive() {
 
                   <motion.div
                     className="relative h-[330px] cursor-grab overflow-hidden rounded-2xl [touch-action:pan-y] sm:h-[395px]"
-                    drag="x"
-                    dragConstraints={{ left: 0, right: 0 }}
-                    dragElastic={0.08}
-                    onDragStart={() => setIsCoverAutoPaused(true)}
-                    onDragEnd={(_, info) => {
-                      if (info.offset.x < -45 || info.velocity.x < -300) moveCover(1);
-                      if (info.offset.x > 45 || info.velocity.x > 300) moveCover(-1);
+                    onPointerDown={(event) => {
+                      coverSwipeStart.current = { x: event.clientX, y: event.clientY };
+                      didCoverSwipe.current = false;
+                      setIsCoverAutoPaused(true);
+                      event.currentTarget.setPointerCapture(event.pointerId);
+                    }}
+                    onPointerUp={(event) => finishCoverSwipe(event.clientX, event.clientY)}
+                    onPointerCancel={() => {
+                      coverSwipeStart.current = null;
                       setIsCoverAutoPaused(false);
                     }}
-                    whileTap={{ cursor: 'grabbing' }}
                   >
                     <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-14 bg-linear-to-r from-white/80 to-transparent" />
                     <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-14 bg-linear-to-l from-white/80 to-transparent" />
@@ -207,6 +291,8 @@ export default function NetworkArchive() {
                           key={item.id}
                           type="button"
                           onClick={() => {
+                            if (didCoverSwipe.current) return;
+
                             if (isActive) {
                               openNewsletter(item);
                               return;
@@ -227,12 +313,15 @@ export default function NetworkArchive() {
                           aria-label={isActive ? `${item.title}を開く` : `${item.title}を選択`}
                         >
                           <span className="relative block aspect-[1/1.38] w-full overflow-hidden rounded-2xl border border-stone-200/70 bg-stone-150 shadow-[0_16px_40px_rgba(0,32,74,0.18)]">
-                            <img
-                              src={item.image}
-                              alt={item.title}
-                              className="h-full w-full object-cover brightness-[0.72] contrast-[1.08] saturate-[0.9]"
-                              referrerPolicy="no-referrer"
-                            />
+                            {item.image ? (
+                              <img
+                                src={item.image}
+                                alt={item.title}
+                                className="h-full w-full object-cover brightness-[0.72] contrast-[1.08] saturate-[0.9]"
+                              />
+                            ) : (
+                              <span className="absolute inset-0 bg-[#31475C]" aria-hidden="true" />
+                            )}
 
                             <span className="absolute inset-0 bg-linear-to-t from-[#00132C]/55 via-transparent to-white/10" />
 
