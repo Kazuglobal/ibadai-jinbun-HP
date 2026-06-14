@@ -1,5 +1,6 @@
 import express from "express";
 import type { Request } from "express";
+import crypto from "crypto";
 import fs from "fs";
 import path from "path";
 import { createServer as createViteServer } from "vite";
@@ -350,7 +351,7 @@ function authorizeChatAnalytics(req: Request) {
     ? authHeader.slice("Bearer ".length)
     : decodeURIComponent(cookieToken);
 
-  if (suppliedToken !== token) {
+  if (!timingSafeEqualStr(suppliedToken, token)) {
     return {
       ok: false,
       status: 401,
@@ -437,6 +438,8 @@ type StoryPhoto = {
 
 const storyInterviewRequests = new Map<string, { count: number; resetAt: number }>();
 const storySubmissionRequests = new Map<string, { count: number; resetAt: number }>();
+const chatRequests = new Map<string, { count: number; resetAt: number }>();
+const registerRequests = new Map<string, { count: number; resetAt: number }>();
 
 function getSafeText(value: unknown, maxLength = 2000) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
@@ -460,26 +463,43 @@ function escapeSlackText(value: unknown) {
     .replace(/>/g, "&gt;");
 }
 
-function storyInterviewRateAllowed(ip: string) {
+function rateLimitAllowed(
+  store: Map<string, { count: number; resetAt: number }>,
+  ip: string,
+  limit: number,
+  windowMs: number,
+) {
   const now = Date.now();
-  const existing = storyInterviewRequests.get(ip);
+  const existing = store.get(ip);
   if (!existing || existing.resetAt <= now) {
-    storyInterviewRequests.set(ip, { count: 1, resetAt: now + 10 * 60 * 1000 });
+    store.set(ip, { count: 1, resetAt: now + windowMs });
     return true;
   }
   existing.count += 1;
-  return existing.count <= 20;
+  return existing.count <= limit;
+}
+
+function storyInterviewRateAllowed(ip: string) {
+  return rateLimitAllowed(storyInterviewRequests, ip, 20, 10 * 60 * 1000);
 }
 
 function storySubmissionRateAllowed(ip: string) {
-  const now = Date.now();
-  const existing = storySubmissionRequests.get(ip);
-  if (!existing || existing.resetAt <= now) {
-    storySubmissionRequests.set(ip, { count: 1, resetAt: now + 60 * 60 * 1000 });
-    return true;
-  }
-  existing.count += 1;
-  return existing.count <= 3;
+  return rateLimitAllowed(storySubmissionRequests, ip, 3, 60 * 60 * 1000);
+}
+
+function chatRateAllowed(ip: string) {
+  return rateLimitAllowed(chatRequests, ip, 20, 60 * 1000);
+}
+
+function registerRateAllowed(ip: string) {
+  return rateLimitAllowed(registerRequests, ip, 5, 60 * 60 * 1000);
+}
+
+function timingSafeEqualStr(a: string, b: string) {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return crypto.timingSafeEqual(bufA, bufB);
 }
 
 function decodeStoryPhoto(photo: StoryPhoto) {
@@ -844,7 +864,15 @@ app.post("/api/chat", async (req, res) => {
   let budgetSettled = false;
 
   try {
-    const { message, history } = req.body;
+    if (!chatRateAllowed(req.ip || "unknown")) {
+      return res.status(429).json({
+        error: "短時間に多くのリクエストが送信されました。少し時間をおいて再度お試しください。",
+        code: "RATE_LIMITED",
+      });
+    }
+
+    const message = getSafeText(req.body?.message, 2000);
+    const history = req.body?.history;
     if (!message) {
       return res.status(400).json({ error: "Message is required" });
     }
@@ -998,7 +1026,7 @@ app.post("/admin/chat-analytics/login", (req, res) => {
     return res.status(403).type("html").send(adminLoginHtml("CHAT_ANALYTICS_TOKEN が未設定です。"));
   }
 
-  if (submittedToken !== expectedToken) {
+  if (!timingSafeEqualStr(submittedToken, expectedToken)) {
     return res.status(401).type("html").send(adminLoginHtml("管理者トークンが違います。"));
   }
 
@@ -1087,20 +1115,33 @@ app.get("/admin/chat-analytics", (req, res) => {
 // GAS Forwarding Webhook registration endpoint
 app.post("/api/register", async (req, res) => {
   try {
-    const { fullName, kana, gradYear, address, phone, partyStatus, memo } = req.body;
-    
+    if (!registerRateAllowed(req.ip || "unknown")) {
+      return res.status(429).json({
+        error: "短時間に多くの登録リクエストが送信されました。少し時間をおいて再度お試しください。",
+        code: "RATE_LIMITED",
+      });
+    }
+
+    const fullName = getSafeText(req.body?.fullName, 100);
+    const kana = getSafeText(req.body?.kana, 100);
+    const gradYear = getSafeText(req.body?.gradYear, 50);
+    const address = getSafeText(req.body?.address, 300);
+    const phone = getSafeText(req.body?.phone, 30);
+    const partyStatus = getSafeText(req.body?.partyStatus, 30) || "attend";
+    const memo = getSafeText(req.body?.memo, 2000);
+
     if (!fullName || !gradYear || !address || !phone) {
       return res.status(400).json({ error: "必須項目が入力されていません。" });
     }
 
     const payload = {
       fullName,
-      kana: kana || "",
+      kana,
       gradYear,
       address,
       phone,
-      partyStatus: partyStatus || "attend",
-      memo: memo || ""
+      partyStatus,
+      memo
     };
 
     const gasWebAppUrl = process.env.GAS_WEBAPP_URL;
