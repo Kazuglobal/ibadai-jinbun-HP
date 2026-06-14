@@ -7,6 +7,8 @@ import Events from './components/Events';
 import EventRegistration from './components/EventRegistration';
 import Stories from './components/Stories';
 import NetworkArchive from './components/NetworkArchive';
+import Newsletter43WebMagazine from './components/Newsletter43WebMagazine';
+import NewsletterArchiveMagazine from './components/NewsletterArchiveMagazine';
 import Update from './components/Update';
 import Reconnection from './components/Reconnection';
 import Footer from './components/Footer';
@@ -18,7 +20,16 @@ import { useGsapHomeAnimations } from './hooks/useGsapHomeAnimations';
 
 export default function App() {
   // Demo interactive state
-  const [currentView, setCurrentView] = useState<'home' | 'about'>('home');
+  const initialNewsletterIssue =
+    typeof window !== 'undefined' && /^#newsletter-(3[4-9]|4[0-3])$/.test(window.location.hash)
+      ? Number(window.location.hash.match(/\d+/)?.[0] ?? 43)
+      : 43;
+  const [currentView, setCurrentView] = useState<'home' | 'about' | 'newsletter43'>(
+    typeof window !== 'undefined' && /^#newsletter-(3[4-9]|4[0-3])$/.test(window.location.hash)
+      ? 'newsletter43'
+      : 'home',
+  );
+  const [selectedNewsletterIssue, setSelectedNewsletterIssue] = useState(initialNewsletterIssue);
   const [selectedTopic, setSelectedTopic] = useState<string>('');
   const [isRegModalOpen, setIsRegModalOpen] = useState<boolean>(false);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
@@ -33,12 +44,19 @@ export default function App() {
     setIsRegModalOpen(true);
   };
 
-  const handleNavigate = (targetView: 'home' | 'about', hash?: string) => {
+  const handleNavigate = (targetView: 'home' | 'about' | 'newsletter43', hash?: string) => {
     setCurrentView(targetView);
     if (hash) {
       if (hash === '#event-registration-form') {
         setSelectedTopic('第１８回総会・懇親会');
         setIsRegModalOpen(true);
+      } else if (/^#newsletter-(3[4-9]|4[0-3])$/.test(hash) || hash === '#newsletter-reader') {
+        const issueFromHash = Number(hash.match(/\d+/)?.[0] ?? selectedNewsletterIssue);
+        setSelectedNewsletterIssue(issueFromHash);
+        setCurrentView('newsletter43');
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 120);
       } else {
         setTimeout(() => {
           const element = document.querySelector(hash);
@@ -61,6 +79,23 @@ export default function App() {
 
   // Synchronize on backward/forward browser events or hash loaded initially
   useEffect(() => {
+    const openNewsletterIssue = (issueNumber: number) => {
+      setSelectedNewsletterIssue(issueNumber);
+      setCurrentView('newsletter43');
+      window.history.pushState(null, '', `#newsletter-${issueNumber}`);
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }, 120);
+    };
+
+    const handleOpenNewsletter43 = () => openNewsletterIssue(43);
+    const handleOpenNewsletterIssue = (event: Event) => {
+      const issueNumber = Number((event as CustomEvent<number>).detail);
+      if (issueNumber >= 34 && issueNumber <= 43) {
+        openNewsletterIssue(issueNumber);
+      }
+    };
+
     const handleHashChange = () => {
       const hash = window.location.hash;
       const aboutHashes = ['#about-section', '#purpose-activities', '#presidents-greeting', '#bylaws', '#organization-board', '#annual-reports', '#membership', '#branches', '#privacy'];
@@ -74,6 +109,13 @@ export default function App() {
         setCurrentView('home');
         setSelectedTopic('第１８回総会・懇親会');
         setIsRegModalOpen(true);
+      } else if (/^#newsletter-(3[4-9]|4[0-3])$/.test(hash) || hash === '#newsletter-reader') {
+        const issueFromHash = Number(hash.match(/\d+/)?.[0] ?? 43);
+        setSelectedNewsletterIssue(issueFromHash);
+        setCurrentView('newsletter43');
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 120);
       } else if (hash && hash !== '#') {
         setCurrentView('home');
         setTimeout(() => {
@@ -83,9 +125,15 @@ export default function App() {
       }
     };
 
+    window.addEventListener('open-newsletter-43', handleOpenNewsletter43);
+    window.addEventListener('open-newsletter-issue', handleOpenNewsletterIssue);
     window.addEventListener('hashchange', handleHashChange);
     handleHashChange();
-    return () => window.removeEventListener('hashchange', handleHashChange);
+    return () => {
+      window.removeEventListener('open-newsletter-43', handleOpenNewsletter43);
+      window.removeEventListener('open-newsletter-issue', handleOpenNewsletterIssue);
+      window.removeEventListener('hashchange', handleHashChange);
+    };
   }, []);
 
   return (
@@ -112,6 +160,26 @@ export default function App() {
               <NetworkArchive />
               <Update />
               <Reconnection />
+            </motion.div>
+          ) : currentView === 'newsletter43' ? (
+            <motion.div
+              key={`newsletter-${selectedNewsletterIssue}-view`}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.35, ease: 'easeOut' }}
+            >
+              {selectedNewsletterIssue === 43 ? (
+                <Newsletter43WebMagazine />
+              ) : (
+                <NewsletterArchiveMagazine
+                  issueNumber={selectedNewsletterIssue}
+                  onIssueChange={(issueNumber) => {
+                    setSelectedNewsletterIssue(issueNumber);
+                    window.history.pushState(null, '', `#newsletter-${issueNumber}`);
+                  }}
+                />
+              )}
             </motion.div>
           ) : (
             <motion.div
@@ -145,13 +213,13 @@ export default function App() {
       </AnimatePresence>
 
       {/* Persistent floating AI Chat Assistant */}
-      <ChatAssistant isOpen={isChatOpen} onOpenChange={setIsChatOpen} />
+      {currentView !== 'newsletter43' && <ChatAssistant isOpen={isChatOpen} onOpenChange={setIsChatOpen} />}
 
       {/* Styled Mobile Bottom Navigation Bar */}
-      <MobileBottomNav currentView={currentView} onNavigate={handleNavigate} onOpenChat={handleOpenChat} />
+      {currentView !== 'newsletter43' && <MobileBottomNav currentView={currentView} onNavigate={handleNavigate} onOpenChat={handleOpenChat} />}
 
       {/* Pop-up modal newsletter helper */}
-      <NewsletterModal autoOpenReady={isHomeIntroComplete} />
+      {currentView === 'home' && <NewsletterModal autoOpenReady={isHomeIntroComplete} />}
     </div>
   );
 }
