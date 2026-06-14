@@ -10,7 +10,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 const GEMINI_CHAT_MODEL = process.env.GEMINI_CHAT_MODEL || "gemini-2.5-flash-lite";
 const STORIES_GEMINI_MODEL = process.env.STORIES_GEMINI_MODEL || "gemini-2.5-flash-lite";
 const SLACK_STORIES_WEBHOOK_URL = process.env.SLACK_STORIES_WEBHOOK_URL || "";
@@ -27,8 +27,31 @@ const REDIS_REST_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_RE
 const CHAT_ANALYTICS_FILE = path.join(process.cwd(), "data", "chat-analytics.json");
 
 app.set("trust proxy", process.env.NODE_ENV === "production" ? 1 : false);
-app.use(express.json({ limit: "9mb" }));
-app.use(express.urlencoded({ extended: false }));
+app.disable("x-powered-by");
+
+// Security headers applied to every response.
+// frame-ancestors/X-Frame-Options block clickjacking (esp. the admin page),
+// nosniff blocks MIME confusion, and the rest reduce information leakage.
+app.use((_req, res, next) => {
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("X-Frame-Options", "DENY");
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+  res.setHeader("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+  res.setHeader(
+    "Content-Security-Policy",
+    "frame-ancestors 'none'; base-uri 'self'; object-src 'none'; form-action 'self'",
+  );
+  if (process.env.NODE_ENV === "production") {
+    res.setHeader("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  }
+  next();
+});
+
+// Body parsing: keep the default tight. Only the photo-upload endpoint needs a
+// large body, so the 9 MB limit is scoped to it instead of every route.
+app.use("/api/stories/submit", express.json({ limit: "9mb" }));
+app.use(express.json({ limit: "256kb" }));
+app.use(express.urlencoded({ extended: false, limit: "32kb" }));
 
 interface ChatAnalyticsRecord {
   timestamp: string;
@@ -463,6 +486,25 @@ function escapeSlackText(value: unknown) {
     .replace(/>/g, "&gt;");
 }
 
+// Cap the number of tracked IPs so a stream of unique/spoofed source IPs can't
+// grow these in-memory maps without bound (memory-exhaustion DoS).
+const RATE_LIMIT_MAX_ENTRIES = 50_000;
+
+function pruneRateLimitStore(store: Map<string, { count: number; resetAt: number }>, now: number) {
+  for (const [key, entry] of store) {
+    if (entry.resetAt <= now) store.delete(key);
+  }
+  // If still oversized after dropping expired windows, evict oldest insertions.
+  if (store.size > RATE_LIMIT_MAX_ENTRIES) {
+    const overflow = store.size - RATE_LIMIT_MAX_ENTRIES;
+    let removed = 0;
+    for (const key of store.keys()) {
+      store.delete(key);
+      if (++removed >= overflow) break;
+    }
+  }
+}
+
 function rateLimitAllowed(
   store: Map<string, { count: number; resetAt: number }>,
   ip: string,
@@ -472,6 +514,7 @@ function rateLimitAllowed(
   const now = Date.now();
   const existing = store.get(ip);
   if (!existing || existing.resetAt <= now) {
+    if (store.size >= RATE_LIMIT_MAX_ENTRIES) pruneRateLimitStore(store, now);
     store.set(ip, { count: 1, resetAt: now + windowMs });
     return true;
   }
@@ -995,7 +1038,7 @@ app.post("/api/chat", async (req, res) => {
       });
     }
     console.error("Chat error:", error);
-    res.status(500).json({ error: error.message || "予期しないエラーが発生しました。" });
+    res.status(500).json({ error: "予期しないエラーが発生しました。時間をおいて再度お試しください。" });
   }
 });
 
@@ -1179,8 +1222,8 @@ app.post("/api/register", async (req, res) => {
     }
   } catch (error: any) {
     console.error("Registration endpoint error:", error);
-    res.status(500).json({ 
-      error: "GASサーバーへの転送中にエラーが発生しました。詳細: " + error.message,
+    res.status(500).json({
+      error: "登録リクエストの処理中にエラーが発生しました。時間をおいて再度お試しください。",
       code: "GAS_FORWARD_FAILED"
     });
   }
