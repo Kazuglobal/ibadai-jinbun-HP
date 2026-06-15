@@ -3,7 +3,6 @@ import type { Request } from "express";
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
-import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
 
@@ -21,10 +20,19 @@ const CHAT_USD_JPY_RATE = getPositiveEnvNumber("CHAT_USD_JPY_RATE", 160);
 const GEMINI_INPUT_USD_PER_1M = getPositiveEnvNumber("GEMINI_INPUT_USD_PER_1M", 0.1);
 const GEMINI_OUTPUT_USD_PER_1M = getPositiveEnvNumber("GEMINI_OUTPUT_USD_PER_1M", 0.4);
 const MAX_HISTORY_MESSAGES = getPositiveEnvNumber("CHAT_MAX_HISTORY_MESSAGES", 8);
-const CHAT_RECENT_MESSAGE_RETENTION_DAYS = getPositiveEnvNumber("CHAT_RECENT_MESSAGE_RETENTION_DAYS", 7);
+// Long-term Q&A log: keep each question↔answer pair for a year by default.
+const CHAT_RECENT_MESSAGE_RETENTION_DAYS = getPositiveEnvNumber("CHAT_RECENT_MESSAGE_RETENTION_DAYS", 365);
+// Max number of stored Q&A pairs (rolling, oldest pushed out).
+const CHAT_RECENT_MESSAGE_LIMIT = getPositiveEnvNumber("CHAT_RECENT_MESSAGE_LIMIT", 1000);
+// Max number of Q&A pairs rendered in the admin dashboard.
+const CHAT_ANALYTICS_DISPLAY_LIMIT = getPositiveEnvNumber("CHAT_ANALYTICS_DISPLAY_LIMIT", 100);
 const REDIS_REST_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || "";
 const REDIS_REST_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || "";
-const CHAT_ANALYTICS_FILE = path.join(process.cwd(), "data", "chat-analytics.json");
+// On serverless platforms (e.g. Vercel) the project filesystem is read-only;
+// only /tmp is writable. Redis is the real persistence layer — this is a best-effort fallback.
+const CHAT_ANALYTICS_FILE = process.env.VERCEL
+  ? path.join("/tmp", "chat-analytics.json")
+  : path.join(process.cwd(), "data", "chat-analytics.json");
 
 app.set("trust proxy", process.env.NODE_ENV === "production" ? 1 : false);
 app.disable("x-powered-by");
@@ -165,8 +173,14 @@ function readChatAnalytics(): ChatAnalyticsRecord[] {
 }
 
 function writeChatAnalytics(records: ChatAnalyticsRecord[]) {
-  fs.mkdirSync(path.dirname(CHAT_ANALYTICS_FILE), { recursive: true });
-  fs.writeFileSync(CHAT_ANALYTICS_FILE, JSON.stringify(pruneLocalRecords(records).slice(-500), null, 2));
+  // Analytics persistence must never break the user-facing chat. If the filesystem
+  // is read-only (serverless without Redis), log and continue rather than throwing.
+  try {
+    fs.mkdirSync(path.dirname(CHAT_ANALYTICS_FILE), { recursive: true });
+    fs.writeFileSync(CHAT_ANALYTICS_FILE, JSON.stringify(pruneLocalRecords(records).slice(-CHAT_RECENT_MESSAGE_LIMIT), null, 2));
+  } catch (error) {
+    console.error("Failed to persist chat analytics (non-fatal):", error);
+  }
 }
 
 async function appendChatAnalytics(record: ChatAnalyticsRecord, reservedCostJpy = 0) {
@@ -195,11 +209,12 @@ async function appendChatAnalytics(record: ChatAnalyticsRecord, reservedCostJpy 
           timestamp: record.timestamp,
           intent: record.intent,
           userMessage: record.userMessage,
+          assistantReply: record.assistantReply || "",
           success: record.success,
           estimatedCostJpy: record.estimatedCostJpy,
         }),
       ]);
-      await redisCommand(["LTRIM", recentKey, 0, 49]);
+      await redisCommand(["LTRIM", recentKey, 0, CHAT_RECENT_MESSAGE_LIMIT - 1]);
       await redisCommand(["EXPIRE", recentKey, CHAT_RECENT_MESSAGE_RETENTION_DAYS * 24 * 60 * 60]);
     }
     return;
@@ -313,7 +328,7 @@ async function buildChatAnalytics(month = getCurrentMonth()) {
     const [usage, rawIntents, rawRecent] = await Promise.all([
       getMonthlyUsage(month),
       redisCommand<string[]>(["HGETALL", redisKey("intents", month)]),
-      redisCommand<string[]>(["LRANGE", redisKey("recent", month), 0, 29]),
+      redisCommand<string[]>(["LRANGE", redisKey("recent", month), 0, CHAT_ANALYTICS_DISPLAY_LIMIT - 1]),
     ]);
     const intents: Record<string, number> = {};
     for (let index = 0; index < (rawIntents || []).length; index += 2) {
@@ -342,12 +357,13 @@ async function buildChatAnalytics(month = getCurrentMonth()) {
       .sort((a, b) => b[1] - a[1])
       .map(([intent, count]) => ({ intent, count })),
     recentQuestions: records
-      .slice(-30)
+      .slice(-CHAT_ANALYTICS_DISPLAY_LIMIT)
       .reverse()
       .map((record) => ({
         timestamp: record.timestamp,
         intent: record.intent,
         userMessage: record.userMessage,
+        assistantReply: record.assistantReply || "",
         success: record.success,
         estimatedCostJpy: record.estimatedCostJpy,
       })),
@@ -1100,6 +1116,7 @@ app.get("/admin/chat-analytics", (req, res) => {
     section { margin-top: 28px; }
     table { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e5dfd5; border-radius: 8px; overflow: hidden; }
     th, td { border-bottom: 1px solid #eee8de; padding: 10px 12px; text-align: left; font-size: 13px; vertical-align: top; }
+    td:nth-child(3), td:nth-child(4) { max-width: 320px; word-break: break-word; white-space: pre-wrap; }
     th { background: #00204a; color: #fff; font-size: 12px; letter-spacing: .06em; }
     tr:last-child td { border-bottom: 0; }
     .bar { height: 10px; background: #ebe3d7; border-radius: 999px; overflow: hidden; margin-top: 8px; }
@@ -1118,7 +1135,7 @@ app.get("/admin/chat-analytics", (req, res) => {
     </section>
     <section>
       <h2>最近の質問</h2>
-      <table><thead><tr><th>日時</th><th>カテゴリ</th><th>質問</th><th>概算費用</th></tr></thead><tbody id="questions"></tbody></table>
+      <table><thead><tr><th>日時</th><th>カテゴリ</th><th>質問</th><th>回答</th><th>概算費用</th></tr></thead><tbody id="questions"></tbody></table>
     </section>
   </main>
   <script>
@@ -1145,8 +1162,8 @@ app.get("/admin/chat-analytics", (req, res) => {
         ? data.topIntents.map((row) => '<tr><td>' + escapeHtml(row.intent) + '</td><td>' + row.count + '</td></tr>').join("")
         : '<tr><td colspan="2">まだデータがありません</td></tr>';
       document.getElementById("questions").innerHTML = data.recentQuestions.length
-        ? data.recentQuestions.map((row) => '<tr><td>' + escapeHtml(row.timestamp) + '</td><td>' + escapeHtml(row.intent) + '</td><td>' + escapeHtml(row.userMessage) + '</td><td>' + yen.format(row.estimatedCostJpy) + '円</td></tr>').join("")
-        : '<tr><td colspan="4">まだデータがありません</td></tr>';
+        ? data.recentQuestions.map((row) => '<tr><td>' + escapeHtml(row.timestamp) + '</td><td>' + escapeHtml(row.intent) + '</td><td>' + escapeHtml(row.userMessage) + '</td><td>' + escapeHtml(row.assistantReply) + '</td><td>' + yen.format(row.estimatedCostJpy) + '円</td></tr>').join("")
+        : '<tr><td colspan="5">まだデータがありません</td></tr>';
     }).catch((error) => {
       document.getElementById("status").textContent = error.message;
     });
@@ -1232,6 +1249,8 @@ app.post("/api/register", async (req, res) => {
 // Vite server integrations
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
+    // Lazy-import Vite so it is never pulled into the serverless bundle.
+    const { createServer: createViteServer } = await import("vite");
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -1250,4 +1269,12 @@ async function startServer() {
   });
 }
 
-startServer();
+// On Vercel the Express app is exported as a serverless function (see api/index.ts),
+// so it must NOT bind a port or attach Vite middleware here. Everywhere else
+// (local `tsx server.ts`, and `node dist/server.cjs` on a Node host) we self-host.
+if (!process.env.VERCEL) {
+  startServer();
+}
+
+export { app };
+export default app;
