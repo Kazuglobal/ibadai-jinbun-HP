@@ -519,6 +519,9 @@ export default function Stories() {
 
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
 
+  // "掲載について" details are hidden by default and revealed on click.
+  const [isPublicationInfoOpen, setIsPublicationInfoOpen] = useState(false);
+
   // Computed / filtered grads database list
   const filteredAndSortedGrads = useMemo(() => {
     let result = [...graduates];
@@ -917,14 +920,17 @@ export default function Stories() {
             </div>
           </div>
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-            <a
-              href="#join-interviews"
-              className="inline-flex items-center justify-center gap-2 border border-stone-300 bg-white px-5 py-3 text-xs font-bold tracking-wider text-stone-700"
+            <button
+              type="button"
+              onClick={() => setIsPublicationInfoOpen((open) => !open)}
+              className="inline-flex items-center justify-center gap-2 border border-stone-300 bg-white px-5 py-3 text-xs font-bold tracking-wider text-stone-700 transition-colors hover:border-[#00204A]"
               id="join-interview-btn"
+              aria-expanded={isPublicationInfoOpen}
+              aria-controls="join-interviews"
             >
               掲載について
-              <ArrowRight className="h-4 w-4" />
-            </a>
+              <ChevronDown className={`h-4 w-4 transition-transform ${isPublicationInfoOpen ? "rotate-180" : ""}`} />
+            </button>
             <button
               type="button"
               onClick={() => setIsSubmitModalOpen(true)}
@@ -938,10 +944,21 @@ export default function Stories() {
         </div>
 
         {/* =========================================================================
-            ABOUT PUBLICATION — 掲載について (anchor target for #join-interviews)
+            ABOUT PUBLICATION — 掲載について (toggled open by the 掲載について button)
             ========================================================================= */}
-        <div id="join-interviews" className="mt-20 scroll-mt-24">
-          <div className="text-center">
+        <AnimatePresence initial={false}>
+          {isPublicationInfoOpen && (
+            <motion.section
+              key="publication-info"
+              id="join-interviews"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              className="overflow-hidden scroll-mt-24"
+            >
+              <div className="mt-12 border-t border-stone-200 pt-12">
+                <div className="text-center">
             <span className="text-xs font-bold tracking-[0.3em] text-[#CD9535]">ABOUT PUBLICATION</span>
             <h3 className="mt-3 font-serif text-2xl font-bold tracking-wider text-[#00204A] sm:text-3xl">
               掲載について
@@ -1054,7 +1071,10 @@ export default function Stories() {
             </button>
             <span className="text-xs text-stone-500">所要時間の目安: 約10〜15分 / 写真は最大3枚まで</span>
           </div>
-        </div>
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* =========================================================================
