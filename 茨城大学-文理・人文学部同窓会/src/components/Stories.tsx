@@ -936,6 +936,125 @@ export default function Stories() {
             </button>
           </div>
         </div>
+
+        {/* =========================================================================
+            ABOUT PUBLICATION — 掲載について (anchor target for #join-interviews)
+            ========================================================================= */}
+        <div id="join-interviews" className="mt-20 scroll-mt-24">
+          <div className="text-center">
+            <span className="text-xs font-bold tracking-[0.3em] text-[#CD9535]">ABOUT PUBLICATION</span>
+            <h3 className="mt-3 font-serif text-2xl font-bold tracking-wider text-[#00204A] sm:text-3xl">
+              掲載について
+            </h3>
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-stone-600">
+              STORIESは、文理・人文学部の卒業生の歩みを紹介するコーナーです。
+              オンラインインタビューに答えるだけで、どなたでも掲載を申請いただけます。費用はかかりません。
+              いただいた回答は内容や事実を変えない範囲で読みやすく整え、事務局が確認・編集のうえ掲載基準に沿って反映します。
+            </p>
+          </div>
+
+          {/* Application steps */}
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                step: '01',
+                title: '基本情報を入力',
+                desc: '掲載名・卒業年・専攻・現在の所属など、記事の土台となる情報を入力します。',
+              },
+              {
+                step: '02',
+                title: 'オンラインインタビュー（全5問）',
+                desc: '画面の質問に順番に答えるだけ。所要時間は約10〜15分が目安です。',
+              },
+              {
+                step: '03',
+                title: '写真・特典を添える',
+                desc: '顔写真（最大3枚）やHP・SNS、同窓生向けの特典（任意）を一緒に申請できます。',
+              },
+              {
+                step: '04',
+                title: '事務局が審査・掲載',
+                desc: '内容を確認・編集のうえ、掲載基準を満たすものをSTORIESに掲載します。',
+              },
+            ].map((item) => (
+              <div
+                key={item.step}
+                className="flex h-full flex-col border border-stone-200 bg-white p-6 text-left"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FDFAF0] font-serif text-sm font-bold text-[#CD9535]">
+                  {item.step}
+                </span>
+                <h4 className="mt-4 font-serif text-base font-bold tracking-wider text-[#00204A]">
+                  {item.title}
+                </h4>
+                <p className="mt-2 text-xs leading-6 text-stone-500">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Eligibility and review notes */}
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="border border-stone-200 bg-[#FAF9F5] p-6 text-left">
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-white text-[#CD9535] shadow-sm">
+                  <GraduationCap className="h-5 w-5" />
+                </span>
+                <h4 className="font-serif text-base font-bold tracking-wider text-[#00204A]">
+                  対象となる方
+                </h4>
+              </div>
+              <ul className="mt-4 space-y-2.5">
+                {[
+                  '文理学部・人文学部・人文社会科学部の卒業生',
+                  '専攻や卒業年は問わず、どなたでもご応募いただけます',
+                  '顔写真や活動内容の掲載にご同意いただける方',
+                ].map((line) => (
+                  <li key={line} className="flex gap-2 text-xs leading-6 text-stone-600">
+                    <span className="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-[#CD9535]" />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="border border-stone-200 bg-[#FAF9F5] p-6 text-left">
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-white text-[#CD9535] shadow-sm">
+                  <Gift className="h-5 w-5" />
+                </span>
+                <h4 className="font-serif text-base font-bold tracking-wider text-[#00204A]">
+                  掲載前のご確認
+                </h4>
+              </div>
+              <ul className="mt-4 space-y-2.5">
+                {[
+                  'すべての申請は掲載前に事務局が確認・編集します',
+                  '営利目的・第三者の権利を侵害する内容などは掲載できません',
+                  '申請内容や掲載基準によっては反映されない場合があります',
+                  '掲載後の修正・削除は事務局までご連絡ください',
+                ].map((line) => (
+                  <li key={line} className="flex gap-2 text-xs leading-6 text-stone-600">
+                    <span className="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-[#CD9535]" />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={() => setIsSubmitModalOpen(true)}
+              className="inline-flex items-center justify-center gap-2 bg-[#00204A] px-6 py-3 text-xs font-bold tracking-wider text-white transition-colors hover:bg-[#003366]"
+            >
+              インタビューを始める
+              <ArrowRight className="h-4 w-4" />
+            </button>
+            <span className="text-xs text-stone-500">所要時間の目安: 約10〜15分 / 写真は最大3枚まで</span>
+          </div>
+        </div>
       </div>
 
       {/* =========================================================================
