@@ -20,11 +20,9 @@ import {
   Instagram,
   Twitter,
   Globe,
-  Link,
-  Upload,
-  Camera,
   X
 } from 'lucide-react';
+import StoryInterviewApplication from './StoryInterviewApplication';
 
 // Classy Grad database containing exactly 24 graduates to reach the "24 items found" requirement!
 const GRADUATES_DATA = [
@@ -503,18 +501,8 @@ function getInterviewDetails(grad: typeof GRADUATES_DATA[0]) {
 }
 
 export default function Stories() {
-  // Initialize graduates from localStorage or static data
-  const [graduates, setGraduates] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem('ibaraki_alumni_stories');
-      if (saved) {
-        return JSON.parse(saved);
-      }
-    } catch (e) {
-      console.error('Error loading alumni stories from localStorage:', e);
-    }
-    return GRADUATES_DATA;
-  });
+  // The current cards are presentation samples until reviewed alumni submissions are published.
+  const graduates = GRADUATES_DATA;
 
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -529,119 +517,10 @@ export default function Stories() {
   // Active story details selected for full-screen immersive modal experience
   const [selectedGrad, setSelectedGrad] = useState<any | null>(null);
 
-  // --- SUBMIT MODAL ACTIONS & FIELDS ---
   const [isSubmitModalOpen, setIsSubmitModalOpen] = useState(false);
-  const [formName, setFormName] = useState('');
-  const [formMajor, setFormMajor] = useState('');
-  const [formGradYear, setFormGradYear] = useState('2024年卒');
-  const [formAffiliation, setFormAffiliation] = useState('');
-  const [formCategory, setFormCategory] = useState('education');
-  const [formTitle, setFormTitle] = useState('');
-  const [formQuote, setFormQuote] = useState('');
-  
-  // SNS Links
-  const [formLinkedin, setFormLinkedin] = useState('');
-  const [formFacebook, setFormFacebook] = useState('');
-  const [formInstagram, setFormInstagram] = useState('');
-  const [formX, setFormX] = useState('');
-  const [formWebsite, setFormWebsite] = useState('');
-  
-  // Discount Tag fields
-  const [formHasDiscount, setFormHasDiscount] = useState(false);
-  const [formDiscountDetails, setFormDiscountDetails] = useState('');
 
-  // Image Upload Fields
-  const [formImage, setFormImage] = useState<string>('');
-  const [isDragging, setIsDragging] = useState(false);
-
-  const handleAddSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formName || !formMajor || !formAffiliation || !formTitle || !formQuote) {
-      alert('必須項目（※）をすべて入力してください。');
-      return;
-    }
-    
-    // Choose premium professional avatar photo based on Category
-    const categoryImages: Record<string, string> = {
-      education: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=600&auto=format&fit=crop',
-      media: 'https://images.unsplash.com/photo-1614283233556-f35b0c801ef1?q=80&w=600&auto=format&fit=crop',
-      finance: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop',
-      it: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=600&auto=format&fit=crop',
-      manufacturer: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=600&auto=format&fit=crop',
-      service: 'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?q=80&w=600&auto=format&fit=crop',
-      other: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=600&auto=format&fit=crop',
-    };
-    
-    const pickedImage = formImage || categoryImages[formCategory] || 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=600&auto=format&fit=crop';
-    
-    // Match Category label, bg, border, text
-    const categoryMeta: Record<string, { label: string; bg: string; border: string; text: string }> = {
-      education: { label: '教育・行政', bg: 'bg-[#FDFAF0]', border: 'border-[#CD9535]/30', text: 'text-[#CD9535]' },
-      media: { label: 'メディア・出版・広告', bg: 'bg-[#F0F5FA]', border: 'border-[#2B6CB0]/30', text: 'text-[#2B6CB0]' },
-      finance: { label: '金融・コンサルティング', bg: 'bg-[#FEFCBF]/60', border: 'border-[#D69E2E]/40', text: 'text-[#B7791F]' },
-      it: { label: 'IT・通信', bg: 'bg-[#ECFDFC]', border: 'border-[#0D9488]/30', text: 'text-[#0D9488]' },
-      manufacturer: { label: 'メーカー・製造', bg: 'bg-[#FFF5F5]', border: 'border-[#E53E3E]/30', text: 'text-[#E53E3E]' },
-      service: { label: 'サービス・小売', bg: 'bg-[#EEFCF5]', border: 'border-[#2F855A]/30', text: 'text-[#2F855A]' },
-      other: { label: 'その他', bg: 'bg-[#F2F4F8]', border: 'border-[#4A5568]/30', text: 'text-[#4A5568]' },
-    };
-    
-    const meta = categoryMeta[formCategory] || categoryMeta.other;
-    const newId = graduates.length > 0 ? Math.max(...graduates.map(g => g.id)) + 1 : 1;
-    
-    const newGrad = {
-      id: newId,
-      image: pickedImage,
-      category: formCategory,
-      categoryLabel: meta.label,
-      categoryBg: meta.bg,
-      categoryBorder: meta.border,
-      categoryText: meta.text,
-      gradYear: formGradYear,
-      major: formMajor,
-      title: formTitle,
-      quote: formQuote,
-      affiliation: formAffiliation,
-      name: formName,
-      link: `#story-${newId}`,
-      hasDiscount: formHasDiscount,
-      discountDetails: formHasDiscount ? formDiscountDetails : '',
-      linkedinUrl: formLinkedin || undefined,
-      facebookUrl: formFacebook || undefined,
-      instagramUrl: formInstagram || undefined,
-      xUrl: formX || undefined,
-      websiteUrl: formWebsite || undefined
-    };
-    
-    const updatedGrads = [newGrad, ...graduates];
-    setGraduates(updatedGrads);
-    localStorage.setItem('ibaraki_alumni_stories', JSON.stringify(updatedGrads));
-    
-    // Clear form and show success message
-    setFormName('');
-    setFormMajor('');
-    setFormAffiliation('');
-    setFormTitle('');
-    setFormQuote('');
-    setFormLinkedin('');
-    setFormFacebook('');
-    setFormInstagram('');
-    setFormX('');
-    setFormWebsite('');
-    setFormHasDiscount(false);
-    setFormDiscountDetails('');
-    setFormImage('');
-    setIsSubmitModalOpen(false);
-    
-    document.getElementById('stories-results-anchor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
-  // Reset demo list
-  const handleResetDemoList = () => {
-    if (window.confirm('インタビュー掲載リストをデフォルトデータにリセットしますか？')) {
-      localStorage.removeItem('ibaraki_alumni_stories');
-      setGraduates(GRADUATES_DATA);
-    }
-  };
+  // "掲載について" details are hidden by default and revealed on click.
+  const [isPublicationInfoOpen, setIsPublicationInfoOpen] = useState(false);
 
   // Computed / filtered grads database list
   const filteredAndSortedGrads = useMemo(() => {
@@ -735,8 +614,12 @@ export default function Stories() {
             </h2>
           </div>
           <p className="mt-3 text-[11px] leading-5 tracking-[0.04em] text-stone-600 sm:mt-6 sm:text-base sm:leading-7">
-            茨城大学文理・人文学部で学び、さまざまな分野で活躍する卒業生の声をご紹介します。
+            同窓生一人ひとりの歩みを、オンラインインタビューを通じて集めていく場所です。現在表示中の記事は掲載イメージのサンプルです。
           </p>
+          <div className="mt-3 inline-flex items-center gap-2 border border-amber-200 bg-amber-50 px-3 py-2 text-[10px] font-bold leading-5 text-amber-900 sm:mt-5 sm:text-xs">
+            <span className="h-2 w-2 rounded-full bg-[#CD9535]" />
+            現在、公開済みの同窓生インタビューはまだありません
+          </div>
         </header>
 
         {featuredGrad && !hasActiveFilters && (
@@ -857,20 +740,11 @@ export default function Stories() {
           <div className="flex items-end justify-between gap-4 border-b border-stone-200 pb-3 sm:pb-4">
             <div>
               <h3 className="font-serif text-[18px] font-bold tracking-[0.04em] text-[#00204A] sm:text-[31px]">
-                {hasActiveFilters ? '検索結果' : '新着インタビュー'}
+                {hasActiveFilters ? 'サンプル検索結果' : '掲載イメージ'}
                 <span className="ml-2 text-[14px] text-[#B57A24] sm:text-xl">
-                  {filteredAndSortedGrads.length}件
+                  サンプル {filteredAndSortedGrads.length}件
                 </span>
               </h3>
-              {typeof window !== 'undefined' && localStorage.getItem('ibaraki_alumni_stories') && (
-                <button
-                  type="button"
-                  onClick={handleResetDemoList}
-                  className="mt-2 text-[10px] text-stone-400 underline hover:text-red-500"
-                >
-                  初期データに戻す
-                </button>
-              )}
             </div>
 
             <div className="relative">
@@ -1037,33 +911,170 @@ export default function Stories() {
             </span>
             <div>
               <h3 className="font-serif text-lg font-bold tracking-wider text-[#00204A]">
-                あなたのストーリーも紹介しませんか？
+                同窓生の歩みが、この同窓会の一番の財産です
               </h3>
               <p className="mt-1 text-xs leading-6 text-stone-500">
-                卒業後の活動や、同窓生に紹介したいお店・事業を掲載できます。
+                かんたんなオンラインインタビューに答えて、写真・HP・SNS・同窓生特典と一緒にSTORIESへ掲載申請できます。
+                内容は事務局が確認し、掲載基準によっては反映されない場合があります。
               </p>
             </div>
           </div>
           <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
-            <a
-              href="#join-interviews"
-              className="inline-flex items-center justify-center gap-2 border border-stone-300 bg-white px-5 py-3 text-xs font-bold tracking-wider text-stone-700"
+            <button
+              type="button"
+              onClick={() => setIsPublicationInfoOpen((open) => !open)}
+              className="inline-flex items-center justify-center gap-2 border border-stone-300 bg-white px-5 py-3 text-xs font-bold tracking-wider text-stone-700 transition-colors hover:border-[#00204A]"
               id="join-interview-btn"
+              aria-expanded={isPublicationInfoOpen}
+              aria-controls="join-interviews"
             >
-              掲載ガイドライン
-              <ArrowRight className="h-4 w-4" />
-            </a>
+              掲載について
+              <ChevronDown className={`h-4 w-4 transition-transform ${isPublicationInfoOpen ? "rotate-180" : ""}`} />
+            </button>
             <button
               type="button"
               onClick={() => setIsSubmitModalOpen(true)}
               className="inline-flex items-center justify-center gap-2 bg-[#00204A] px-5 py-3 text-xs font-bold tracking-wider text-white"
               id="direct-submit-btn"
             >
-              掲載を申し込む
+              インタビューを始める
               <ArrowRight className="h-4 w-4" />
             </button>
           </div>
         </div>
+
+        {/* =========================================================================
+            ABOUT PUBLICATION — 掲載について (toggled open by the 掲載について button)
+            ========================================================================= */}
+        <AnimatePresence initial={false}>
+          {isPublicationInfoOpen && (
+            <motion.section
+              key="publication-info"
+              id="join-interviews"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.4, ease: "easeInOut" }}
+              className="overflow-hidden scroll-mt-24"
+            >
+              <div className="mt-12 border-t border-stone-200 pt-12">
+                <div className="text-center">
+            <span className="text-xs font-bold tracking-[0.3em] text-[#CD9535]">ABOUT PUBLICATION</span>
+            <h3 className="mt-3 font-serif text-2xl font-bold tracking-wider text-[#00204A] sm:text-3xl">
+              掲載について
+            </h3>
+            <p className="mx-auto mt-4 max-w-2xl text-sm leading-7 text-stone-600">
+              STORIESは、文理・人文学部の卒業生の歩みを紹介するコーナーです。
+              オンラインインタビューに答えるだけで、どなたでも掲載を申請いただけます。費用はかかりません。
+              いただいた回答は内容や事実を変えない範囲で読みやすく整え、事務局が確認・編集のうえ掲載基準に沿って反映します。
+            </p>
+          </div>
+
+          {/* Application steps */}
+          <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {[
+              {
+                step: '01',
+                title: '基本情報を入力',
+                desc: '掲載名・卒業年・専攻・現在の所属など、記事の土台となる情報を入力します。',
+              },
+              {
+                step: '02',
+                title: 'オンラインインタビュー（全5問）',
+                desc: '画面の質問に順番に答えるだけ。所要時間は約10〜15分が目安です。',
+              },
+              {
+                step: '03',
+                title: '写真・特典を添える',
+                desc: '顔写真（最大3枚）やHP・SNS、同窓生向けの特典（任意）を一緒に申請できます。',
+              },
+              {
+                step: '04',
+                title: '事務局が審査・掲載',
+                desc: '内容を確認・編集のうえ、掲載基準を満たすものをSTORIESに掲載します。',
+              },
+            ].map((item) => (
+              <div
+                key={item.step}
+                className="flex h-full flex-col border border-stone-200 bg-white p-6 text-left"
+              >
+                <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#FDFAF0] font-serif text-sm font-bold text-[#CD9535]">
+                  {item.step}
+                </span>
+                <h4 className="mt-4 font-serif text-base font-bold tracking-wider text-[#00204A]">
+                  {item.title}
+                </h4>
+                <p className="mt-2 text-xs leading-6 text-stone-500">{item.desc}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Eligibility and review notes */}
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="border border-stone-200 bg-[#FAF9F5] p-6 text-left">
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-white text-[#CD9535] shadow-sm">
+                  <GraduationCap className="h-5 w-5" />
+                </span>
+                <h4 className="font-serif text-base font-bold tracking-wider text-[#00204A]">
+                  対象となる方
+                </h4>
+              </div>
+              <ul className="mt-4 space-y-2.5">
+                {[
+                  '文理学部・人文学部・人文社会科学部の卒業生',
+                  '専攻や卒業年は問わず、どなたでもご応募いただけます',
+                  '顔写真や活動内容の掲載にご同意いただける方',
+                ].map((line) => (
+                  <li key={line} className="flex gap-2 text-xs leading-6 text-stone-600">
+                    <span className="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-[#CD9535]" />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="border border-stone-200 bg-[#FAF9F5] p-6 text-left">
+              <div className="flex items-center gap-3">
+                <span className="flex h-9 w-9 flex-none items-center justify-center rounded-full bg-white text-[#CD9535] shadow-sm">
+                  <Gift className="h-5 w-5" />
+                </span>
+                <h4 className="font-serif text-base font-bold tracking-wider text-[#00204A]">
+                  掲載前のご確認
+                </h4>
+              </div>
+              <ul className="mt-4 space-y-2.5">
+                {[
+                  'すべての申請は掲載前に事務局が確認・編集します',
+                  '営利目的・第三者の権利を侵害する内容などは掲載できません',
+                  '申請内容や掲載基準によっては反映されない場合があります',
+                  '掲載後の修正・削除は事務局までご連絡ください',
+                ].map((line) => (
+                  <li key={line} className="flex gap-2 text-xs leading-6 text-stone-600">
+                    <span className="mt-2 h-1.5 w-1.5 flex-none rounded-full bg-[#CD9535]" />
+                    <span>{line}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={() => setIsSubmitModalOpen(true)}
+              className="inline-flex items-center justify-center gap-2 bg-[#00204A] px-6 py-3 text-xs font-bold tracking-wider text-white transition-colors hover:bg-[#003366]"
+            >
+              インタビューを始める
+              <ArrowRight className="h-4 w-4" />
+            </button>
+            <span className="text-xs text-stone-500">所要時間の目安: 約10〜15分 / 写真は最大3枚まで</span>
+          </div>
+              </div>
+            </motion.section>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* =========================================================================
@@ -1291,408 +1302,7 @@ export default function Stories() {
         )}
       </AnimatePresence>
 
-      {/* =========================================================================
-          STORY WORK DIRECT REGISTRATION FORM DIALOG EXPERIENCE
-          ========================================================================= */}
-      <AnimatePresence>
-        {isSubmitModalOpen && (
-          <div className="fixed inset-0 z-50 overflow-y-auto" role="dialog" aria-modal="true">
-            {/* Backdrop Blur Overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setIsSubmitModalOpen(false)}
-              className="fixed inset-0 bg-[#001025]/75 backdrop-blur-xs transition-opacity"
-            />
-
-            {/* Modal Body placement position wrapper */}
-            <div className="flex min-h-screen items-center justify-center p-2 sm:p-4 text-center">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                transition={{ type: "spring", duration: 0.5, bounce: 0.15 }}
-                className="relative bg-white rounded-3xl overflow-hidden shadow-2xl max-w-2xl w-full text-left z-50 border border-stone-200 flex flex-col max-h-[92vh] sm:max-h-[90vh]"
-              >
-                {/* Close Button top-right */}
-                <button
-                  type="button"
-                  onClick={() => setIsSubmitModalOpen(false)}
-                  className="absolute top-3.5 right-3.5 z-50 p-2 text-stone-400 hover:text-[#00204A] hover:bg-stone-50 rounded-full border border-stone-200 bg-white transition-all shadow-sm focus:outline-none"
-                  aria-label="Close form"
-                >
-                  <X className="w-5 h-5 opacity-80" />
-                </button>
-
-                {/* Scrollable Container Wrapper with padding */}
-                <div className="overflow-y-auto p-5 sm:p-8 md:p-10 flex-1 scrollbar-thin">
-                  {/* Form Header */}
-                <div className="mb-6 pb-4 border-b border-stone-150">
-                  <span className="inline-block text-[10px] text-[#CD9535] font-sans font-bold tracking-widest uppercase mb-1">
-                    Direct Submission Form
-                  </span>
-                  <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#00204A] tracking-wider">
-                    STORIES 掲載登録
-                  </h2>
-                  <p className="text-stone-500 text-xs mt-1.5 leading-normal">
-                    ご自身の活動内容や、在校生・同窓生へのメッセージ、事業・お店の特典をご記入ください。登録後リアルタイムにスライドへ反映されます。
-                  </p>
-                </div>
-
-                <form onSubmit={handleAddSubmit} className="space-y-4">
-                  {/* Photo Upload Zone (Drag-and-Drop + Manual Click) */}
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-sans font-bold text-[#00204A] tracking-wide">
-                      プロフィール写真・店舗/事業イメージ (任意)
-                    </label>
-                    <div 
-                      onDragOver={(e) => {
-                        e.preventDefault();
-                        setIsDragging(true);
-                      }}
-                      onDragLeave={() => setIsDragging(false)}
-                      onDrop={(e) => {
-                        e.preventDefault();
-                        setIsDragging(false);
-                        const file = e.dataTransfer.files?.[0];
-                        if (file) {
-                          if (file.size > 2 * 1024 * 1024) {
-                            alert('画像サイズは2MB以下にしてください。');
-                            return;
-                          }
-                          const reader = new FileReader();
-                          reader.onload = () => {
-                            if (typeof reader.result === 'string') {
-                              setFormImage(reader.result);
-                            }
-                          };
-                          reader.readAsDataURL(file);
-                        }
-                      }}
-                      className={`border-2 border-dashed rounded-xl p-4 transition-all text-center flex flex-col items-center justify-center cursor-pointer select-none ${
-                        isDragging 
-                          ? 'border-[#CD9535] bg-amber-50/40 scale-[1.01]' 
-                          : formImage 
-                            ? 'border-emerald-300 bg-emerald-50/10' 
-                            : 'border-stone-200 hover:border-[#CD9535]/55 bg-[#FAF9F5] hover:bg-[#FAF9F5]/70'
-                      }`}
-                      onClick={() => document.getElementById('photo-upload-input')?.click()}
-                    >
-                      <input 
-                        type="file" 
-                        id="photo-upload-input" 
-                        accept="image/*" 
-                        className="hidden" 
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            if (file.size > 2 * 1024 * 1024) {
-                              alert('画像サイズは2MB以下にしてください。');
-                              return;
-                            }
-                            const reader = new FileReader();
-                            reader.onload = () => {
-                              if (typeof reader.result === 'string') {
-                                setFormImage(reader.result);
-                              }
-                            };
-                            reader.readAsDataURL(file);
-                          }
-                        }}
-                      />
-                      
-                      {formImage ? (
-                        <div className="flex flex-col items-center gap-2">
-                          <div className="relative w-20 h-20">
-                            <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#CD9535] shadow-sm">
-                              <img src={formImage} alt="Uploaded preview" className="w-full h-full object-cover" />
-                            </div>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setFormImage('');
-                              }}
-                              className="absolute -top-1 -right-1 z-20 w-6 h-6 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-md border-2 border-white hover:scale-110 transition-transform cursor-pointer"
-                              title="画像を削除"
-                            >
-                              <X className="w-3.5 h-3.5 stroke-[3]" />
-                            </button>
-                          </div>
-                          <p className="text-xs text-emerald-600 font-bold flex items-center gap-1">
-                            <span>✓ 画像のアップロードに成功しました！</span>
-                          </p>
-                          <p className="text-[10px] text-stone-400">
-                            (クリックまたはドラッグ＆ドロップで別の画像に変更)
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="py-2.5 flex flex-col items-center gap-1.5 text-stone-500">
-                          <div className="w-10 h-10 rounded-full bg-stone-100 border border-stone-200 flex items-center justify-center text-stone-400 animate-pulse">
-                            <Upload className="w-5 h-5 text-[#CD9535]" />
-                          </div>
-                          <p className="text-xs font-bold text-stone-600 mt-1">
-                            クリックしてファイルを選択、またはここにドラッグ＆ドロップ
-                          </p>
-                          <p className="text-[10px] text-stone-400">
-                            PNG, JPG, WEBP (2MB以内。未選択時はカテゴリーの標準写真が使われます)
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Row 1: Name and Major */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-sans font-bold text-[#00204A] tracking-wide mb-1.5">
-                        お名前・紹介名 <span className="text-red-500 font-extrabold">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="例: 茨大 太郎 または I.Tさん"
-                        value={formName}
-                        onChange={(e) => setFormName(e.target.value)}
-                        className="w-full text-sm py-2 px-3 bg-[#FAF9F5] border border-stone-200 rounded-lg outline-none focus:border-[#CD9535] focus:ring-1 focus:ring-[#CD9535]/15 transition-all font-sans text-[#00204A]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-sans font-bold text-[#00204A] tracking-wide mb-1.5">
-                        学部・出身専攻 <span className="text-red-500 font-extrabold">*</span>
-                      </label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="例: 人文学科社会科学専攻"
-                        value={formMajor}
-                        onChange={(e) => setFormMajor(e.target.value)}
-                        className="w-full text-sm py-2 px-3 bg-[#FAF9F5] border border-stone-200 rounded-lg outline-none focus:border-[#CD9535] focus:ring-1 focus:ring-[#CD9535]/15 transition-all font-sans text-[#00204A]"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Row 2: Graduation Year and Category */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-sans font-bold text-[#00204A] tracking-wide mb-1.5">
-                        卒業年度・卒年
-                      </label>
-                      <select
-                        value={formGradYear}
-                        onChange={(e) => setFormGradYear(e.target.value)}
-                        className="w-full text-sm py-2.5 px-3 bg-[#FAF9F5] border border-stone-200 rounded-lg outline-none focus:border-[#CD9535] focus:ring-1 focus:ring-[#CD9535]/15 transition-all font-sans text-[#00204A]"
-                      >
-                        <option value="2024年卒">2024年卒</option>
-                        <option value="2023年卒">2023年卒</option>
-                        <option value="2022年卒">2022年卒</option>
-                        <option value="2021年卒">2021年卒</option>
-                        <option value="2020年卒">2020年卒</option>
-                        <option value="2015年卒">2015年卒</option>
-                        <option value="2010年卒">2010年卒</option>
-                        <option value="2005年卒">2005年卒</option>
-                        <option value="2000年卒">2000年卒</option>
-                        <option value="1995年卒">1995年卒</option>
-                        <option value="1990年卒">1990年卒</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-sans font-bold text-[#00204A] tracking-wide mb-1.5">
-                        掲載カテゴリー（職種・分野）
-                      </label>
-                      <select
-                        value={formCategory}
-                        onChange={(e) => setFormCategory(e.target.value)}
-                        className="w-full text-sm py-2.5 px-3 bg-[#FAF9F5] border border-stone-200 rounded-lg outline-none focus:border-[#CD9535] focus:ring-1 focus:ring-[#CD9535]/15 transition-all font-sans text-[#00204A]"
-                      >
-                        <option value="education">教育・行政</option>
-                        <option value="media">メディア・出版・広告</option>
-                        <option value="finance">金融・コンサルティング</option>
-                        <option value="it">IT・通信</option>
-                        <option value="manufacturer">メーカー・製造</option>
-                        <option value="service">サービス・小売</option>
-                        <option value="other">その他</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  {/* Row 3: Affiliation */}
-                  <div>
-                    <label className="block text-xs font-sans font-bold text-[#00204A] tracking-wide mb-1.5">
-                      現在の勤務先・所属・役職名 <span className="text-red-500 font-extrabold">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="例: 株式会社○○ 総合開発推進部 主任"
-                      value={formAffiliation}
-                      onChange={(e) => setFormAffiliation(e.target.value)}
-                      className="w-full text-sm py-2 px-3 bg-[#FAF9F5] border border-stone-200 rounded-lg outline-none focus:border-[#CD9535] focus:ring-1 focus:ring-[#CD9535]/15 transition-all font-sans text-[#00204A]"
-                    />
-                  </div>
-
-                  {/* Headline */}
-                  <div>
-                    <label className="block text-xs font-sans font-bold text-[#00204A] tracking-wide mb-1.5">
-                      インタビュー見出し・スローガン <span className="text-red-500 font-extrabold">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="例: 伝統と最先端を融合し、地域の美味しさを全国へ"
-                      value={formTitle}
-                      onChange={(e) => setFormTitle(e.target.value)}
-                      className="w-full text-sm py-2 px-3 bg-[#FAF9F5] border border-stone-200 rounded-lg outline-none focus:border-[#CD9535] focus:ring-1 focus:ring-[#CD9535]/15 transition-all font-sans text-[#00204A]"
-                    />
-                  </div>
-
-                  {/* Activity and message */}
-                  <div>
-                    <label className="block text-xs font-sans font-bold text-[#00204A] tracking-wide mb-1.5">
-                      主な活動内容や、在学生への一言メッセージ <span className="text-red-500 font-extrabold">*</span>
-                    </label>
-                    <textarea
-                      required
-                      rows={3}
-                      placeholder="大学生活での思い出や、今の仕事のやりがいなどをご記入ください。Q1〜Q3の質問への回答が自動生成されます。"
-                      value={formQuote}
-                      onChange={(e) => setFormQuote(e.target.value)}
-                      className="w-full text-sm py-2 px-3 bg-[#FAF9F5] border border-stone-200 rounded-lg resize-none outline-none focus:border-[#CD9535] focus:ring-1 focus:ring-[#CD9535]/15 transition-all font-sans text-[#00204A]"
-                    />
-                  </div>
-
-                  {/* Benefits Tag */}
-                  <div className="bg-amber-50/50 p-4 rounded-xl border border-amber-200 select-none">
-                    <label className="flex items-center gap-2 cursor-pointer font-sans text-xs font-bold text-amber-900">
-                      <input
-                        type="checkbox"
-                        checked={formHasDiscount}
-                        onChange={(e) => setFormHasDiscount(e.target.checked)}
-                        className="w-4 h-4 accent-amber-600 rounded cursor-pointer"
-                      />
-                      <span>🎁 お店や事業など、同窓生向けの「割引・優待特典」を登録する</span>
-                    </label>
-                    
-                    {formHasDiscount && (
-                      <motion.div 
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        className="mt-3"
-                      >
-                        <textarea
-                          placeholder="特典詳細をご記入ください。 （例: 「会計より10%OFF、または手作り商品を1点プレゼント」等）"
-                          rows={2}
-                          value={formDiscountDetails}
-                          onChange={(e) => setFormDiscountDetails(e.target.value)}
-                          className="w-full text-xs py-2 px-3 bg-white border border-amber-200 rounded-md outline-none focus:border-amber-500 font-sans text-stone-700"
-                        />
-                      </motion.div>
-                    )}
-                  </div>
-
-                  {/* SNS Options Grid (The critical user request!) */}
-                  <div className="border-t border-stone-150 pt-4">
-                    <label className="block text-xs font-sans font-bold text-[#00204A] tracking-wide mb-2 uppercase">
-                      🖥️ 各種SNS / ホームページリンクの入力 (任意)
-                    </label>
-                    
-                    <div className="space-y-2.5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-[105px] font-sans text-[11px] font-black text-stone-500 flex items-center gap-1.5">
-                          <Linkedin className="w-3.5 h-3.5 text-[#0077B5]" />
-                          <span>LinkedIn</span>
-                        </div>
-                        <input
-                          type="url"
-                          placeholder="https://linkedin.com/in/username"
-                          value={formLinkedin}
-                          onChange={(e) => setFormLinkedin(e.target.value)}
-                          className="flex-1 text-xs py-1.5 px-2.5 bg-[#FAF9F5] border border-stone-200 rounded focus:border-[#CD9535] outline-none font-sans"
-                        />
-                      </div>
-
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-[105px] font-sans text-[11px] font-black text-stone-500 flex items-center gap-1.5">
-                          <Facebook className="w-3.5 h-3.5 text-[#1877F2]" />
-                          <span>Facebook</span>
-                        </div>
-                        <input
-                          type="url"
-                          placeholder="https://facebook.com/profile"
-                          value={formFacebook}
-                          onChange={(e) => setFormFacebook(e.target.value)}
-                          className="flex-1 text-xs py-1.5 px-2.5 bg-[#FAF9F5] border border-stone-200 rounded focus:border-[#CD9535] outline-none font-sans"
-                        />
-                      </div>
-
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-[105px] font-sans text-[11px] font-black text-stone-500 flex items-center gap-1.5">
-                          <Instagram className="w-3.5 h-3.5 text-[#D62976]" />
-                          <span>Instagram</span>
-                        </div>
-                        <input
-                          type="url"
-                          placeholder="https://instagram.com/username"
-                          value={formInstagram}
-                          onChange={(e) => setFormInstagram(e.target.value)}
-                          className="flex-1 text-xs py-1.5 px-2.5 bg-[#FAF9F5] border border-stone-200 rounded focus:border-[#CD9535] outline-none font-sans"
-                        />
-                      </div>
-
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-[105px] font-sans text-[11px] font-black text-stone-500 flex items-center gap-1.5">
-                          <Twitter className="w-3.5 h-3.5 text-stone-800" />
-                          <span>X (Twitter)</span>
-                        </div>
-                        <input
-                          type="url"
-                          placeholder="https://x.com/username"
-                          value={formX}
-                          onChange={(e) => setFormX(e.target.value)}
-                          className="flex-1 text-xs py-1.5 px-2.5 bg-[#FAF9F5] border border-stone-200 rounded focus:border-[#CD9535] outline-none font-sans"
-                        />
-                      </div>
-
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-[105px] font-sans text-[11px] font-black text-stone-500 flex items-center gap-1.5">
-                          <Globe className="w-3.5 h-3.5 text-stone-700" />
-                          <span>自社・個人HP</span>
-                        </div>
-                        <input
-                          type="url"
-                          placeholder="https://example.com"
-                          value={formWebsite}
-                          onChange={(e) => setFormWebsite(e.target.value)}
-                          className="flex-1 text-xs py-1.5 px-2.5 bg-[#FAF9F5] border border-stone-200 rounded focus:border-[#CD9535] outline-none font-sans"
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Submission and Cancel Buttons */}
-                  <div className="border-t border-stone-150 pt-5 mt-4 flex items-center justify-end gap-3 select-none">
-                    <button
-                      type="button"
-                      onClick={() => setIsSubmitModalOpen(false)}
-                      className="py-2.5 px-5 bg-white border border-stone-200 hover:bg-stone-50 text-stone-600 rounded-lg text-xs font-sans font-bold tracking-widest transition-colors cursor-pointer"
-                    >
-                      キャンセル
-                    </button>
-                    <button
-                      type="submit"
-                      className="py-2.5 px-6 bg-[#CD9535] hover:bg-[#B5822C] text-white rounded-lg text-xs font-sans font-bold tracking-widest transition-colors cursor-pointer shadow-md"
-                    >
-                      登録を申請する 📨
-                    </button>
-                  </div>
-                </form>
-                </div> {/* End scrollable content wrapper */}
-              </motion.div>
-            </div>
-          </div>
-        )}
-      </AnimatePresence>
+      <StoryInterviewApplication isOpen={isSubmitModalOpen} onClose={() => setIsSubmitModalOpen(false)} />
     </section>
   );
 }
