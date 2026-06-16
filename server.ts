@@ -9,7 +9,6 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const app = express();
-const PORT = Number(process.env.PORT) || 3000;
 const GEMINI_CHAT_MODEL = process.env.GEMINI_CHAT_MODEL || "gemini-2.5-flash-lite";
 const STORIES_GEMINI_MODEL = process.env.STORIES_GEMINI_MODEL || "gemini-2.5-flash-lite";
 const SLACK_STORIES_WEBHOOK_URL = process.env.SLACK_STORIES_WEBHOOK_URL || "";
@@ -1246,35 +1245,9 @@ app.post("/api/register", async (req, res) => {
   }
 });
 
-// Vite server integrations
-async function startServer() {
-  if (process.env.NODE_ENV !== "production") {
-    // Lazy-import Vite so it is never pulled into the serverless bundle.
-    const { createServer: createViteServer } = await import("vite");
-    const vite = await createViteServer({
-      server: { middlewareMode: true },
-      appType: "spa",
-    });
-    app.use(vite.middlewares);
-  } else {
-    const distPath = path.join(process.cwd(), 'dist');
-    app.use(express.static(distPath));
-    app.get('*', (req, res) => {
-      res.sendFile(path.join(distPath, 'index.html'));
-    });
-  }
-
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on port ${PORT}`);
-  });
-}
-
-// On Vercel the Express app is exported as a serverless function (see api/index.ts),
-// so it must NOT bind a port or attach Vite middleware here. Everywhere else
-// (local `tsx server.ts`, and `node dist/server.cjs` on a Node host) we self-host.
-if (!process.env.VERCEL) {
-  startServer();
-}
-
+// This module only configures and exports the Express app. The dev/host bootstrap
+// (Vite middleware, static serving, app.listen) lives in dev-server.ts so that the
+// Vercel serverless function (api/index.ts → this module) never imports Vite or binds
+// a port. Keeping Vite out of the serverless import graph avoids ERR_MODULE_NOT_FOUND.
 export { app };
 export default app;
