@@ -501,8 +501,8 @@ function getInterviewDetails(grad: typeof GRADUATES_DATA[0]) {
 }
 
 export default function Stories() {
-  // The current cards are presentation samples until reviewed alumni submissions are published.
-  const graduates = GRADUATES_DATA;
+  // Published profiles will be added after the office reviews submitted interviews.
+  const graduates = GRADUATES_DATA.slice(0, 0);
 
   const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -614,14 +614,45 @@ export default function Stories() {
             </h2>
           </div>
           <p className="mt-3 text-[11px] leading-5 tracking-[0.04em] text-stone-600 sm:mt-6 sm:text-base sm:leading-7">
-            同窓生一人ひとりの歩みを、オンラインインタビューを通じて集めていく場所です。現在表示中の記事は掲載イメージのサンプルです。
+            同窓生一人ひとりの歩みを、オンラインインタビューを通じて集めていく場所です。掲載されたストーリーは、ここに順次追加されます。
           </p>
           <div className="mt-3 inline-flex items-center gap-2 border border-amber-200 bg-amber-50 px-3 py-2 text-[10px] font-bold leading-5 text-amber-900 sm:mt-5 sm:text-xs">
             <span className="h-2 w-2 rounded-full bg-[#CD9535]" />
-            現在、公開済みの同窓生インタビューはまだありません
+            現在、最初のストーリーを募集しています
           </div>
         </header>
 
+        <motion.button
+          type="button"
+          onClick={() => setIsSubmitModalOpen(true)}
+          whileHover={{ y: -3 }}
+          transition={{ duration: 0.25 }}
+          className="group mt-4 grid w-full overflow-hidden border border-stone-200 bg-white text-left shadow-sm sm:mt-9 sm:grid-cols-[220px_1fr]"
+          data-gsap-card
+        >
+          <div className="flex min-h-36 items-center justify-center bg-[#00204A] px-6 py-8 text-white sm:min-h-56">
+            <div className="text-center">
+              <Users className="mx-auto h-10 w-10 text-[#E7BB62] sm:h-14 sm:w-14" />
+              <p className="mt-4 font-serif text-lg font-bold tracking-[0.12em] sm:text-xl">YOUR STORY</p>
+            </div>
+          </div>
+          <div className="flex flex-col justify-center p-5 sm:p-9">
+            <p className="text-[10px] font-bold tracking-[0.2em] text-[#B57A24] sm:text-xs">STORY 01 募集中</p>
+            <h3 className="mt-2 font-serif text-xl font-bold leading-relaxed tracking-[0.04em] text-[#00204A] sm:mt-3 sm:text-3xl">
+              あなたの歩みが、ここに追加されます
+            </h3>
+            <p className="mt-2 text-xs leading-6 text-stone-600 sm:mt-4 sm:text-sm sm:leading-7">
+              仕事や活動、学生時代の思い出をお聞かせください。写真やHP・SNSと一緒に掲載を申請できます。
+            </p>
+            <span className="mt-4 inline-flex items-center gap-2 text-xs font-bold tracking-wider text-[#00204A] sm:mt-6 sm:text-sm">
+              インタビューを始める
+              <ArrowRight className="h-4 w-4 text-[#CD9535] transition-transform group-hover:translate-x-1" />
+            </span>
+          </div>
+        </motion.button>
+
+        {graduates.length > 0 && (
+          <>
         {featuredGrad && !hasActiveFilters && (
           <motion.button
             type="button"
@@ -903,6 +934,8 @@ export default function Stories() {
             </div>
           )}
         </div>
+          </>
+        )}
 
         <div className="mt-16 flex flex-col items-center justify-between gap-6 border-y border-stone-200 py-8 text-center md:flex-row md:text-left">
           <div className="flex flex-col items-center gap-4 md:flex-row">
