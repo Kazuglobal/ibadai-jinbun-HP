@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Download, 
   ArrowRight, 
   CheckCircle, 
   User, 
@@ -14,8 +13,6 @@ import {
   Layers,
   Sparkles,
   Mail,
-  FileSpreadsheet,
-  Check,
   UserPlus,
   UserMinus,
   Phone,
@@ -28,20 +25,9 @@ interface AboutProps {
 }
 
 export default function About({ onNavigate }: AboutProps) {
-  const [activeTab, setActiveTab] = useState<'business' | 'finance' | 'audit'>('business');
   const [isGreetingOpen, setIsGreetingOpen] = useState(false);
   const [isOfficersOpen, setIsOfficersOpen] = useState(false);
   const [isBylawsOpen, setIsBylawsOpen] = useState(false);
-  const [downloadingFile, setDownloadingFile] = useState<string | null>(null);
-
-  // File download mock experience
-  const handleDownload = (filename: string) => {
-    setDownloadingFile(filename);
-    setTimeout(() => {
-      setDownloadingFile(null);
-      alert(`「${filename}」がダウンロードされました。（※デモ用の模擬ダウンロードです）`);
-    }, 1200);
-  };
 
   const boardMembers = [
     { title: '名誉会長', name: '原口　弥生', year: '人文社会科学部長' },
@@ -95,7 +81,7 @@ export default function About({ onNavigate }: AboutProps) {
                 同窓会について
               </h1>
               <p className="text-stone-600 text-sm sm:text-base leading-relaxed tracking-wider font-sans max-w-xl">
-                茨城大学文理・人文学部同窓会の目的や活動、組織・役員、事業報告などをご紹介します。
+                茨城大学文理・人文学部同窓会の目的や活動、組織・役員などをご紹介します。
               </p>
             </div>
 
@@ -163,7 +149,7 @@ export default function About({ onNavigate }: AboutProps) {
             <span className="text-4xl sm:text-5xl font-mono font-bold text-[#CD9535]/65 leading-none">01</span>
             <div>
               <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#00204A] tracking-wider relative pb-1">
-                同窓会の全貌（数字でみる ＆ 目的・活動）
+                同窓会の活動
                 <span className="absolute bottom-0 left-0 w-12 h-[2.5px] bg-[#CD9535]" />
               </h2>
             </div>
@@ -171,13 +157,7 @@ export default function About({ onNavigate }: AboutProps) {
 
           {/* Infographics: Numbers board (みてすぐわかるレイアウト) */}
           <p className="text-stone-500 text-xs tracking-widest font-sans uppercase mb-4">ALUMNI ASSOCIATION BY THE NUMBERS</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12">
-            <div className="bg-[#00204A] text-white p-6 rounded-2xl flex flex-col items-center justify-center text-center shadow-sm">
-              <span className="text-xs text-[#CD9535] font-sans font-bold tracking-wider mb-2">同窓会員数</span>
-              <span className="text-2xl sm:text-3xl font-serif font-extrabold tracking-tight">19,000<span className="text-xs sm:text-sm font-sans font-medium ml-1">人超</span></span>
-              <span className="text-[10px] text-stone-300 font-sans mt-2">全国各地・多分野で活躍</span>
-            </div>
-            
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-12">
             <div className="bg-[#FAF9F5] border border-stone-200/80 p-6 rounded-2xl flex flex-col items-center justify-center text-center">
               <span className="text-xs text-stone-500 font-sans font-bold tracking-wider mb-2">設立</span>
               <span className="text-2xl sm:text-3xl font-serif font-extrabold text-[#00204A] tracking-tight">1982<span className="text-xs sm:text-sm font-sans font-medium ml-1">年</span></span>
@@ -195,13 +175,6 @@ export default function About({ onNavigate }: AboutProps) {
               <span className="text-2xl sm:text-3xl font-serif font-extrabold text-[#00204A] tracking-tight">2<span className="text-xs sm:text-sm font-sans font-medium ml-1">大主軸</span></span>
               <span className="text-[10px] text-stone-500 font-sans mt-2">後輩たちの未来を応援</span>
             </div>
-          </div>
-
-          <div className="border-b border-stone-200/50 pb-6 mb-8">
-            <h3 className="text-sm font-bold text-[#00204A] tracking-widest uppercase mb-2">主な活動内容のマップ</h3>
-            <p className="text-stone-600 text-sm leading-relaxed max-w-3xl">
-              文字を読む負担を感じさせないよう、主要な活動目的をシンプルな視覚的タイルでカード化しました。
-            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -322,13 +295,12 @@ export default function About({ onNavigate }: AboutProps) {
                 </div>
               </div>
 
-              {/* Portrait container holding simulated picture of Ohwada Kazuo */}
+              {/* Portrait container holding the chairperson photo */}
               <div className="relative group w-full max-w-[280px] aspect-square lg:aspect-[4/5] rounded-2xl overflow-hidden shadow-lg border border-stone-200">
                 <img 
-                  src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=800&auto=format&fit=crop"
-                  alt="大和田 一雄 同窓会会長 温和なシニア男性の肖像"
+                  src="/newsletters/36/image-01.webp"
+                  alt="大和田 一雄 同窓会会長の肖像"
                   className="w-full h-full object-cover filter brightness-[0.98] transition-all duration-500 group-hover:scale-102"
-                  referrerPolicy="no-referrer"
                 />
                 <div className="absolute inset-0 bg-linear-to-t from-[#00204A]/40 to-transparent opacity-40" />
               </div>
@@ -489,23 +461,13 @@ export default function About({ onNavigate }: AboutProps) {
             {/* Right: Board members listings (centered) */}
             <div className="flex flex-col text-left">
               
-              {/* Flex header area holding small description and photo at top-right */}
-              <div className="flex items-start justify-between gap-4 mb-4">
+              {/* Header area for the board list */}
+              <div className="mb-4">
                 <div>
                   <span className="text-[13px] font-bold text-[#00204A] tracking-widest uppercase flex items-center gap-1.5 border-b border-stone-100 pb-2">
                     <Users className="w-4.5 h-4.5 text-[#CD9535]" />
                     <span>役員一覧</span>
                   </span>
-                </div>
-
-                {/* Overlapping small board members group image */}
-                <div className="w-[100px] h-[65px] rounded-lg overflow-hidden border border-white shadow-md select-none transform rotate-2">
-                  <img 
-                    src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?q=80&w=400&auto=format&fit=crop"
-                    alt="Board executives group"
-                    className="w-full h-full object-cover filter brightness-[0.98]"
-                    referrerPolicy="no-referrer"
-                  />
                 </div>
               </div>
 
@@ -536,324 +498,6 @@ export default function About({ onNavigate }: AboutProps) {
                 <span>役員紹介の詳細を見る</span>
                 <ArrowRight className="w-4 h-4 text-stone-400" />
               </button>
-            </div>
-
-          </div>
-        </div>
-
-        {/* =========================================================================
-            05. ANNUAL REPORTS (事業報告)
-            ========================================================================= */}
-        <div className="relative py-12 md:py-16 border-t border-stone-200/40" id="annual-reports">
-          {/* Header Title group */}
-          <div className="flex items-baseline gap-3 mb-4 text-left">
-            <span className="text-4xl sm:text-5xl font-mono font-bold text-[#CD9535]/65 leading-none">05</span>
-            <div>
-              <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#00204A] tracking-wider relative pb-1">
-                事業報告
-                <span className="absolute bottom-0 left-0 w-12 h-[2.5px] bg-[#CD9535]" />
-              </h2>
-            </div>
-          </div>
-
-          <p className="text-stone-600 text-[14.5px] leading-relaxed tracking-wider font-sans mb-10 text-left max-w-xl">
-            同窓会のさまざまな活動について、事業報告書を公開しています。
-          </p>
-
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
-            
-            {/* Left Area: Tab interface, lists downloads (7 cols) */}
-            <div className="lg:col-span-7 flex flex-col items-stretch">
-              
-              {/* Tabs button header (Perfect replication) */}
-              <div className="flex bg-stone-100 p-1 rounded-xl gap-1 mb-6" id="reports-tab-controls">
-                <button
-                  onClick={() => setActiveTab('business')}
-                  className={`flex-1 py-3 text-center text-xs font-bold rounded-lg cursor-pointer tracking-widest transition-all ${
-                    activeTab === 'business' 
-                      ? 'bg-[#00204A] text-white shadow-xs' 
-                      : 'text-stone-500 hover:text-stone-800'
-                  }`}
-                >
-                  事業報告
-                </button>
-                <button
-                  onClick={() => setActiveTab('finance')}
-                  className={`flex-1 py-3 text-center text-xs font-bold rounded-lg cursor-pointer tracking-widest transition-all ${
-                    activeTab === 'finance' 
-                      ? 'bg-[#00204A] text-white shadow-xs' 
-                      : 'text-stone-500 hover:text-stone-800'
-                  }`}
-                >
-                  会計報告
-                </button>
-                <button
-                  onClick={() => setActiveTab('audit')}
-                  className={`flex-1 py-3 text-center text-xs font-bold rounded-lg cursor-pointer tracking-widest transition-all ${
-                    activeTab === 'audit' 
-                      ? 'bg-[#00204A] text-white shadow-xs' 
-                      : 'text-stone-500 hover:text-stone-800'
-                  }`}
-                >
-                  監査報告
-                </button>
-              </div>
-
-              {/* Dynamic Interactive Reports listing frame */}
-              <div className="space-y-3.5 text-left mb-6">
-                <AnimatePresence mode="wait">
-                  {activeTab === 'business' && (
-                    <motion.div
-                      key="business-list"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.2 }}
-                      className="space-y-3.5"
-                    >
-                      {/* Personal Info Policy Change Announcement */}
-                      <div className="bg-amber-50/40 border border-[#CD9535]/30 rounded-2xl p-5 md:p-6 mb-6">
-                        <span className="text-[10px] font-bold text-[#CD9535] tracking-widest uppercase block mb-1.5 font-sans">重要なお知らせ</span>
-                        <h4 className="font-serif font-bold text-[#00204A] text-sm sm:text-base mb-3 leading-snug">
-                          個人情報の取扱いに関する基本方針の改正について
-                        </h4>
-                        <div className="text-stone-700 text-xs sm:text-[13px] leading-relaxed tracking-wider space-y-3 font-sans">
-                          <p>
-                            「個人情報の保護に関する法律（略称「個人情報保護法」）平成１５年法律第１５号。平成１７年４月１日施行」に基づき、平成３０年７月１４日に「個人情報の取扱いに関する基本方針」を作成し、会員の個人情報を保有し、会員名簿を作成し、適正に管理し、活用してまいりました。
-                          </p>
-                          <p>
-                            この度、茨城大学において、新たな取り組みとして、広く社会との繋がりをもつために、「イバダイ・サステナ・パートナーズ（略称：イバサス）」が創設されることになりました。
-                          </p>
-                          <p>
-                            この「イバサス」は、卒業生、在学生に限らず、大学を応援したい方や企業等多くの方に入会していただき、茨城大学を広くご理解ご支援いただくことを目的としています。
-                          </p>
-                          <p>
-                            これに伴い、大学と本同窓会を始め全学部の各同窓会との間で、「学生個人情報等の共同利用に関する覚書」を締結することになり、本同窓会は去る令和７年４月１５日付で締結いたしました。詳細は本ページ下部（06）の「法令順守」セクションに掲載しております。
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Header for reports */}
-                      <span className="text-[11px] font-bold text-stone-400 tracking-widest uppercase block mb-3 font-sans">事業報告書 ダウンロード</span>
-
-                      {/* Document Card 1 */}
-                      <div 
-                        onClick={() => handleDownload('2024年度 事業報告書.pdf')}
-                        className="bg-stone-50 hover:bg-stone-100/60 border border-stone-200/80 rounded-xl p-4 flex items-center justify-between transition-colors cursor-pointer group"
-                      >
-                        <div className="flex items-center gap-3.5">
-                          {/* Mini campus brick icon element */}
-                          <div className="w-[45px] h-[45px] rounded-md overflow-hidden border border-white shadow-xs flex-shrink-0">
-                            <img 
-                              src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=150&auto=format&fit=crop"
-                              alt="Mini campus icon"
-                              className="w-full h-full object-cover filter brightness-[0.98] blur-[0.3px]"
-                              referrerPolicy="no-referrer"
-                            />
-                          </div>
-                          <div>
-                            <span className="font-bold text-[#00204A] text-sm group-hover:text-amber-800 transition-colors block">
-                              2024年度 事業報告書
-                            </span>
-                            <span className="text-[11px] text-stone-400 font-sans block mt-0.5">（PDF / 2.3MB）</span>
-                          </div>
-                        </div>
-
-                        <div className="p-2 border border-stone-300 group-hover:border-amber-600 rounded-sm bg-white text-stone-500 group-hover:text-amber-700 transition-all">
-                          <Download className="w-4 h-4" />
-                        </div>
-                      </div>
-
-                      {/* Document Card 2 */}
-                      <div 
-                        onClick={() => handleDownload('2023年度 事業報告書.pdf')}
-                        className="bg-stone-50 hover:bg-stone-100/60 border border-stone-200/80 rounded-xl p-4 flex items-center justify-between transition-colors cursor-pointer group"
-                      >
-                        <div className="flex items-center gap-3.5">
-                          <div className="w-[45px] h-[45px] rounded-md overflow-hidden border border-white shadow-xs flex-shrink-0">
-                            <img 
-                              src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=150&auto=format&fit=crop"
-                              alt="Mini campus icon"
-                              className="w-full h-full object-cover filter brightness-[0.98]"
-                              referrerPolicy="no-referrer"
-                            />
-                          </div>
-                          <div>
-                            <span className="font-bold text-[#00204A] text-sm group-hover:text-amber-800 transition-colors block">
-                              2023年度 事業報告書
-                            </span>
-                            <span className="text-[11px] text-stone-400 font-sans block mt-0.5">（PDF / 2.1MB）</span>
-                          </div>
-                        </div>
-
-                        <div className="p-2 border border-stone-300 group-hover:border-amber-600 rounded-sm bg-white text-stone-500 group-hover:text-amber-700 transition-all">
-                          <Download className="w-4 h-4" />
-                        </div>
-                      </div>
-
-                      {/* Document Card 3 */}
-                      <div 
-                        onClick={() => handleDownload('2022年度 事業報告書.pdf')}
-                        className="bg-stone-50 hover:bg-stone-100/60 border border-stone-200/80 rounded-xl p-4 flex items-center justify-between transition-colors cursor-pointer group"
-                      >
-                        <div className="flex items-center gap-3.5">
-                          <div className="w-[45px] h-[45px] rounded-md overflow-hidden border border-white shadow-xs flex-shrink-0">
-                            <img 
-                              src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=150&auto=format&fit=crop"
-                              alt="Mini campus icon"
-                              className="w-full h-full object-cover filter brightness-[0.98]"
-                              referrerPolicy="no-referrer"
-                            />
-                          </div>
-                          <div>
-                            <span className="font-bold text-[#00204A] text-sm group-hover:text-amber-800 transition-colors block">
-                              2022年度 事業報告書
-                            </span>
-                            <span className="text-[11px] text-stone-400 font-sans block mt-0.5">（PDF / 1.9MB）</span>
-                          </div>
-                        </div>
-
-                        <div className="p-2 border border-stone-300 group-hover:border-amber-600 rounded-sm bg-white text-stone-500 group-hover:text-amber-700 transition-all">
-                          <Download className="w-4 h-4" />
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {activeTab === 'finance' && (
-                    <motion.div
-                      key="finance-list"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.2 }}
-                      className="space-y-3.5"
-                    >
-                      {/* Document Card Finance */}
-                      <div 
-                        onClick={() => handleDownload('2024年度 決算報告書.pdf')}
-                        className="bg-stone-50 hover:bg-stone-100/60 border border-stone-200/80 rounded-xl p-4 flex items-center justify-between transition-colors cursor-pointer group"
-                      >
-                        <div className="flex items-center gap-3.5">
-                          <div className="w-[45px] h-[45px] bg-slate-100 rounded-md border border-white shadow-xs flex-shrink-0 flex items-center justify-center text-slate-400">
-                            <FileSpreadsheet className="w-6 h-6 text-[#CD9535]" />
-                          </div>
-                          <div>
-                            <span className="font-bold text-[#00204A] text-sm group-hover:text-amber-800 transition-colors block">
-                              2024年度 会計決算報告書
-                            </span>
-                            <span className="text-[11px] text-stone-400 font-sans block mt-0.5">（PDF / 1.5MB）</span>
-                          </div>
-                        </div>
-
-                        <div className="p-2 border border-stone-300 group-hover:border-amber-600 rounded-sm bg-white text-stone-500 group-hover:text-amber-700 transition-all">
-                          <Download className="w-4 h-4" />
-                        </div>
-                      </div>
-
-                      {/* Document Card Finance 2 */}
-                      <div 
-                        onClick={() => handleDownload('2023年度 決算報告書.pdf')}
-                        className="bg-stone-50 hover:bg-stone-100/60 border border-stone-200/80 rounded-xl p-4 flex items-center justify-between transition-colors cursor-pointer group"
-                      >
-                        <div className="flex items-center gap-3.5">
-                          <div className="w-[45px] h-[45px] bg-slate-100 rounded-md border border-white shadow-xs flex-shrink-0 flex items-center justify-center text-slate-400">
-                            <FileSpreadsheet className="w-6 h-6 text-[#CD9535]" />
-                          </div>
-                          <div>
-                            <span className="font-bold text-[#00204A] text-sm group-hover:text-amber-800 transition-colors block">
-                              2023年度 会計決算報告書
-                            </span>
-                            <span className="text-[11px] text-stone-400 font-sans block mt-0.5">（PDF / 1.4MB）</span>
-                          </div>
-                        </div>
-
-                        <div className="p-2 border border-stone-300 group-hover:border-amber-600 rounded-sm bg-white text-stone-500 group-hover:text-amber-700 transition-all">
-                          <Download className="w-4 h-4" />
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {activeTab === 'audit' && (
-                    <motion.div
-                      key="audit-list"
-                      initial={{ opacity: 0, y: 8 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -8 }}
-                      transition={{ duration: 0.2 }}
-                      className="space-y-3.5"
-                    >
-                      {/* Document Card Audit */}
-                      <div 
-                        onClick={() => handleDownload('2024年度 監査報告書.pdf')}
-                        className="bg-stone-50 hover:bg-stone-100/60 border border-stone-200/80 rounded-xl p-4 flex items-center justify-between transition-colors cursor-pointer group"
-                      >
-                        <div className="flex items-center gap-3.5">
-                          <div className="w-[45px] h-[45px] bg-[#FAF9F5] rounded-md border border-white shadow-xs flex-shrink-0 flex items-center justify-center">
-                            <Check className="w-6 h-6 text-emerald-600 stroke-[3]" />
-                          </div>
-                          <div>
-                            <span className="font-bold text-[#00204A] text-sm group-hover:text-amber-800 transition-colors block">
-                              2024年度 監事監査報告書
-                            </span>
-                            <span className="text-[11px] text-stone-400 font-sans block mt-0.5">（PDF / 850KB）</span>
-                          </div>
-                        </div>
-
-                        <div className="p-2 border border-stone-300 group-hover:border-amber-600 rounded-sm bg-white text-stone-500 group-hover:text-amber-700 transition-all">
-                          <Download className="w-4 h-4" />
-                        </div>
-                      </div>
-
-                      {/* Document Card Audit 2 */}
-                      <div 
-                        onClick={() => handleDownload('2023年度 監査報告書.pdf')}
-                        className="bg-stone-50 hover:bg-stone-100/60 border border-stone-200/80 rounded-xl p-4 flex items-center justify-between transition-colors cursor-pointer group"
-                      >
-                        <div className="flex items-center gap-3.5">
-                          <div className="w-[45px] h-[45px] bg-[#FAF9F5] rounded-md border border-white shadow-xs flex-shrink-0 flex items-center justify-center">
-                            <Check className="w-6 h-6 text-emerald-600 stroke-[3]" />
-                          </div>
-                          <div>
-                            <span className="font-bold text-[#00204A] text-sm group-hover:text-amber-800 transition-colors block">
-                              2023年度 監事監査報告書
-                            </span>
-                            <span className="text-[11px] text-stone-400 font-sans block mt-0.5">（PDF / 810KB）</span>
-                          </div>
-                        </div>
-
-                        <div className="p-2 border border-stone-300 group-hover:border-amber-600 rounded-sm bg-white text-stone-500 group-hover:text-amber-700 transition-all">
-                          <Download className="w-4 h-4" />
-                        </div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Action trigger to load more historical folders */}
-              <button
-                onClick={() => alert('過去20年分のアーカイブデータへの閲覧権限を付与しました。（デモ稼働）')}
-                className="inline-flex self-start items-center justify-center gap-2 border border-stone-300 hover:border-[#00204A] bg-white text-[#00204A] font-sans font-bold text-xs py-3.5 px-6 rounded-full transition-all cursor-pointer shadow-xs"
-              >
-                <span>過去の報告書をすべて見る</span>
-                <ArrowRight className="w-4 h-4 text-stone-400" />
-              </button>
-
-            </div>
-
-            {/* Right Audit Graphic Column (5 cols) */}
-            <div className="lg:col-span-5 relative w-full pt-6 lg:pt-14 flex justify-center">
-              <div className="relative group w-full max-w-[340px] aspect-[4/5] rounded-2xl overflow-hidden shadow-lg border border-stone-100">
-                <img 
-                  src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?q=80&w=800&auto=format&fit=crop"
-                  alt="Annual accounts reports charts with calculators"
-                  className="w-full h-full object-cover filter brightness-[0.98] transition-transform duration-500 group-hover:scale-102"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/15 to-transparent" />
-              </div>
             </div>
 
           </div>

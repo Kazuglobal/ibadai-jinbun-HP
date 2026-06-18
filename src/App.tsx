@@ -98,7 +98,7 @@ export default function App() {
 
     const handleHashChange = () => {
       const hash = window.location.hash;
-      const aboutHashes = ['#about-section', '#purpose-activities', '#presidents-greeting', '#bylaws', '#organization-board', '#annual-reports', '#membership', '#branches', '#privacy'];
+      const aboutHashes = ['#about-section', '#purpose-activities', '#presidents-greeting', '#bylaws', '#organization-board', '#membership', '#branches', '#privacy'];
       if (aboutHashes.includes(hash)) {
         setCurrentView('about');
         setTimeout(() => {
