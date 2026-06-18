@@ -274,7 +274,7 @@ export default function ChatAssistant({ isOpen: controlledIsOpen, onOpenChange }
                         <div className="relative group/slider">
                           <div 
                             ref={sliderRef}
-                            className="flex gap-2.5 overflow-x-auto py-1.5 px-0.5 scroll-smooth snap-x snap-mandatory scrollbar-none"
+                            className="flex gap-2.5 overflow-x-auto overscroll-x-contain py-1.5 px-0.5 scroll-smooth snap-x snap-proximity [touch-action:pan-x_pan-y] [-webkit-overflow-scrolling:touch] scrollbar-none"
                             id="faq-slider-scroller"
                           >
                             {faqCards.map((faq) => (
@@ -364,7 +364,7 @@ export default function ChatAssistant({ isOpen: controlledIsOpen, onOpenChange }
             </div>
 
             {/* In-chat quick navigation helper anchors */}
-            <div className="px-4 py-2 bg-white border-t border-stone-100 flex flex-wrap gap-1.5 overflow-x-auto whitespace-nowrap scrollbar-none z-10">
+            <div className="px-4 py-2 bg-white border-t border-stone-100 flex flex-wrap gap-1.5 overflow-x-auto overscroll-x-contain whitespace-nowrap [touch-action:pan-x_pan-y] [-webkit-overflow-scrolling:touch] scrollbar-none z-10">
               <button
                 onClick={() => setInputMessage('住所変更したいです')}
                 className="text-[11px] font-medium bg-stone-50 hover:bg-amber-50 border border-stone-200/80 hover:border-amber-400/50 text-[#00204A] hover:text-amber-800 rounded-full py-1 px-2.5 transition-colors cursor-pointer"

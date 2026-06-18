@@ -23,37 +23,39 @@ const EVENTS_DATA = [
   },
   {
     id: '02',
-    title: '若手卒業生\nキャリアトーク',
-    subTitle: '',
+    title: 'Coming soon',
+    subTitle: '詳細は決まり次第お知らせします',
     image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=600&auto=format&fit=crop',
-    dateYear: '2026',
-    dateDay: '7.18',
-    dateWeek: 'SAT',
-    statusText: 'オンライン・受付中',
-    statusClass: 'bg-indigo-50 text-indigo-800 border-indigo-200',
+    dateYear: 'TBD',
+    dateDay: '--.--',
+    dateWeek: 'TBD',
+    statusText: 'Coming soon',
+    statusClass: 'bg-stone-100 text-stone-600 border-stone-200',
     details: [
-      { label: '場所', value: 'オンライン（Zoom）' },
-      { label: '内容', value: '卒業生の経験談の共有' },
-      { label: '申込', value: '事前申込制（7/10まで）' }
+      { label: '場所', value: '未定' },
+      { label: '内容', value: '準備中' },
+      { label: '申込', value: '受付開始までお待ちください' }
     ],
-    link: '#event-2'
+    link: '#events-section',
+    isComingSoon: true
   },
   {
     id: '03',
-    title: '卒業生交流会・\n地域ネットワークイベント',
-    subTitle: '',
+    title: 'Coming soon',
+    subTitle: '詳細は決まり次第お知らせします',
     image: 'https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?q=80&w=600&auto=format&fit=crop',
-    dateYear: '2026',
-    dateDay: '9.12',
-    dateWeek: 'SAT',
-    statusText: '対面・準備中',
-    statusClass: 'bg-amber-50 text-amber-800 border-amber-200',
+    dateYear: 'TBD',
+    dateDay: '--.--',
+    dateWeek: 'TBD',
+    statusText: 'Coming soon',
+    statusClass: 'bg-stone-100 text-stone-600 border-stone-200',
     details: [
-      { label: '場所', value: '東京・大阪・名古屋ほか' },
-      { label: '内容', value: 'どなたでも参加可能' },
-      { label: '申込', value: '事前申込制（9/5まで）' }
+      { label: '場所', value: '未定' },
+      { label: '内容', value: '準備中' },
+      { label: '申込', value: '受付開始までお待ちください' }
     ],
-    link: '#event-3'
+    link: '#events-section',
+    isComingSoon: true
   }
 ];
 
@@ -131,7 +133,7 @@ export default function Events({ onSelectEvent }: EventsProps) {
 
         </div>
 
-        <div className="-mr-4 flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 pl-[10vw] pr-4 scrollbar-none sm:-mr-6 sm:pr-6 md:hidden">
+        <div className="-mr-4 flex snap-x snap-proximity gap-4 overflow-x-auto overscroll-x-contain pb-3 pl-[10vw] pr-4 scroll-smooth [touch-action:pan-x_pan-y] [-webkit-overflow-scrolling:touch] scrollbar-none sm:-mr-6 sm:pr-6 md:hidden">
           {EVENTS_DATA.map((item) => {
             const location = item.details.find((detail) => detail.label === '場所')?.value ?? '';
             const formattedDate = `${item.dateYear}.${item.dateDay
@@ -143,20 +145,25 @@ export default function Events({ onSelectEvent }: EventsProps) {
               <motion.a
                 key={item.id}
                 href={item.link}
+                aria-disabled={item.isComingSoon ? true : undefined}
                 onClick={(event) => {
+                  if (item.isComingSoon) {
+                    event.preventDefault();
+                    return;
+                  }
                   if (onSelectEvent) {
                     event.preventDefault();
                     onSelectEvent(item.title.replace(/\n/g, ''));
                   }
                 }}
                 whileTap={{ scale: 0.99 }}
-                className="group w-[80vw] max-w-[520px] flex-none snap-center text-left"
+                className={`group w-[80vw] max-w-[520px] flex-none snap-center text-left ${item.isComingSoon ? 'cursor-default opacity-75' : ''}`}
               >
                 <div className="aspect-[16/9] overflow-hidden bg-stone-200">
                   <img
                     src={item.image}
                     alt={item.title.replace(/\n/g, '')}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                    className={`h-full w-full object-cover transition-transform duration-500 ${item.isComingSoon ? 'grayscale' : 'group-hover:scale-[1.03]'}`}
                     referrerPolicy="no-referrer"
                   />
                 </div>
@@ -266,20 +273,29 @@ export default function Events({ onSelectEvent }: EventsProps) {
  
               {/* 4. Bottom Link Indicator with arrow */}
               <div className="border-t border-stone-200/50 pt-3">
-                <a 
+                  <a
                   href={item.link}
+                  aria-disabled={item.isComingSoon ? true : undefined}
                   onClick={(e) => {
+                    if (item.isComingSoon) {
+                      e.preventDefault();
+                      return;
+                    }
                     if (onSelectEvent) {
                       e.preventDefault();
                       onSelectEvent(item.title.replace(/\n/g, ''));
                     }
                   }}
-                  className="group inline-flex items-center gap-1.5 text-[#CD9535] font-sans font-bold text-[11px] sm:text-[11.5px] tracking-widest hover:opacity-85"
+                  className={`group inline-flex items-center gap-1.5 font-sans text-[11px] font-bold tracking-widest sm:text-[11.5px] ${
+                    item.isComingSoon ? 'cursor-default text-stone-400' : 'text-[#CD9535] hover:opacity-85'
+                  }`}
                 >
-                  <span>詳細・申込はこちら</span>
-                  <svg className="w-3.5 h-3.5 text-[#CD9535] stroke-[1.2] transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path d="M5 12h14M12 5l7 7-7 7" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
+                  <span>{item.isComingSoon ? 'Coming soon' : '詳細・申込はこちら'}</span>
+                  {!item.isComingSoon && (
+                    <svg className="w-3.5 h-3.5 text-[#CD9535] stroke-[1.2] transition-transform duration-300 group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path d="M5 12h14M12 5l7 7-7 7" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
                 </a>
               </div>
  

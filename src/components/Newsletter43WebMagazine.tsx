@@ -16,6 +16,7 @@ import activityImage from '../data/newsletter43/activity.jpg';
 import hasuiImage from '../data/newsletter43/hasui.jpg';
 import homeworkImage from '../data/newsletter43/homework.jpg';
 import jumpRopeImage from '../data/newsletter43/jump-rope.jpg';
+import kidoYukikoImage from '../data/newsletter43/kido-yukiko.jpg';
 import lunchImage from '../data/newsletter43/lunch.jpg';
 import NewsletterArticleBody, { type NewsletterArticlePhoto } from './NewsletterArticleBody';
 import NewsletterPdfFlipbook from './NewsletterPdfFlipbook';
@@ -42,15 +43,17 @@ const articles: MagazineArticle[] = [
     title: '茨城大学 半世紀の想い出',
     author: '木戸 之都子（人文・文10回卒）',
     deck: '入学から50年。人文学部、人文図書室、同窓会名簿づくりの記憶をたどる巻頭エッセイ。',
+    photos: [{ image: kidoYukikoImage, label: '木戸 之都子 様', variant: 'portrait' }],
     accent: '#B57A24',
     readTime: '約5分',
     pullQuote: '半世紀の記憶は、学びの場と人のつながりが重なってできた同窓会の歩みでもあります。',
     body: [
-      '私が茨城大学人文学部文学科に入学したのは1976年のことでした。卒業後は人文学部に就職し、2023年に定年退職しましたが、その後も非常勤講師やアルバイト等で現在も茨城大学と関わっています。今年は入学してからちょうど50年目になり、過去の出来事や記憶が懐かしく思い出され、感慨深いです。',
-      '入学当時の最初の記憶は、授業の始まる直前に教室にやってきて演説していく上級生や、廊下に散乱するビラ、キャンパス内の立て看など、学生運動の名残りを感じたことでした。人文学部文学科の1年生は60名で、専攻を超えた繋がりが強かったように感じます。',
-      '卒業後の1981年、人文学部助手として人文図書室に職を得ました。当時の理念のもと、人文図書室は1984年に統合新設され、人文系の専門的参考図書を収集し、教員・学生への支援サービスを積極的に行いました。',
-      '図書館所蔵古文書との関わりも茨城大学の大事な思い出です。郷土資料の整備に関わり、古文書のくずし字に触れるきっかけになりました。現在もボランティアで近世村方文書の史料整理にささやかながら関わっています。',
-      '1982年に設立された文理・人文学部同窓会には設立準備段階から加わり、担当は同窓会名簿作成でした。今後も同窓会が学部や大学との連携を密接にとりながら、茨城大学の発展に寄与することを期待しています。',
+      '私が茨城大学人文学部文学科に入学したのは1976年のことでした。卒業後は人文学部に就職し、2023年に定年退職しましたが、その後も非常勤講師やアルバイト等で現在も茨城大学と関わっています。今年は入学してからちょうど50年目になり、光陰矢の如し、とはよくいったもので、過去の出来事や記憶が懐かしく思い出され、感慨深いです。入学当時の最初の記憶は1年生の授業の始まる直前にいきなり教室にやってきて教卓で演説していく上級生や廊下に散乱するビラやキャンパス内の立て看など、学生運動の名残りを感じたことでした。人文学部文学科の1年生は60名で、同じ専攻だけでなく専攻を超えた繋がりが強かったように感じます。',
+      '卒業後の1981年、人文学部助手として人文図書室に職を得て、人文図書室分室という1スパン（研究室1個分）の狭いスペースが私の部屋になりました。当時、人文図書室運営委員長だった東敏雄教授の「学部独自の図書室を充実させていく」という理念の元、それまで社会系と文系に分かれていた人文図書室が1984年増築された人文B棟に新たな人文図書室として統合新設されました。人文系の専門的参考図書を収集し、人文学部の教員・学生への支援サービスを積極的に行った結果、人文図書室の蔵書数は図書約20,000冊、雑誌約1,000誌になり、パソコン（20台）等を所有し、学生の文献情報検索の技術向上のためにガイダンスも実施してきました。また、1983年度以降の卒業論文の情報（目次構成・使用した参考文献など）を収集し、データベース化して閲覧に供しています（人文学部の教職員・学生のみが利用可）。',
+      'しかし、残念ながら当初の職員3名が1名までに減少し、予算の縮小等もあり、2021年人文図書室は廃止されました。ただし、その機能は大幅に縮小して2022年、2スパンの学部共同資料室に姿をかえました。40年近い人文図書室の歴史は2011年3月11日の東日本大震災や2020年4月以降のコロナ禍のつらい思い出を含めて、私の中では大切な思い出になりつつあります。',
+      '図書館所蔵古文書の関わりも茨城大学の大事な思い出です。当時、人文図書室運営委員だった河内八郎教授からのお誘いで図書館所蔵の郷土資料の整備に関わり、当時、図書館のデジタル化の波で隅に追いやられがちだった古文書のくずし字に触れるきっかけになり、歴史の学生さんと史料整理を行いながら読むことの楽しさを覚えました。現在もボランティアで図書館所蔵の近世村方文書の史料整理にささやかながら関わっています。',
+      '1982年に設立された文理・人文学部同窓会には設立準備段階から加わり、私の担当は同窓会名簿作成でした。同窓会名簿は今年の発行で10冊目になりますが、2003年に個人情報保護法が制定されてから卒業生の住所や勤務先を把握するのがとくに困難になり、試行錯誤を繰り返しながら発行を重ねた記憶があります。同窓会費が入学時に徴収する方式になってから現在の同窓会加入率は95％になっていると聞きます。設立当初は同窓会への理解がなかなか得られず、在学中や卒業間際に勧誘するしかなく、加入率も30％と伸び悩んでいて、現在と比べると隔世の感があります。',
+      '今後も文理・人文学部同窓会が学部や大学との連携を密接にとりながら、茨城大学の発展に寄与するとともに同窓生同士の交流を活発に行っていくこと期待しています。',
     ],
   },
   {
@@ -65,11 +68,19 @@ const articles: MagazineArticle[] = [
     readTime: '約4分',
     pullQuote: 'テクノロジーを活用しながら、豊かな心のやりとりをいかに追求するか。',
     body: [
-      '同窓会の皆様には、様々なご支援、ご協力、お気遣いを日頃より賜っております。学部を代表しまして、御礼申し上げます。今春、人文社会科学部長・学野長・研究科長に就任いたしました。',
-      '私の専門は国際政治学と平和学で、環境問題と安全保障との関連を軸に研究してきました。急激な変化をふまえて、新しい適応力のあるライフスタイルや価値観をもった市民をどう育成して世に送り出すべきか、議論し考える日々です。',
-      '対面授業が増え、大学も賑わいを取り戻しています。他方で、魅力的な職場・学び場作りが不可欠です。教職員や学生の多様性に基づき、生活上のバランスを確保することが重要です。',
-      '急速に発達したオンライン会議の技術は、授業に変革をもたらしました。一方で、同じ空気を共有する対面の機会は減少し、仕事の余白に生じていた豊かなやりとりに基づく人間関係は変化しています。',
-      '私は学部長就任後の最初の教授会にて、「学部（カレッジ）の再構築」を掲げました。テクノロジーを活用しながら、豊かな心のやりとりをいかに追求するかを考えるべきと信じています。',
+      '同窓会の皆様には、様々なご支援、ご協力、お気遣いを日頃より賜っております。学部を代表しまして、御礼申し上げます。',
+      '今春、人文社会科学部長・学野長・研究科長に就任いたしました。責任の重さを感じながら、学部の新しい姿を構想しつつ、社会の期待に応えられるように改革を着実に進めるために準備を重ねております。',
+      '私の専門は国際政治学と平和学で、環境問題と安全保障との関連を軸に研究してきました。コロナ禍に社会が適応する中で、イラン情勢が、私たち日本人が過去の石油危機から何を学んだかを試そうとしています。このような急激な変化をふまえて、新しい適応力のあるライフスタイルや価値観をもった市民をどう育成して世に送り出すべきか、議論し考える日々です。',
+      '現在の学部・大学院教育と今後',
+      '対面授業が増え、大学も賑わいを取り戻しています。他方で、より優秀な人物を惹きつけるためには、魅力的な職場・学び場作りが不可欠です。そのためには教職員や学生の多様性に基づき、生活上のバランスを確保することが重要です。教職員のワーク・ライフ・バランスと多様な学生への対応により、急な休講や欠席であっても学びの機会を失わない仕組みの活用を推進しております。',
+      'このような価値観を社会に拡げる専門家を教育すべく、大学院では来年度から文部科学省に採択された「ダイバーシティ地域共創プログラム」の学位プログラム化を行います。',
+      '他方で、地方国立大学の厳しい大学財政事情から、教員の減少傾向は続いており、総合人文社会系学部としての強みをどう活かし弱みをカバーしていくかが課題となっております。メディア文化や心理・人間科学といったメジャーが学生の人気を集める一方で、第一希望の叶わなかった学生たちの意欲をいかに維持するかは課題です。また、変化する学生や社会のニーズに応えるためのメジャー・サブメジャー制の中身についても、検討が必要です。',
+      'テクノロジーの発展と人のつながりの再構築',
+      '急速に発達したオンライン会議の技術は、教室を中心とした授業に変革をもたらし、資料のペーパレス化による紙資源節約、教員や学生の居場所に捕らわれない自由な授業実施を可能にし、計り知れないメリットをもたらしました。他方で、同じ空気を共有する対面の機会は減少し、教員と学生、そして教員同士の仕事の「余白」に生じていた豊かなやりとりに基づく人間関係は変化しています。',
+      '私は学部長就任後の最初の教授会にて、「学部（カレッジ）の再構築」を掲げました。',
+      '教員と学生が寝食を共にして学んだはるか昔のカレッジに戻るのではなく（そういう機会はあってよいのですが）、テクノロジーを活用しながら、豊かな心のやりとりをいかにして追求するか、を考えるべきと私は信じています。',
+      'すでに、教員間でもゆるやかなつながりで、各自の研究の周縁部を豊かにする様々な試みが実践されています。当学部には「市民共創教育研究センター」があり、学部教員がメンバーです。このような場を活かして、多種多様な交流をつくり、これからの学部について、議論して参りたいと存じます。',
+      '最後になりましたが同窓生の皆様のご発展を祈念しつつ、学部への引き続きのご支援ならびにご協力をお願いするとともに、私たちをお見守りくださいますようお願い申し上げます。学内外で皆様にお目にかかるのを楽しみにしております。',
     ],
   },
   {
@@ -89,11 +100,10 @@ const articles: MagazineArticle[] = [
     readTime: '約4分',
     pullQuote: '学校以外の第三の居場所から、子ども一人ひとりに寄り添う支援を考える。',
     body: [
-      '私は将来教員を志しており、今回のiOPを通じて、学校という枠組みの外側から子どもたちの実態を見つめたいと考え、NPO法人「ただいま」での活動を決めました。',
-      '近年増加する不登校児童・生徒がどのような思いを抱え、学校以外の「第三の居場所」がどう機能しているのかを当事者の目線で理解し、教員としての土台を築くことを目標にしました。',
-      '2024年9月から現在に至るまで、ひたちなか市のフリースクール「ふらっと」や放課後の居場所「てらこや」にて週1回のスタッフ業務を行いました。主な役割は子どもたちの遊び相手や見守り、環境整備でした。',
-      '活動を通じて、一人ひとりの特性に応じた「個別最適な支援」の重要性を痛感しました。不登校の背景には発達特性への無理解や家庭環境など多様な要因が潜んでおり、画一的な対応は通用しないということを学びました。',
-      'この経験を糧に、将来は学校の中だけで完結せず、地域の活動とも密に連携しながら、多様な特性を持つ子どもたち一人ひとりに寄り添える教員を目指します。',
+      '私は将来教員を志しており、今回のiOPを通じて、学校という枠組みの外側から子どもたちの実態を見つめたいと考え、NPO法人「ただいま」での活動を決めました。近年増加する不登校児童・生徒がどのような思いを抱え、学校以外の「第三の居場所」がどう機能しているのかを当事者の目線で理解し、教員としての土台を築くことを目標に、現場での実践を通じて学びを深めました。',
+      '2024年9月から現在に至るまで、ひたちなか市のフリースクール「ふらっと」や放課後の居場所「てらこや」にて週1回のスタッフ業務を行いました。主な役割は子どもたちの遊び相手や見守り、環境整備でしたが、学校提出用の活動報告書の執筆補助など、地域と学校を繋ぐ実務にも携わりました。',
+      '活動を通じて、一人ひとりの特性に応じた「個別最適な支援」の重要性を痛感しました。不登校の背景には発達特性への無理解や家庭環境など多様な要因が潜んでおり、画一的な対応は通用しないということ。また、表面的な行動の裏にある「見えない背景」を多角的に想像し、試行錯誤しながら寄り添う中で、子どもが社会との繋がりを再構築していく姿を目の当たりにしたことは大きな成果であったと感じております。',
+      'この経験を糧に、将来は学校の中だけで完結せず、地域の活動とも密に連携しながら、多様な特性を持つ子どもたち一人ひとりに寄り添える教員を目指します。大学内では学べない地域の実情に触れることができ、実りの多いiOP活動となりました。',
     ],
   },
   {
@@ -163,6 +173,30 @@ function changeFontScale(current: number, direction: -1 | 1) {
   return fontScales[Math.min(fontScales.length - 1, Math.max(0, nearestIndex + direction))];
 }
 
+function splitAuthor(author: string) {
+  const trimmed = author.trim();
+  const normalized = trimmed.replace(/\s+/g, ' ');
+  const parentheticalMatch = normalized.match(/^(.+?)（(.+?)）$/);
+
+  if (parentheticalMatch) {
+    return {
+      role: parentheticalMatch[2],
+      name: parentheticalMatch[1],
+    };
+  }
+
+  const separatorIndex = trimmed.lastIndexOf('　');
+
+  if (separatorIndex <= 0) {
+    return { role: '', name: normalized };
+  }
+
+  return {
+    role: trimmed.slice(0, separatorIndex).replace(/\s+/g, ' ').trim(),
+    name: trimmed.slice(separatorIndex + 1).replace(/\s+/g, ' ').trim(),
+  };
+}
+
 export default function Newsletter43WebMagazine() {
   const [activeArticleId, setActiveArticleId] = React.useState(articles[0].id);
   const [fontScale, setFontScale] = React.useState(1);
@@ -172,6 +206,7 @@ export default function Newsletter43WebMagazine() {
   const timelineRef = React.useRef<HTMLDivElement>(null);
   const activeIndex = articles.findIndex((article) => article.id === activeArticleId);
   const activeArticle = articles[activeIndex] ?? articles[0];
+  const activeAuthor = splitAuthor(activeArticle.author);
   const readingProgress = ((activeIndex + 1) / articles.length) * 100;
 
   React.useEffect(() => {
@@ -303,7 +338,7 @@ export default function Newsletter43WebMagazine() {
               {articles.map((article, index) => {
                 const image =
                   article.id === 'memory'
-                    ? '/newsletters/41/image-01.webp'
+                    ? kidoYukikoImage
                     : article.id === 'dean'
                       ? hasuiImage
                       : article.id === 'iop'
@@ -329,7 +364,13 @@ export default function Newsletter43WebMagazine() {
                     <span className="overflow-hidden border border-[#E2D8C8] bg-[#FFFCF7] shadow-[0_8px_22px_rgba(20,33,61,0.07)] transition-transform group-hover:-translate-y-0.5">
                       <span className={`grid ${image ? 'md:grid-cols-2' : ''}`}>
                         {image && index % 2 === 0 && (
-                          <img src={image} alt="" className="h-44 w-full object-cover object-top sm:h-52 md:h-72" />
+                          <img
+                            src={image}
+                            alt=""
+                            className={`h-44 w-full object-top sm:h-52 md:h-72 ${
+                              article.id === 'memory' || article.id === 'dean' ? 'bg-[#EAF4F8] object-contain' : 'object-cover'
+                            }`}
+                          />
                         )}
                         <span className="flex min-h-[170px] flex-col justify-center p-5 sm:p-7">
                           <span className="font-serif text-[23px] font-bold leading-[1.45] text-[#14213D] sm:text-3xl">{article.title}</span>
@@ -340,7 +381,13 @@ export default function Newsletter43WebMagazine() {
                           </span>
                         </span>
                         {image && index % 2 === 1 && (
-                          <img src={image} alt="" className="h-44 w-full object-cover object-top sm:h-52 md:h-72" />
+                          <img
+                            src={image}
+                            alt=""
+                            className={`h-44 w-full object-top sm:h-52 md:h-72 ${
+                              article.id === 'memory' || article.id === 'dean' ? 'bg-[#EAF4F8] object-contain' : 'object-cover'
+                            }`}
+                          />
                         )}
                       </span>
                     </span>
@@ -359,7 +406,10 @@ export default function Newsletter43WebMagazine() {
                   <span className="font-serif text-4xl font-bold sm:text-5xl" style={{ color: activeArticle.accent }}>{activeArticle.page}</span>
                   <div>
                     <p className="text-[11px] font-black tracking-[0.18em]" style={{ color: activeArticle.accent }}>{activeArticle.label}</p>
-                    <p className="mt-1 text-sm font-bold text-stone-500">{activeArticle.author}</p>
+                    <div className="mt-1 max-w-[240px] text-sm font-bold leading-5 text-stone-500 sm:max-w-none">
+                      {activeAuthor.role && <p>{activeAuthor.role}</p>}
+                      <p className="whitespace-nowrap text-[#14213D] sm:text-stone-500">{activeAuthor.name}</p>
+                    </div>
                     <p className="mt-1 flex items-center gap-1.5 text-xs font-bold text-stone-400">
                       <Clock className="h-3.5 w-3.5" />
                       {activeArticle.readTime}
