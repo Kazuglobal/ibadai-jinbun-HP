@@ -28,7 +28,6 @@ export default function Header({ currentView = 'home', onNavigate }: HeaderProps
     { name: '会長挨拶', hash: '#presidents-greeting' },
     { name: '同窓会会則', hash: '#bylaws' },
     { name: '組織・役員一覧', hash: '#organization-board' },
-    { name: '事業・会計報告', hash: '#annual-reports' },
     { name: '入会・退会について', hash: '#membership' },
     { name: '地域支部・職域支部', hash: '#branches' },
     { name: '個人情報保護・法令順守', hash: '#privacy' }
