@@ -23,8 +23,8 @@ export const heroVisualImages = {
     label: 'ALUMNI',
   },
   archive: {
-    src: '/newsletters/42/image-04.webp',
-    alt: '図書資料の前で撮影された教員ポートレート',
+    src: 'https://images.unsplash.com/photo-1513001900722-370f803f498d?q=80&w=900&auto=format&fit=crop',
+    alt: '書籍とアーカイブ資料',
     label: 'ARCHIVE',
   },
 } satisfies Record<string, HeroVisualImage>;
