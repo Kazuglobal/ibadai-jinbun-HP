@@ -4,6 +4,7 @@ export type NewsletterArticlePhoto = {
   image: string;
   label: string;
   articleId?: string;
+  variant?: 'default' | 'portrait';
 };
 
 type NewsletterArticleBodyProps = {
@@ -60,13 +61,22 @@ export default function NewsletterArticleBody({
             {paragraphPhotos.length > 0 && (
               <div className={`grid gap-4 py-2 ${paragraphPhotos.length > 1 ? 'sm:grid-cols-2' : ''}`}>
                 {paragraphPhotos.map((photo) => (
-                  <figure key={photo.image} className="border border-[#D7C8AA] bg-[#F8F1E6] p-3">
-                    <div className="flex min-h-52 items-center justify-center overflow-hidden bg-stone-200">
+                  <figure
+                    key={photo.image}
+                    className={`border border-[#D7C8AA] bg-[#F8F1E6] p-3 ${
+                      photo.variant === 'portrait' ? 'mx-auto w-full max-w-[240px] sm:max-w-[280px]' : ''
+                    }`}
+                  >
+                    <div
+                      className={`flex items-center justify-center overflow-hidden bg-stone-200 ${
+                        photo.variant === 'portrait' ? 'min-h-0' : 'min-h-52'
+                      }`}
+                    >
                       <img
                         src={photo.image}
                         alt={photo.label}
                         loading="lazy"
-                        className="max-h-[560px] w-full object-contain"
+                        className={photo.variant === 'portrait' ? 'w-full object-contain' : 'max-h-[560px] w-full object-contain'}
                       />
                     </div>
                     <figcaption className="mt-3 text-xs font-bold leading-5 text-stone-500">
