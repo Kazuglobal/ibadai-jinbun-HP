@@ -1,6 +1,7 @@
 import React from 'react';
 import { ArrowUp, Mail, Phone, MapPin, ChevronRight } from 'lucide-react';
 import { motion } from 'motion/react';
+import ContactForm from './ContactForm';
 
 interface FooterProps {
   onNavigate?: (view: 'home' | 'about' | 'newsletter43', hash?: string) => void;
@@ -172,6 +173,8 @@ export default function Footer({ onNavigate }: FooterProps) {
 
 
             </div>
+
+            <ContactForm />
 
           </div>
 

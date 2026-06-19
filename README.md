@@ -31,3 +31,10 @@ View your app in AI Studio: https://ai.studio/apps/4a9b0331-bac2-4ffe-b422-6c25a
 - Chat analytics API: `GET /api/chat/analytics` with `Authorization: Bearer <CHAT_ANALYTICS_TOKEN>`
 - Admin dashboard: `GET /admin/chat-analytics`, then enter `CHAT_ANALYTICS_TOKEN` in the login form.
 - Set `CHAT_ANALYTICS_TOKEN` in production. Without it, analytics access stays blocked.
+
+## Form Email Forwarding
+
+- Contact, address-change, and event-registration submissions are forwarded to Google Apps Script.
+- Set `GAS_WEBAPP_URL` to the deployed Apps Script web app URL.
+- Optional: set `FORM_WEBHOOK_URL` when contact/address forms should use a different webhook. If omitted, they fall back to `GAS_WEBAPP_URL`.
+- Server-side recipients are fixed to `ibadai.bj.dousou@gmail.com` and `oodate@salat.co.jp`.
