@@ -40,3 +40,16 @@ View your app in AI Studio: https://ai.studio/apps/4a9b0331-bac2-4ffe-b422-6c25a
 - Chat analytics API: `GET /api/chat/analytics` with `Authorization: Bearer <CHAT_ANALYTICS_TOKEN>`
 - Admin dashboard: `GET /admin/chat-analytics`, then enter `CHAT_ANALYTICS_TOKEN` in the login form.
 - Set `CHAT_ANALYTICS_TOKEN` in production. Without it, analytics access stays blocked.
+# お問い合わせ・住所変更フォームのメール設定
+
+フォーム送信はサーバーから Google Apps Script の Web アプリへ転送し、次の2宛先へメール送信します。
+
+- `ibadai.bj.dousou@gmail.com`
+- `oodate@salat.co.jp`
+
+1. Google Apps Script に [`google-apps-script/forms.gs`](./google-apps-script/forms.gs) を貼り付けます。
+2. 「デプロイ」からウェブアプリとしてデプロイし、アクセスできるユーザーを「全員」に設定します。
+3. 発行されたURLをローカルの `.env` と本番環境の `FORM_WEBHOOK_URL` に設定します。
+4. デプロイしたGoogleアカウントで、初回のメール送信権限を許可します。
+
+ローカルの転送テストは `npm run test:forms` で実行できます。このテストは模擬Webhookを使用するため、実際のメールは送信しません。

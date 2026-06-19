@@ -8,7 +8,6 @@ import {
   Calendar, 
   ChevronDown, 
   ChevronUp, 
-  Bell, 
   ArrowRight,
   FileText,
   BadgeCheck,
@@ -18,20 +17,19 @@ import {
 
 export default function Update() {
   // --- FORM STATES ---
-  const [name, setName] = useState('茨城 太郎');
-  const [nameKana, setNameKana] = useState('イバラキ タロウ');
-  const [birthdate, setBirthdate] = useState('1990/04/01');
-  const [gradYear, setGradYear] = useState('2015年');
+  const [name, setName] = useState('');
+  const [nameKana, setNameKana] = useState('');
+  const [birthdate, setBirthdate] = useState('');
+  const [gradYear, setGradYear] = useState('');
   const [department, setDepartment] = useState('人文学部 文学科');
 
-  const [postalCode, setPostalCode] = useState('310-8512');
-  const [prefecture, setPrefecture] = useState('茨城県');
-  const [cityAddress, setCityAddress] = useState('水戸市文京1-5-30');
-  const [building, setBuilding] = useState('例) 茨城大学◯◯寮101');
+  const [postalCode, setPostalCode] = useState('');
+  const [prefecture, setPrefecture] = useState('');
+  const [cityAddress, setCityAddress] = useState('');
+  const [building, setBuilding] = useState('');
 
-  const [phone, setPhone] = useState('090-1234-5678');
-  const [email, setEmail] = useState('alumni@ibaraki.ac.jp');
-  const [subscribeMail, setSubscribeMail] = useState(true);
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
 
   // Accordion state (Mobile ONLY)
   const [expandedSection, setExpandedSection] = useState<number>(1); // default expand section 1
@@ -41,26 +39,64 @@ export default function Update() {
     setExpandedSection(expandedSection === index ? 0 : index);
   };
 
-  // Demo status simulation
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError('');
+
+    if (!name.trim() || !postalCode.trim() || !prefecture.trim() || !cityAddress.trim() || !phone.trim() || !email.trim()) {
+      setSubmitError('氏名、郵便番号、都道府県、市区町村・番地、電話番号、メールアドレスを入力してください。');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setSubmitError('正しいメールアドレスを入力してください。');
+      return;
+    }
+
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitSuccess(true);
-      // Automatically scroll to the success card
-      const el = document.getElementById('update-success-banner');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    try {
+      const response = await fetch('/api/forms/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: 'address-update',
+          fullName: name,
+          email,
+          phone,
+          details: {
+            nameKana,
+            birthdate,
+            gradYear,
+            department,
+            postalCode,
+            prefecture,
+            cityAddress,
+            building,
+          },
+          website: '',
+        }),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.error || '送信に失敗しました。');
       }
-    }, 1000);
+
+      setSubmitSuccess(true);
+      const el = document.getElementById('update-success-banner');
+      window.setTimeout(() => el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+    } catch (error) {
+      setSubmitError(error instanceof Error ? error.message : '送信に失敗しました。');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetForm = () => {
     setSubmitSuccess(false);
+    setSubmitError('');
     setExpandedSection(1);
   };
 
@@ -108,8 +144,8 @@ export default function Update() {
                 <div className="bg-white p-3 rounded-xl border border-stone-200/60 flex items-start gap-2.5">
                   <div className="w-6 h-6 rounded-full bg-[#108A93] text-white flex items-center justify-center font-bold text-[11px] flex-shrink-0">2</div>
                   <div>
-                    <h4 className="text-xs font-bold text-[#00204A]">送信＆自動受理</h4>
-                    <p className="text-[9px] text-stone-400 mt-1">送信ボタンを押して即時、手続きが完了します！</p>
+                    <h4 className="text-xs font-bold text-[#00204A]">事務局へ送信</h4>
+                    <p className="text-[9px] text-stone-400 mt-1">入力内容を事務局へ安全に送信します。</p>
                   </div>
                 </div>
               </div>
@@ -217,6 +253,12 @@ export default function Update() {
 
         {/* Anchor point to scroll to */}
         <div id="interactive-forms-anchor" className="scroll-mt-8" />
+
+        {submitError && (
+          <div role="alert" className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {submitError}
+          </div>
+        )}
 
         {/* =========================================================================
             FORMS WRAPPER:
@@ -485,34 +527,7 @@ export default function Update() {
                   />
                 </div>
 
-                {/* 3. Mail Delivery Option toggle */}
-                <div className="flex flex-col gap-2 pt-2.5">
-                  <span className="text-[11px] font-sans font-bold text-stone-500 tracking-wider">
-                    メール配信希望
-                  </span>
-                  
-                  <button
-                    type="button"
-                    onClick={() => setSubscribeMail(!subscribeMail)}
-                    className={`flex items-center gap-2.5 border rounded-md py-2 px-3 text-[12px] font-sans font-bold transition-all ${
-                      subscribeMail 
-                        ? 'border-[#108A93] bg-[#E8F6F7]/60 text-[#108A93]' 
-                        : 'border-stone-200 bg-white text-stone-500 hover:border-stone-300'
-                    }`}
-                  >
-                    <span className={`w-4.5 h-4.5 rounded flex items-center justify-center transition-all ${
-                      subscribeMail ? 'bg-[#108A93] text-white' : 'border border-stone-350 bg-white'
-                    }`}>
-                      {subscribeMail && <Check className="w-3 h-3 text-white stroke-[2.5]" />}
-                    </span>
-                    <span>希望する</span>
-                  </button>
-                </div>
               </div>
-            </div>
-            
-            <div className="mt-6 text-[10px] text-stone-400 font-sans tracking-wide leading-tight">
-              ※配信希望者の皆様に同窓会誌の送付等も優先してお知らせします。
             </div>
           </div>
 
@@ -937,22 +952,6 @@ export default function Update() {
                         />
                       </div>
 
-                      {/* Newsletter sign option */}
-                      <div className="flex items-center gap-3 pt-2">
-                        <button
-                          type="button"
-                          onClick={() => setSubscribeMail(!subscribeMail)}
-                          className={`w-5 h-5 rounded flex items-center justify-center border transition-all ${
-                            subscribeMail ? 'bg-[#108A93] border-[#108A93] text-white' : 'border-stone-300 bg-white'
-                          }`}
-                        >
-                          {subscribeMail && <Check className="w-3.5 h-3.5 text-currentColor stroke-[2.5]" />}
-                        </button>
-                        <span className="text-stone-700 text-xs font-sans font-semibold">
-                          最新情報のメール配信を希望する
-                        </span>
-                      </div>
-
                       {/* Back/Next triggers */}
                       <div className="pt-3 flex justify-between items-center">
                         <button
@@ -1097,8 +1096,8 @@ export default function Update() {
                   変更届の送信が完了しました
                 </h3>
                 <p className="text-[#00204A] text-xs sm:text-[13.5px] leading-relaxed tracking-wider mb-4">
-                  ご入力いただいた住所・連絡先の更新情報がオンライン届出としてシステムに仮登録されました。
-                  同窓会事務局にて情報確認完了しだい、本登録させていただきます。
+                  ご入力いただいた住所・連絡先の更新情報を同窓会事務局へ送信しました。
+                  事務局で内容を確認後、登録情報を更新します。
                 </p>
                 <button
                   onClick={resetForm}

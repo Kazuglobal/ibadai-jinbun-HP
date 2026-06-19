@@ -15,6 +15,8 @@ const STORIES_GEMINI_MODEL = process.env.STORIES_GEMINI_MODEL || "gemini-2.5-fla
 const SLACK_STORIES_WEBHOOK_URL = process.env.SLACK_STORIES_WEBHOOK_URL || "";
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || "";
 const SLACK_STORIES_CHANNEL_ID = process.env.SLACK_STORIES_CHANNEL_ID || "";
+const FORM_WEBHOOK_URL = process.env.FORM_WEBHOOK_URL || process.env.GAS_WEBAPP_URL || "";
+const FORM_RECIPIENTS = ["ibadai.bj.dousou@gmail.com", "oodate@salat.co.jp"];
 const CHAT_MONTHLY_BUDGET_JPY = getPositiveEnvNumber("CHAT_MONTHLY_BUDGET_JPY", 1000);
 const CHAT_USD_JPY_RATE = getPositiveEnvNumber("CHAT_USD_JPY_RATE", 160);
 const GEMINI_INPUT_USD_PER_1M = getPositiveEnvNumber("GEMINI_INPUT_USD_PER_1M", 0.1);
@@ -456,6 +458,7 @@ const storyInterviewRequests = new Map<string, { count: number; resetAt: number 
 const storySubmissionRequests = new Map<string, { count: number; resetAt: number }>();
 const chatRequests = new Map<string, { count: number; resetAt: number }>();
 const registerRequests = new Map<string, { count: number; resetAt: number }>();
+const formRequests = new Map<string, { count: number; resetAt: number }>();
 
 function getSafeText(value: unknown, maxLength = 2000) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
@@ -509,6 +512,14 @@ function chatRateAllowed(ip: string) {
 
 function registerRateAllowed(ip: string) {
   return rateLimitAllowed(registerRequests, ip, 5, 60 * 60 * 1000);
+}
+
+function formRateAllowed(ip: string) {
+  return rateLimitAllowed(formRequests, ip, 10, 60 * 60 * 1000);
+}
+
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 }
 
 function timingSafeEqualStr(a: string, b: string) {
@@ -1152,13 +1163,17 @@ app.post("/api/register", async (req, res) => {
     }
 
     const payload = {
+      formType: "event-registration",
+      recipients: FORM_RECIPIENTS,
+      submittedAt: new Date().toISOString(),
       fullName,
       kana,
       gradYear,
       address,
       phone,
       partyStatus,
-      memo
+      memo,
+      subject: `【第18回総会 参加申込】 ${fullName} 様`,
     };
 
     const gasWebAppUrl = process.env.GAS_WEBAPP_URL;
@@ -1199,6 +1214,99 @@ app.post("/api/register", async (req, res) => {
     res.status(500).json({ 
       error: "GASサーバーへの転送中にエラーが発生しました。詳細: " + error.message,
       code: "GAS_FORWARD_FAILED"
+    });
+  }
+});
+
+app.post("/api/forms/submit", async (req, res) => {
+  try {
+    if (!formRateAllowed(req.ip || "unknown")) {
+      return res.status(429).json({
+        error: "短時間に多くの送信が行われました。時間をおいて再度お試しください。",
+        code: "RATE_LIMITED",
+      });
+    }
+
+    // A filled honeypot indicates an automated submission.
+    if (getSafeText(req.body?.website, 200)) {
+      return res.json({ status: "success" });
+    }
+
+    const type = req.body?.type === "address-update" ? "address-update" : "contact";
+    const fullName = getSafeText(req.body?.fullName, 100);
+    const email = getSafeText(req.body?.email, 254);
+    const phone = getSafeText(req.body?.phone, 30);
+    const subject = getSafeText(req.body?.subject, 200);
+    const message = getSafeText(req.body?.message, 4000);
+
+    if (!fullName || !email || !isValidEmail(email)) {
+      return res.status(400).json({ error: "お名前と正しいメールアドレスを入力してください。" });
+    }
+
+    if (type === "contact" && (!subject || !message)) {
+      return res.status(400).json({ error: "件名とお問い合わせ内容を入力してください。" });
+    }
+
+    const details =
+      type === "address-update"
+        ? {
+            nameKana: getSafeText(req.body?.details?.nameKana, 100),
+            birthdate: getSafeText(req.body?.details?.birthdate, 30),
+            gradYear: getSafeText(req.body?.details?.gradYear, 50),
+            department: getSafeText(req.body?.details?.department, 100),
+            postalCode: getSafeText(req.body?.details?.postalCode, 20),
+            prefecture: getSafeText(req.body?.details?.prefecture, 20),
+            cityAddress: getSafeText(req.body?.details?.cityAddress, 200),
+            building: getSafeText(req.body?.details?.building, 200),
+          }
+        : {};
+
+    if (
+      type === "address-update" &&
+      (!details.postalCode || !details.prefecture || !details.cityAddress || !phone)
+    ) {
+      return res.status(400).json({ error: "住所変更の必須項目をすべて入力してください。" });
+    }
+
+    if (!FORM_WEBHOOK_URL) {
+      return res.status(503).json({
+        error: "送信先が未設定です。事務局へ直接メールでお問い合わせください。",
+        code: "FORM_WEBHOOK_NOT_CONFIGURED",
+      });
+    }
+
+    const payload = {
+      formType: type,
+      recipients: FORM_RECIPIENTS,
+      submittedAt: new Date().toISOString(),
+      fullName,
+      email,
+      phone,
+      subject: type === "address-update" ? `【住所変更届】${fullName} 様` : `【お問い合わせ】${subject}`,
+      message,
+      details,
+    };
+
+    const response = await fetch(FORM_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const responseData: any = await response.json().catch(() => ({}));
+
+    if (!response.ok || responseData.status === "error") {
+      throw new Error(responseData.error || `Webhook returned status ${response.status}`);
+    }
+
+    return res.json({
+      status: "success",
+      message: "送信を受け付けました。",
+    });
+  } catch (error: any) {
+    console.error("Form submission error:", error);
+    return res.status(502).json({
+      error: "送信に失敗しました。時間をおいて再度お試しください。",
+      code: "FORM_FORWARD_FAILED",
     });
   }
 });
