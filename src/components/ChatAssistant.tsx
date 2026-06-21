@@ -188,7 +188,7 @@ export default function ChatAssistant({ isOpen: controlledIsOpen, onOpenChange }
                   <h3 className="font-bold text-sm tracking-wide leading-tight">茨大同窓会 AIコンシェルジュ</h3>
                   <div className="flex items-center gap-1.5 mt-0.5">
                     <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping" />
-                    <span className="text-[10px] text-stone-200 uppercase tracking-widest font-semibold">Gemini Flash-Lite Active</span>
+                    <span className="text-[10px] text-stone-200 uppercase tracking-widest font-semibold">オンライン</span>
                   </div>
                 </div>
               </div>
