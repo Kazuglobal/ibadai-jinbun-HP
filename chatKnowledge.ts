@@ -10,7 +10,7 @@
 // contains. This is far more precise on Japanese than word tokenization or naive
 // bigram overlap, and needs no embeddings / external API (no latency or Gemini cost).
 
-import { newsletterArchiveIssues } from "./src/data/newsletterArchive";
+import { newsletterArchiveIssues } from "./src/data/newsletterArchive.js";
 
 type IndexedArticle = {
   issueNumber: number;

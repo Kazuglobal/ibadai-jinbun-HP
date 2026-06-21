@@ -5,7 +5,7 @@ import fs from "fs";
 import path from "path";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
-import { retrieveNewsletterContext } from "./chatKnowledge";
+import { retrieveNewsletterContext } from "./chatKnowledge.js";
 
 dotenv.config();
 
