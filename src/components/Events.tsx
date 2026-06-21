@@ -133,6 +133,8 @@ export default function Events({ onSelectEvent }: EventsProps) {
 
         </div>
 
+        <div id="all-events" className="scroll-mt-24" />
+
         <div className="-mr-4 flex snap-x snap-proximity gap-4 overflow-x-auto overscroll-x-contain pb-3 pl-[10vw] pr-4 scroll-smooth [touch-action:pan-x_pan-y] [-webkit-overflow-scrolling:touch] scrollbar-none sm:-mr-6 sm:pr-6 md:hidden">
           {EVENTS_DATA.map((item) => {
             const location = item.details.find((detail) => detail.label === '場所')?.value ?? '';
@@ -191,7 +193,7 @@ export default function Events({ onSelectEvent }: EventsProps) {
         {/* =========================================================================
             THREE COLUMN EVENTS CARDS GRID - Horizontal Scroll on Mobile, Grid on Tablet/Desktop
             ========================================================================= */}
-        <div className="hidden gap-6 pb-0 md:grid md:grid-cols-2 lg:grid-cols-3 lg:gap-8">
+        <div className="hidden gap-6 pb-0 md:grid md:grid-cols-2 lg:grid-cols-3 lg:gap-8" id="all-events-desktop">
           
           {EVENTS_DATA.map((item) => (
             <motion.div

@@ -854,7 +854,7 @@ export default function About({ onNavigate }: AboutProps) {
           </div>
 
           <a
-            href="#contact"
+            href="#site-footer"
             className="w-full md:w-auto inline-flex items-center justify-center gap-2 bg-[#00204A] hover:bg-[#031C3C] text-white text-xs font-bold py-4 px-8 rounded-full transition-all tracking-widest shadow-sm text-center"
           >
             <span>お問い合わせフォームへ</span>

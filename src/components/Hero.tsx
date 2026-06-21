@@ -3,8 +3,8 @@ import { heroVisualImages, type HeroVisualImage } from '../data/heroVisualImages
 
 const actions = [
   { label: 'NEWS', href: '#news', primary: true },
-  { label: 'ADDRESS', href: '#address', primary: false },
-  { label: 'ARCHIVE', href: '#archive', primary: false },
+  { label: 'ADDRESS', href: '#update-section', primary: false },
+  { label: 'ARCHIVE', href: '#network-archive', primary: false },
 ];
 
 function Photo({ image, className, animate = false }: { image: HeroVisualImage; className: string; animate?: boolean }) {
@@ -35,11 +35,10 @@ function HeroActions({ mobile = false }: { mobile?: boolean }) {
 function DesktopImageGrid() {
   return (
     <div className="relative min-h-[560px]">
-      <Photo image={heroVisualImages.campus} className="absolute left-0 top-0 h-[54%] w-[58%]" animate />
-      <Photo image={heroVisualImages.graduation} className="absolute right-[10%] top-[7%] h-[48%] w-[29%] rounded-t-full" animate />
+      <Photo image={heroVisualImages.campus} className="absolute left-0 top-0 h-[58%] w-[68%]" animate />
       <Photo image={heroVisualImages.archive} className="absolute bottom-[12%] left-0 h-[28%] w-[40%]" animate />
-      <Photo image={heroVisualImages.alumni} className="absolute bottom-[12%] left-[42%] h-[28%] w-[40%]" animate />
-      <div className="absolute bottom-[12%] left-[80%] h-7 w-7 bg-[#00204A]" aria-hidden="true" />
+      <Photo image={heroVisualImages.alumni} className="absolute bottom-[12%] right-[20%] h-[36%] w-[48%]" animate />
+      <div className="absolute bottom-[12%] right-[20%] h-7 w-7 translate-x-full bg-[#00204A]" aria-hidden="true" />
       <div className="absolute right-[4%] top-[8%] h-[17%] w-px bg-[#CD9535]" aria-hidden="true" />
       <div className="absolute right-[4%] top-[55%] h-[13%] w-px bg-[#CD9535]" aria-hidden="true" />
       <div className="absolute right-[1.2%] top-[32%] flex h-[170px] items-center justify-center" aria-hidden="true">
