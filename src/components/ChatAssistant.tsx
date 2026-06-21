@@ -16,10 +16,12 @@ import {
   ChevronLeft, 
   ChevronRight 
 } from 'lucide-react';
+import { CHAT_FAQ_QUESTIONS } from '../data/chatUiConfig';
 
 interface ChatMessage {
   role: 'user' | 'model';
   content: string;
+  sources?: Array<{ id: string; label: string }>;
 }
 
 interface ChatAssistantProps {
@@ -117,7 +119,11 @@ export default function ChatAssistant({ isOpen: controlledIsOpen, onOpenChange }
 
       setMessages((prev) => [
         ...prev,
-        { role: 'model', content: data.reply || 'お答えが返ってきませんでした。' }
+        {
+          role: 'model',
+          content: data.reply || 'お答えが返ってきませんでした。',
+          sources: Array.isArray(data.sources) ? data.sources : [],
+        }
       ]);
     } catch (error: any) {
       console.error('Chat error:', error);
@@ -151,32 +157,14 @@ export default function ChatAssistant({ isOpen: controlledIsOpen, onOpenChange }
   };
 
   // Predefined interactive FAQ quick cards layout list
-  const faqCards = [
-    {
-      id: 'office',
-      question: '事務局の場所や営業時間は？',
-      icon: <Clock className="w-4 h-4 text-[#CD9535]" />,
-      hint: 'アクセス・受付時間 🕒'
-    },
-    {
-      id: 'address',
-      question: '登録住所の変更手続き方法は？',
-      icon: <MapPin className="w-4 h-4 text-[#CD9535]" />,
-      hint: '住所変更の流れ 📬'
-    },
-    {
-      id: 'bulletin',
-      question: '同窓会報をオンラインで見るには？',
-      icon: <BookOpen className="w-4 h-4 text-[#CD9535]" />,
-      hint: '会報閲覧リンク 📖'
-    },
-    {
-      id: 'fee',
-      question: '同窓会に会費や寄付はありますか？',
-      icon: <CreditCard className="w-4 h-4 text-[#CD9535]" />,
-      hint: '会費・寄付手続き 💳'
-    }
-  ];
+  const faqCards = CHAT_FAQ_QUESTIONS.map((faq) => ({
+    ...faq,
+    icon:
+      faq.icon === 'clock' ? <Clock className="w-4 h-4 text-[#CD9535]" /> :
+      faq.icon === 'map' ? <MapPin className="w-4 h-4 text-[#CD9535]" /> :
+      faq.icon === 'book' ? <BookOpen className="w-4 h-4 text-[#CD9535]" /> :
+      <CreditCard className="w-4 h-4 text-[#CD9535]" />,
+  }));
 
   return (
     <div className="fixed bottom-20 sm:bottom-6 right-4 sm:right-6 z-50 font-sans" id="ai-chat-assistant-container">
@@ -248,6 +236,12 @@ export default function ChatAssistant({ isOpen: controlledIsOpen, onOpenChange }
                         >
                           {msg.content}
                         </div>
+                        {isModel && msg.sources && msg.sources.length > 0 && (
+                          <div className="mt-1.5 px-1 text-[10px] leading-relaxed text-stone-500">
+                            <span className="font-bold text-stone-600">根拠：</span>
+                            {msg.sources.map((source) => source.label).join('／')}
+                          </div>
+                        )}
                       </div>
 
                       {!isModel && (
