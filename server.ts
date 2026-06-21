@@ -824,7 +824,7 @@ app.post("/api/stories/interview", async (req, res) => {
 
     if (!process.env.GEMINI_API_KEY) {
       return res.status(503).json({
-        error: "Gemini APIキーが未設定です。サーバー環境のGEMINI_API_KEYを設定してください。",
+        error: "AI機能を一時的にご利用いただけません。お手数ですが、時間をおいて再度お試しください。",
         code: "GEMINI_NOT_CONFIGURED",
       });
     }
@@ -883,31 +883,30 @@ ${transcript}
     const question = getSafeText(result.text, 200);
     if (!question) {
       return res.status(502).json({
-        error: "Geminiから質問を生成できませんでした。もう一度お試しください。",
+        error: "質問を生成できませんでした。もう一度お試しください。",
         code: "GEMINI_EMPTY_RESPONSE",
       });
     }
     res.json({
       question,
-      model: STORIES_GEMINI_MODEL,
     });
   } catch (error: any) {
     console.error("STORIES interview error:", error);
     const status = Number(error?.status);
     if (status === 401 || status === 403) {
       return res.status(503).json({
-        error: "Gemini APIキーを確認できませんでした。サーバー設定をご確認ください。",
+        error: "AI機能を一時的にご利用いただけません。お手数ですが、時間をおいて再度お試しください。",
         code: "GEMINI_AUTH_FAILED",
       });
     }
     if (status === 429) {
       return res.status(429).json({
-        error: "Geminiの利用上限に達しています。時間をおいてからお試しください。",
+        error: "AIの利用上限に達しています。時間をおいてからお試しください。",
         code: "GEMINI_RATE_LIMITED",
       });
     }
     res.status(502).json({
-      error: "Geminiとの通信に失敗しました。時間をおいてからもう一度お試しください。",
+      error: "AIとの通信に失敗しました。時間をおいてからもう一度お試しください。",
       code: "GEMINI_REQUEST_FAILED",
     });
   }
@@ -1064,7 +1063,7 @@ ${baseKnowledge}
     } catch (err: any) {
       console.error(err);
       return res.status(500).json({
-        error: "Gemini API key is not configured. Please make sure GEMINI_API_KEY is active in Settings.",
+        error: "AIチャットが一時的にご利用いただけません。お手数ですが、時間をおいて再度お試しください。",
         code: "KEY_MISSING"
       });
     }
