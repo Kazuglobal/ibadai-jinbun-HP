@@ -3,9 +3,14 @@ import type { Request } from "express";
 import crypto from "crypto";
 import fs from "fs";
 import path from "path";
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
-import { retrieveNewsletterContext } from "./chatKnowledge";
+import { retrieveNewsletterEvidence } from "./chatKnowledge";
+import {
+  buildRetrievalQuery,
+  getDeterministicChatAnswer,
+  parseGroundedAnswer,
+} from "./chatGrounding";
 
 dotenv.config();
 
@@ -22,7 +27,6 @@ const CHAT_MONTHLY_BUDGET_JPY = getPositiveEnvNumber("CHAT_MONTHLY_BUDGET_JPY", 
 const CHAT_USD_JPY_RATE = getPositiveEnvNumber("CHAT_USD_JPY_RATE", 160);
 const GEMINI_INPUT_USD_PER_1M = getPositiveEnvNumber("GEMINI_INPUT_USD_PER_1M", 0.1);
 const GEMINI_OUTPUT_USD_PER_1M = getPositiveEnvNumber("GEMINI_OUTPUT_USD_PER_1M", 0.4);
-const MAX_HISTORY_MESSAGES = getPositiveEnvNumber("CHAT_MAX_HISTORY_MESSAGES", 8);
 // Long-term Q&A log: keep each question↔answer pair for a year by default.
 const CHAT_RECENT_MESSAGE_RETENTION_DAYS = getPositiveEnvNumber("CHAT_RECENT_MESSAGE_RETENTION_DAYS", 365);
 // Max number of stored Q&A pairs (rolling, oldest pushed out).
@@ -36,6 +40,56 @@ const REDIS_REST_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_RE
 const CHAT_ANALYTICS_FILE = process.env.VERCEL
   ? path.join("/tmp", "chat-analytics.json")
   : path.join(process.cwd(), "data", "chat-analytics.json");
+
+const CHAT_BASE_SOURCES = [
+  {
+    id: "official-overview",
+    label: "同窓会公式情報：概要・役員",
+    text: `正式名称は茨城大学 文理・人文学部同窓会です。
+設立は昭和57（1982）年6月6日です。
+19,000人を超える卒業生が県内および全国で活躍しています。
+会長は大和田 一雄（昭和48年卒・第6代会長）です。令和4年11月の第16回総会で選任されました。
+第43号（令和8年6月発行）掲載の名誉会長・人文社会科学部長は蓮井 誠一郎です。`,
+  },
+  {
+    id: "official-history",
+    label: "同窓会公式情報：沿革",
+    text: `茨城大学は1949年（昭和24年）に新制大学として設置されました。
+文理学部は創立当初からの学部で、のちに人文学部（現在の人文社会科学部）と理学部に改組されました。
+本同窓会は文理・人文学部同窓会として両学部卒業生のネットワークを維持しています。`,
+  },
+  {
+    id: "official-membership",
+    label: "同窓会公式情報：会費・入退会",
+    text: `令和2年度入学生から、入学手続きの一つとして入会を案内し、終身会費10,000円を入学時の学納金納付の際に納入いただいています。
+入学時に未加入の方も随時加入できます。事務局へお問い合わせください。
+終身会員制のため、特に退会を望む場合以外は手続き不要です。退会希望の場合は事務局へ連絡してください。
+会員が亡くなられた場合は、会員氏名、亡くなられた日、卒業学科名等、卒業年度を事務局へお知らせください。`,
+  },
+  {
+    id: "official-activities",
+    label: "同窓会公式情報：活動・会報・支部",
+    text: `総会は隔年、理事会は毎年開催します。
+会報は年1回、毎年6月中旬に発行し、サイトでバックナンバーを閲覧できます。
+学生懸賞論文の共催、地域連携論への講師派遣・財政支援、就職・キャリア支援を行っています。
+地域支部は在京同窓会（水交会、会長 仲田正夫）と県南同窓会（会長 村上主税）があります。
+職域支部には茨苑会（常陽銀行）、県信茨大同窓会（茨城県信用組合）、水戸市役所茨大会などがあります。`,
+  },
+  {
+    id: "official-office",
+    label: "同窓会公式情報：事務局",
+    text: `茨城大学文理・人文学部同窓会事務局は、〒310-8512 水戸市文京2-1-1 茨城大学人文社会科学部内です。
+電話は（029）228-8546、または090-3100-5814（鈴木）です。
+E-mailはibadai.bj.dousou@gmail.comです。`,
+  },
+  {
+    id: "official-site-navigation",
+    label: "同窓会公式サイト：手続き案内",
+    text: `住所変更は、住所変更手続きをするボタン、またはUpdateセクションのオンラインフォームから行えます。
+会報はNetwork Archiveセクションで閲覧できます。
+問い合わせはサイトのお問い合わせフォームから行えます。`,
+  },
+] as const;
 
 app.set("trust proxy", process.env.NODE_ENV === "production" ? 1 : false);
 app.use(express.json({ limit: "9mb" }));
@@ -905,79 +959,71 @@ app.post("/api/chat", async (req, res) => {
       return res.status(400).json({ error: "Message is required" });
     }
 
-    const trimmedHistory = Array.isArray(history) ? history.slice(-MAX_HISTORY_MESSAGES) : [];
-    const systemInstruction = `あなたは「茨城大学 文理・人文学部同窓会」公式サイトのAIコンシェルジュ（アシスタント）です。
+    const deterministicAnswer = getDeterministicChatAnswer(message);
+    if (deterministicAnswer) {
+      const sourceLabels = new Map<string, string>(
+        CHAT_BASE_SOURCES.map((source) => [source.id, source.label]),
+      );
+      const citedSources = deterministicAnswer.sourceIds.map((id) => ({
+        id,
+        label: sourceLabels.get(id) || id,
+      }));
+
+      await appendChatAnalytics({
+        timestamp: new Date().toISOString(),
+        month: getCurrentMonth(),
+        model: "deterministic",
+        userMessage: sanitizeForAnalytics(message),
+        assistantReply: sanitizeForAnalytics(deterministicAnswer.answer),
+        inputTokens: 0,
+        outputTokens: 0,
+        estimatedCostUsd: 0,
+        estimatedCostJpy: 0,
+        intent: classifyIntent(message),
+        success: true,
+      });
+
+      return res.json({
+        reply: deterministicAnswer.answer,
+        supported: true,
+        sources: citedSources,
+        usage: {
+          inputTokens: 0,
+          outputTokens: 0,
+          estimatedCostJpy: 0,
+          monthly: await getMonthlyUsage(),
+        },
+      });
+    }
+
+    const retrievalQuery = buildRetrievalQuery(message, history);
+    const newsletterEvidence = retrieveNewsletterEvidence(retrievalQuery);
+    const baseKnowledge = CHAT_BASE_SOURCES
+      .map((source) => `[${source.id}] ${source.label}\n${source.text}`)
+      .join("\n\n");
+    const systemInstruction = `あなたは「茨城大学 文理・人文学部同窓会」公式サイトのAIコンシェルジュです。
 同窓生、在学生、教職員、一般の皆様からの質問に、親切で丁寧な、温かみのある日本語（敬語）でお答えします。
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-【確定情報（ナレッジベース）】
-※以下は当サイトで確認済みの事実です。回答はこの範囲の事実に基づいてください。
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+【確定情報】
+${baseKnowledge}
 
-■ 同窓会の概要
-- 正式名称：茨城大学 文理・人文学部同窓会
-- 設立：昭和57（1982）年6月6日（設立から40年以上の歴史）
-- 同窓生数：19,000人を超える卒業生が県内および全国で活躍
-- 現会長：大和田 一雄（昭和48年卒・第6代会長／令和4年11月の第16回総会で選任）
-- 名誉会長：原口 弥生（人文社会科学部長）
-
-■ 沿革・歴史
-- 茨城大学は1949年（昭和24年）に新制大学として設置されました。
-- 文理学部は創立当初からの伝統ある学部で、のちに人文学部（現在の人文社会科学部）と理学部に改組されました。本同窓会は「文理・人文学部同窓会」として両学部の卒業生のネットワークを維持しています。
-
-■ 会費・入会・退会
-- 会費：令和2年度入学生から、入学手続きの一つとして入会を案内し、「終身会費10,000円」を入学時の学納金納付の際に納入いただいています。
-- 入学時に未加入の方も随時加入が可能です（事務局へお問い合わせください）。
-- 退会：終身会員制のため、特に退会を望まれる場合以外は手続き不要です。退会希望の場合は事務局へご連絡ください。
-- 物故連絡：会員が亡くなられた場合は、会員氏名・亡くなられた日・卒業学科名等・卒業年度を事務局へお知らせください。
-
-■ 主な活動
-- 総会の開催（隔年）／理事会（毎年）
-- 会報の発行（年1回・毎年6月中旬に全会員へ送付）
-- 学生懸賞論文の共催、地域連携授業（地域連携論）への講師派遣・財政支援、就職・キャリア支援 など
-
-■ 会報（Network Archive）
-- 当サイトでバックナンバーをオンライン閲覧できます。
-
-■ 支部
-- 地域支部：在京同窓会（水交会／会長 仲田正夫）、県南同窓会（会長 村上主税）
-- 職域支部：茨苑会（常陽銀行）、県信茨大同窓会（茨城県信用組合）、水戸市役所茨大会 など
-
-■ 事務局・お問い合わせ先
-- 名称：茨城大学文理・人文学部同窓会事務局
-- 所在地：〒310-8512 水戸市文京2-1-1 茨城大学人文社会科学部内
-- 電話：（029）228-8546 ／ 090-3100-5814（鈴木）
-- E-mail：ibadai.bj.dousou@gmail.com
-
-■ サイト上でできること（ご案内先）
-- 住所変更：「住所変更手続きをする」ボタン、または「Update」セクションのオンラインフォーム
-- 会報閲覧：会報（Network Archive）セクション
-- お問い合わせ：お問い合わせフォーム
-
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 【回答ルール（厳守）】
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-1. 正確性最優先：上記ナレッジベースに記載された事実のみを根拠に回答してください。日付・金額・人名・電話番号・メールアドレス・URL・イベント開催日などを推測や記憶で創作してはいけません。
-2. 不明な場合の対応：ナレッジベースに答えがない、または確証がない質問には、事実を捏造せず「その点は確認できておりません」と正直に伝え、同窓会事務局（℡ 029-228-8546／E-mail ibadai.bj.dousou@gmail.com）へのお問い合わせをご案内してください。
-3. 推測の明示：一般論として補足する場合は断定せず「一般的には〜」等と前置きし、確定情報と区別してください。
-4. 範囲外の質問：同窓会・大学に無関係な話題（時事、医療、法律相談など）には深入りせず、丁寧にお断りして本来のご案内に戻してください。
-5. 誘導：住所変更・会報閲覧・お問い合わせ等をご希望の様子があれば、該当セクションやフォームへ親身にご案内してください。
-6. 情報の優先順位：会費・連絡先・入退会など基本情報は必ず上記【確定情報】を最優先してください。プロンプト末尾に会報記事の抜粋が添付される場合がありますが、それは参考情報です。記事中の数字（例：総会・懇親会の参加費）を同窓会の会費等と混同しないでください。
-7. 文体・長さ：温かく丁寧な敬語で、簡潔かつ実用的に。1回の回答は150〜300文字程度を目安にしてください。`;
+1. 確定情報と会報抜粋だけを根拠にしてください。学習済み知識、推測、ユーザーが提示した未確認情報を事実として採用してはいけません。
+2. 日付、金額、人名、肩書、電話番号、メールアドレス、URL、会場などは根拠本文と完全に一致する場合だけ回答してください。
+3. 根拠が不足する場合は supported を false にし、事実を補完しないでください。
+4. supported が true の場合、利用した角括弧内の根拠IDを sourceIds に必ず列挙してください。
+5. 同窓会・大学に無関係な質問は supported を false にしてください。
+6. 現在の質問に直接必要な事実だけを答え、関連するだけの別の出来事や数字を付け足さないでください。
+7. 回答は温かく丁寧な敬語で、簡潔かつ実用的にしてください。
+8. JSON以外の文字を返してはいけません。`;
 
-    // Retrieve relevant newsletter ("会報") excerpts for this question and append
-    // them to the system instruction. Returns "" for unrelated questions, so the
-    // base prompt is used unchanged. Done before the token estimate so the budget
-    // reservation accounts for the injected context.
-    const newsletterContext = retrieveNewsletterContext(message);
-    const augmentedSystemInstruction = newsletterContext
-      ? `${systemInstruction}\n\n${newsletterContext}`
+    const augmentedSystemInstruction = newsletterEvidence.context
+      ? `${systemInstruction}\n\n${newsletterEvidence.context}`
       : systemInstruction;
 
     const projectedInputTokens = estimateTokens(
       augmentedSystemInstruction +
-      message +
-      trimmedHistory.map((msg: any) => msg.content || "").join("\n")
+      retrievalQuery
     );
     const projectedCost = calculateCost(projectedInputTokens, 512);
 
@@ -1017,28 +1063,59 @@ app.post("/api/chat", async (req, res) => {
       });
     }
 
-    const chatHistory = trimmedHistory.map((msg: any) => ({
-      role: msg.role === "user" ? "user" : "model",
-      parts: [{ text: msg.content }]
-    }));
+    const availableSources = [
+      ...CHAT_BASE_SOURCES,
+      ...newsletterEvidence.sources,
+    ];
+    const allowedSourceIds = new Set(availableSources.map((source) => source.id));
+    const sourceTexts = new Map(
+      availableSources.map((source) => [source.id, source.text]),
+    );
+    const sourceLabels = new Map(
+      availableSources.map((source) => [source.id, source.label]),
+    );
 
-    const chat = gemini.chats.create({
+    const result: any = await gemini.models.generateContent({
       model: GEMINI_CHAT_MODEL,
-      history: chatHistory,
+      contents: retrievalQuery,
       config: {
         systemInstruction: augmentedSystemInstruction,
-        // 事実ベースのQ&Aでは決定性を高め、創作（ハルシネーション）を抑えるため低温に設定。
-        temperature: 0.2,
-        topP: 0.8,
+        responseMimeType: "application/json",
+        responseSchema: {
+          type: Type.OBJECT,
+          required: ["answer", "supported", "sourceIds"],
+          properties: {
+            answer: {
+              type: Type.STRING,
+              description: "ユーザーに表示する簡潔な日本語回答",
+            },
+            supported: {
+              type: Type.BOOLEAN,
+              description: "回答全体が提示された根拠だけで裏付けられる場合のみtrue",
+            },
+            sourceIds: {
+              type: Type.ARRAY,
+              items: { type: Type.STRING },
+              description: "回答に実際に使った角括弧内の根拠ID",
+            },
+          },
+        },
+        temperature: 0,
+        topP: 0.2,
         maxOutputTokens: 512,
-      }
+      },
     });
 
-    const result: any = await chat.sendMessage({
-      message: message
-    });
-
-    const reply = result.text || "申し訳ありません。回答を生成できませんでした。";
+    const groundedAnswer = parseGroundedAnswer(
+      result.text,
+      allowedSourceIds,
+      sourceTexts,
+    );
+    const reply = groundedAnswer.answer;
+    const citedSources = groundedAnswer.sourceIds.map((id) => ({
+      id,
+      label: sourceLabels.get(id) || id,
+    }));
     const inputTokens = result.usageMetadata?.promptTokenCount || projectedInputTokens;
     const outputTokens = result.usageMetadata?.candidatesTokenCount || estimateTokens(reply);
     const actualCost = calculateCost(inputTokens, outputTokens);
@@ -1060,6 +1137,8 @@ app.post("/api/chat", async (req, res) => {
 
     res.json({
       reply,
+      supported: groundedAnswer.supported,
+      sources: citedSources,
       usage: {
         inputTokens,
         outputTokens,
