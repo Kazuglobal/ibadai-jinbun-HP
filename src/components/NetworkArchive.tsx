@@ -152,6 +152,8 @@ export default function NetworkArchive() {
   return (
     <section className="relative bg-[#FAF9F5] py-16 lg:py-24 border-t border-stone-200/40" id="network-archive">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <div id="archive-main" className="scroll-mt-24" />
+        <div id="activities-record" className="scroll-mt-24" />
         
         {/* =========================================================================
             TOP SECTION: SPLIT NETWORK (LEFT) & ARCHIVE (RIGHT) FOR DESKTOP, STACKED FOR MOBILE

@@ -79,7 +79,7 @@ export default function Reconnection() {
               <motion.a 
                 whileHover={{ scale: 1.03, backgroundColor: 'rgba(0, 32, 74, 0.04)' }}
                 whileTap={{ scale: 0.97 }}
-                href="#news-section"
+                href="#news"
                 className="inline-flex items-center justify-between gap-[18px] bg-transparent text-[#00204A] border border-[#00204A] font-sans font-bold text-[12px] py-4 px-6.5 rounded-full transition-all duration-300"
               >
                 <span>最新ニュースを見る</span>
@@ -89,7 +89,7 @@ export default function Reconnection() {
               <motion.a 
                 whileHover={{ scale: 1.03, backgroundColor: 'rgba(0, 32, 74, 0.04)' }}
                 whileTap={{ scale: 0.97 }}
-                href="#footer"
+                href="#site-footer"
                 className="inline-flex items-center justify-between gap-5 bg-transparent text-[#00204A] border border-[#00204A] font-sans font-bold text-[12px] py-4 px-6 rounded-full transition-all duration-300"
               >
                 <span>お問い合わせ</span>
@@ -209,7 +209,7 @@ export default function Reconnection() {
 
           <motion.a 
             whileTap={{ scale: 0.98 }}
-            href="#news-section"
+            href="#news"
             className="w-full bg-white hover:bg-stone-50 text-[#00204A] text-sm font-sans font-bold py-4 px-6 rounded-xl border border-[#00204A] flex items-center justify-between transition-all"
           >
             <span className="tracking-wider">最新ニュースを見る</span>
@@ -218,7 +218,7 @@ export default function Reconnection() {
 
           <motion.a 
             whileTap={{ scale: 0.98 }}
-            href="#footer"
+            href="#site-footer"
             className="w-full bg-white hover:bg-stone-50 text-[#00204A] text-sm font-sans font-bold py-4 px-6 rounded-xl border border-[#00204A] flex items-center justify-between transition-all"
           >
             <span className="tracking-wider">お問い合わせ</span>

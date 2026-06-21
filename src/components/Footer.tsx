@@ -9,20 +9,20 @@ interface FooterProps {
 export default function Footer({ onNavigate }: FooterProps) {
   const sitemapMain = [
     { name: 'ニュース', en: 'NEWS', href: '#news' },
-    { name: 'イベント', en: 'EVENTS', href: '#events' },
-    { name: '卒業生ストーリー', en: 'STORIES', href: '#stories' },
-    { name: '交流・ネットワーク', en: 'NETWORK', href: '#network' },
-    { name: '会報アーカイブ', en: 'ARCHIVE', href: '#archive' },
+    { name: 'イベント', en: 'EVENTS', href: '#events-section' },
+    { name: '卒業生ストーリー', en: 'STORIES', href: '#stories-section' },
+    { name: '交流・ネットワーク', en: 'NETWORK', href: '#network-archive' },
+    { name: '会報アーカイブ', en: 'ARCHIVE', href: '#network-archive' },
   ];
 
   const sitemapSub = [
-    { name: '住所変更手続き', href: '#address' },
-    { name: '後援支援・学生支援情報', href: '#support' },
+    { name: '住所変更手続き', href: '#update-section' },
+    { name: '後援支援・学生支援情報', href: '#update-section' },
     { name: '入会・退会について', href: '#membership' },
     { name: '地域支部・職域支部', href: '#branches' },
-    { name: 'お問い合わせ', href: '#contact' },
+    { name: 'お問い合わせ', href: '#site-footer' },
     { name: '個人情報保護方針', href: '#privacy' },
-    { name: '会則・概要', href: '#rules' },
+    { name: '会則・概要', href: '#bylaws' },
   ];
 
   const scrollToTop = () => {
@@ -32,20 +32,21 @@ export default function Footer({ onNavigate }: FooterProps) {
   const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     if (!onNavigate) {
-      window.location.hash = href;
+      const element = document.querySelector(href);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        window.location.hash = href;
+      }
       return;
     }
 
-    const aboutHashes = ['#rules', '#bylaws', '#about-section', '#membership', '#branches', '#privacy'];
+    const aboutHashes = ['#bylaws', '#about-section', '#membership', '#branches', '#privacy'];
 
     if (aboutHashes.includes(href)) {
-      onNavigate('about', href === '#rules' ? '#bylaws' : href);
+      onNavigate('about', href);
     } else {
-      let targetHash = href;
-      if (href === '#address') targetHash = '#update-section';
-      if (href === '#events') targetHash = '#events-section';
-      if (href === '#contact') targetHash = '#site-footer';
-      onNavigate('home', targetHash);
+      onNavigate('home', href);
     }
   };
 
@@ -181,7 +182,7 @@ export default function Footer({ onNavigate }: FooterProps) {
         <div className="mt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-[11px] md:text-xs text-stone-500 font-sans">
           <p>© 2026 茨城大学 文理・人文学部同窓会 All Rights Reserved.</p>
           <div className="flex gap-4">
-            <a href="#rules" onClick={(e) => handleLinkClick(e, '#rules')} className="hover:text-[#00204A] transition-colors">会則</a>
+            <a href="#bylaws" onClick={(e) => handleLinkClick(e, '#bylaws')} className="hover:text-[#00204A] transition-colors">会則</a>
             <span>•</span>
             <a href="#privacy" onClick={(e) => handleLinkClick(e, '#privacy')} className="hover:text-[#00204A] transition-colors">プライバシーポリシー</a>
             <span>•</span>

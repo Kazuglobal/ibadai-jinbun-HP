@@ -39,35 +39,64 @@ export default function App() {
   }, []);
   const homeGsapRef = useGsapHomeAnimations(currentView === 'home', handleHomeIntroComplete);
 
+  const resolveNavigationHash = (hash?: string) => {
+    if (!hash) return undefined;
+
+    const hashAliases: Record<string, string> = {
+      '#address': '#update-section',
+      '#archive': '#network-archive',
+      '#contact': '#site-footer',
+      '#events': '#events-section',
+      '#stories': '#stories-section',
+      '#network': '#network-archive',
+      '#news-section': '#news',
+      '#footer': '#site-footer',
+      '#rules': '#bylaws',
+      '#support': '#update-section',
+    };
+
+    return hashAliases[hash] ?? hash;
+  };
+
+  const scrollToHash = (hash: string) => {
+    [360, 800, 1300, 2200].forEach((delay) => {
+      window.setTimeout(() => {
+        const element = document.querySelector(hash);
+        if (element) {
+          const headerOffset = 84;
+          const top = element.getBoundingClientRect().top + window.scrollY - headerOffset;
+          window.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
+        }
+      }, delay);
+    });
+  };
+
   const handleSelectTopic = (title: string) => {
     setSelectedTopic(title);
     setIsRegModalOpen(true);
   };
 
   const handleNavigate = (targetView: 'home' | 'about' | 'newsletter43', hash?: string) => {
+    const targetHash = resolveNavigationHash(hash);
     setCurrentView(targetView);
-    if (hash) {
-      if (hash === '#event-registration-form') {
+    if (targetHash) {
+      if (targetHash === '#event-registration-form') {
         setSelectedTopic('第１８回総会・懇親会');
         setIsRegModalOpen(true);
-      } else if (/^#newsletter-(3[4-9]|4[0-3])$/.test(hash) || hash === '#newsletter-reader') {
-        const issueFromHash = Number(hash.match(/\d+/)?.[0] ?? selectedNewsletterIssue);
+      } else if (/^#newsletter-(3[4-9]|4[0-3])$/.test(targetHash) || targetHash === '#newsletter-reader') {
+        const issueFromHash = Number(targetHash.match(/\d+/)?.[0] ?? selectedNewsletterIssue);
         setSelectedNewsletterIssue(issueFromHash);
         setCurrentView('newsletter43');
+        window.history.pushState(null, '', targetHash);
         setTimeout(() => {
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }, 120);
       } else {
-        setTimeout(() => {
-          const element = document.querySelector(hash);
-          if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
-          } else {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-        }, 100);
+        window.history.pushState(null, '', targetHash);
+        scrollToHash(targetHash);
       }
     } else {
+      window.history.pushState(null, '', window.location.pathname);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
@@ -97,14 +126,11 @@ export default function App() {
     };
 
     const handleHashChange = () => {
-      const hash = window.location.hash;
+      const hash = resolveNavigationHash(window.location.hash);
       const aboutHashes = ['#about-section', '#purpose-activities', '#presidents-greeting', '#bylaws', '#organization-board', '#membership', '#branches', '#privacy'];
       if (aboutHashes.includes(hash)) {
         setCurrentView('about');
-        setTimeout(() => {
-          const el = document.querySelector(hash);
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }, 120);
+        scrollToHash(hash);
       } else if (hash === '#event-registration-form') {
         setCurrentView('home');
         setSelectedTopic('第１８回総会・懇親会');
@@ -118,10 +144,7 @@ export default function App() {
         }, 120);
       } else if (hash && hash !== '#') {
         setCurrentView('home');
-        setTimeout(() => {
-          const el = document.querySelector(hash);
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }, 120);
+        scrollToHash(hash);
       }
     };
 
