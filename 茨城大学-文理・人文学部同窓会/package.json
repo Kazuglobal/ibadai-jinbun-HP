@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "clean": "rm -rf dist server.js",
     "lint": "tsc --noEmit",
+    "test:chat": "tsx --test scripts/test-chat-grounding.ts",
     "test:forms": "tsx scripts/test-form-forwarding.ts"
   },
   "dependencies": {
