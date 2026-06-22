@@ -347,8 +347,8 @@ export default function About({ onNavigate }: AboutProps) {
         <div className="relative py-12 md:py-16 border-t border-stone-200/40" id="bylaws">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
             
-            {/* Left informative section (7 cols) */}
-            <div className="lg:col-span-7 flex flex-col text-left">
+            {/* Left informative section */}
+            <div className="lg:col-span-12 flex flex-col text-left">
               {/* Title group */}
               <div className="flex items-baseline gap-3 mb-6">
                 <span className="text-4xl sm:text-5xl font-mono font-bold text-[#CD9535]/65 leading-none">03</span>
@@ -366,7 +366,7 @@ export default function About({ onNavigate }: AboutProps) {
               </p>
 
               {/* Action and Summary Info Layout Side-by-side */}
-              <div className="space-y-6">
+              <div className="max-w-4xl space-y-6">
                 <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center">
                   <button
                     onClick={() => setIsBylawsOpen(true)}
@@ -424,18 +424,6 @@ export default function About({ onNavigate }: AboutProps) {
               </div>
             </div>
 
-            {/* Right Document Graphic Column (5 cols) */}
-            <div className="lg:col-span-5 relative w-full pt-6 lg:pt-14 flex justify-center">
-              <div className="relative group w-full max-w-[340px] aspect-[4/3] rounded-2xl overflow-hidden shadow-lg border border-stone-100">
-                <img 
-                  src="https://images.unsplash.com/photo-1450133064473-71024230f91b?q=80&w=800&auto=format&fit=crop"
-                  alt="Constitution fountain pen sign document"
-                  className="w-full h-full object-cover filter brightness-[0.98] transition-transform duration-500 group-hover:scale-102"
-                  referrerPolicy="no-referrer"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-stone-900/10 to-transparent" />
-              </div>
-            </div>
 
           </div>
         </div>
@@ -692,7 +680,7 @@ export default function About({ onNavigate }: AboutProps) {
                   </h3>
                 </div>
 
-                <div className="space-y-6">
+                <div className="max-w-4xl space-y-6">
                   {/* Branch 1 */}
                   <div className="border-b border-stone-200/30 pb-5 last:border-0 last:pb-0">
                     <h4 className="font-serif font-bold text-[14.5px] text-[#00204A] mb-1.5 flex items-center gap-2">
@@ -742,7 +730,7 @@ export default function About({ onNavigate }: AboutProps) {
                   </h3>
                 </div>
 
-                <div className="space-y-6">
+                <div className="max-w-4xl space-y-6">
                   {/* Branch 1 */}
                   <div className="border-b border-stone-200/30 pb-5 last:border-0 last:pb-0">
                     <h4 className="font-serif font-bold text-[14.5px] text-[#00204A] mb-1.5 flex items-center gap-2">
