@@ -1306,39 +1306,40 @@ app.post("/api/register", async (req, res) => {
       subject: `【第18回総会 参加申込】 ${fullName} 様`,
     };
 
-    const gasWebAppUrl = process.env.GAS_WEBAPP_URL;
+    const gasWebAppUrl = FORM_WEBHOOK_URL;
 
-    if (gasWebAppUrl) {
-      console.log(`Forwarding registration to GAS WebApp URL: ${gasWebAppUrl}`);
-      
-      const response = await fetch(gasWebAppUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (!response.ok) {
-        throw new Error(`GAS WebApp returned status: ${response.status}`);
-      }
-
-      const resData = await response.json().catch(() => ({ status: "success" }));
-      return res.json({ 
-        status: "success", 
-        message: "Google Apps Script(GAS)経由でメール転送が正常に処理されました。",
-        integrated: true,
-        data: resData 
-      });
-    } else {
-      // Return a simulated success status indicating the local configuration scenario
-      console.info("GAS_WEBAPP_URL is not set in `.env`. Request is simulated perfectly.");
-      return res.json({ 
-        status: "success", 
-        message: "受付完了（開発用シミュレーション）。本番連携には環境変数GAS_WEBAPP_URLを設定してください。",
-        integrated: false
+    if (!gasWebAppUrl) {
+      return res.status(503).json({
+        error: "送信先が未設定です。事務局へ直接メールでお問い合わせください。",
+        code: "FORM_WEBHOOK_NOT_CONFIGURED",
       });
     }
+
+    console.log(`Forwarding registration to GAS WebApp URL: ${gasWebAppUrl}`);
+
+    const response = await fetch(gasWebAppUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!response.ok) {
+      throw new Error(`GAS WebApp returned status: ${response.status}`);
+    }
+
+    const resData: any = await response.json().catch(() => ({ status: "success" }));
+    if (resData.status === "error") {
+      throw new Error(resData.error || "GAS WebApp returned an error");
+    }
+
+    return res.json({
+      status: "success",
+      message: "Google Apps Script(GAS)経由でメール転送が正常に処理されました。",
+      integrated: true,
+      data: resData
+    });
   } catch (error: any) {
     console.error("Registration endpoint error:", error);
     res.status(500).json({ 
