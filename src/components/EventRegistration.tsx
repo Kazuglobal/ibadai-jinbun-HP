@@ -539,8 +539,8 @@ ${formData.memo || 'なし'}
                 <p className="mt-3 text-emerald-800 text-sm max-w-xl mx-auto leading-relaxed">
                   {isIntegrated ? (
                     <>
-                      第１８回総会へのWEB受付（Google Apps Script/メール配信連携）を完了いたしました。<br />
-                      入力いただいた内容は、事務局管理先（<strong>ibadai.bj.dousou@gmail.com</strong> および <strong>oodate@salat.co.jp</strong>）へ即座に転送されました。
+                      第１８回総会へのお申込み（出席登録）を完了いたしました。<br />
+                      ご入力いただいた内容を受け付けました。
                     </>
                   ) : (
                     <>
