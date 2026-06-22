@@ -239,7 +239,7 @@ export default function NewsletterArchiveMagazine({
                   <span className="overflow-hidden border border-[#E2D8C8] bg-[#FFFCF7] shadow-[0_8px_22px_rgba(20,33,61,0.07)] transition-transform group-hover:-translate-y-0.5">
                     <span className={`grid ${article.image ? 'md:grid-cols-2' : ''}`}>
                       {article.image && index % 2 === 0 && (
-                        <img src={article.image} alt={article.imageAlt ?? ''} className="h-44 w-full object-cover object-top sm:h-52 md:h-72" />
+                        <img src={article.image} alt={article.imageAlt ?? ''} className="h-44 w-full bg-[#F3EDE3] object-contain object-center sm:h-52 md:h-72" />
                       )}
                       <span className="flex min-h-[170px] flex-col justify-center p-5 sm:p-7">
                         <span className="font-serif text-[23px] font-bold leading-[1.45] sm:text-3xl">{article.title}</span>
@@ -250,7 +250,7 @@ export default function NewsletterArchiveMagazine({
                         </span>
                       </span>
                       {article.image && index % 2 === 1 && (
-                        <img src={article.image} alt={article.imageAlt ?? ''} className="h-44 w-full object-cover object-top sm:h-52 md:h-72" />
+                        <img src={article.image} alt={article.imageAlt ?? ''} className="h-44 w-full bg-[#F3EDE3] object-contain object-center sm:h-52 md:h-72" />
                       )}
                     </span>
                   </span>
