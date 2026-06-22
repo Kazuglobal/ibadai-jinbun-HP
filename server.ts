@@ -20,6 +20,12 @@ const STORIES_GEMINI_MODEL = process.env.STORIES_GEMINI_MODEL || "gemini-2.5-fla
 const SLACK_STORIES_WEBHOOK_URL = process.env.SLACK_STORIES_WEBHOOK_URL || "";
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || "";
 const SLACK_STORIES_CHANNEL_ID = process.env.SLACK_STORIES_CHANNEL_ID || "";
+const DEFAULT_EVENT_REGISTRATION_WEBHOOK_URL =
+  "https://script.google.com/macros/s/AKfycbyvCZ6a1ZKdwaJfmxgXz_N0GVWgyfyLovb3fhYfnhovbnBbeKZ9D4eA99yTnAcUmr7p/exec";
+const EVENT_REGISTRATION_WEBHOOK_URL =
+  process.env.GAS_WEBAPP_URL ||
+  DEFAULT_EVENT_REGISTRATION_WEBHOOK_URL;
+const FORM_RECIPIENTS = ["ibadai.bj.dousou@gmail.com", "oodate@salat.co.jp"];
 const CHAT_MONTHLY_BUDGET_JPY = getPositiveEnvNumber("CHAT_MONTHLY_BUDGET_JPY", 1000);
 const CHAT_USD_JPY_RATE = getPositiveEnvNumber("CHAT_USD_JPY_RATE", 160);
 const GEMINI_INPUT_USD_PER_1M = getPositiveEnvNumber("GEMINI_INPUT_USD_PER_1M", 0.1);
@@ -1324,16 +1330,20 @@ app.post("/api/register", async (req, res) => {
     }
 
     const payload = {
+      formType: "event-registration",
+      recipients: FORM_RECIPIENTS,
+      submittedAt: new Date().toISOString(),
       fullName,
       kana,
       gradYear,
       address,
       phone,
       partyStatus,
-      memo
+      memo,
+      subject: `【第18回総会 参加申込】 ${fullName} 様`,
     };
 
-    const gasWebAppUrl = FORM_WEBHOOK_URL;
+    const gasWebAppUrl = EVENT_REGISTRATION_WEBHOOK_URL;
 
     if (!gasWebAppUrl) {
       return res.status(503).json({
