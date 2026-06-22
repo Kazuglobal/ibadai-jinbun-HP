@@ -1373,7 +1373,7 @@ app.post("/api/register", async (req, res) => {
 
     return res.json({
       status: "success",
-      message: "Google Apps Script(GAS)経由でメール転送が正常に処理されました。",
+      message: "第１８回総会へのお申込みを受け付けました。",
       integrated: true,
       data: resData
     });
