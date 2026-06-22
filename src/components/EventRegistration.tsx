@@ -13,11 +13,6 @@ import {
   Check, 
   Send,
   Sparkles,
-  Settings,
-  ChevronDown,
-  ChevronUp,
-  Copy,
-  Code,
   AlertTriangle,
   X
 } from 'lucide-react';
@@ -33,8 +28,6 @@ export default function EventRegistration({ selectedTopic, onClearTopic, onClose
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submissionError, setSubmissionError] = useState<string | null>(null);
   const [isIntegrated, setIsIntegrated] = useState(false);
-  const [isAdminOpen, setIsAdminOpen] = useState(false);
-  const [showCopied, setShowCopied] = useState(false);
 
   const [formData, setFormData] = useState({
     fullName: '',
@@ -153,88 +146,6 @@ ${formData.memo || 'なし'}
     });
     setFormSubmitted(false);
     setSubmissionError(null);
-  };
-
-  const gasCodeExample = `function doPost(e) {
-  try {
-    // 1. 各送信データをJSONとしてパース
-    var params = JSON.parse(e.postData.contents);
-    
-    var fullName   = params.fullName || "";
-    var kana       = params.kana || "";
-    var gradYear   = params.gradYear || "";
-    var address    = params.address || "";
-    var phone      = params.phone || "";
-    var partyStatus= params.partyStatus === "attend" ? "出席する（懇親会参加・会費5,000円）" : "欠席または総会のみ";
-    var memo       = params.memo || "";
-    var timestamp  = new Date(); // 日本時間での登録日時
-    
-    // 2. アクティブなスプレッドシートに申込行を自動追記
-    var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-    
-    // シートの1行目が空の場合、ヘッダー（列見出し）を定義
-    if (sheet.getLastRow() === 0) {
-      sheet.appendRow([
-        "登録日時", 
-        "お名前", 
-        "ふりがな", 
-        "ご卒業年月・学部", 
-        "ご住所", 
-        "電話番号", 
-        "懇親会のご予定", 
-        "連絡事項・その他"
-      ]);
-    }
-    
-    // データの追記を実行
-    sheet.appendRow([
-      timestamp,
-      fullName,
-      kana,
-      gradYear,
-      address,
-      phone,
-      partyStatus,
-      memo
-    ]);
-    
-    // 3. 事務局へのメール同時送信通知
-    var subject = "【第18回総会 参加申込】 " + fullName + " 様 (WEB)";
-    var body = "第18回同窓会総会へのWEBお申し込み通知がありました。\\n\\n" +
-               "【登録日時】 " + Utilities.formatDate(timestamp, "JST", "yyyy/MM/dd HH:mm:ss") + "\\n" +
-               "【お名前】 " + fullName + " (" + kana + ")\\n" +
-               "// 卒業年月・出身学部学科等\\n" +
-               "【卒業年月等】 " + gradYear + "\\n" +
-               "【ご住所】 " + address + "\\n" +
-               "【電話番号】 " + phone + "\\n" +
-               "【懇親会への参加】 " + partyStatus + "\\n" +
-               "【その他連絡事項】\\n" + memo + "\\n\\n" +
-               "--- \\n" +
-               "茨城大学 文理・人文学部同窓会WEBサイトより自動追記・転送";
-               
-    // 同窓会事務局の指定アドレス（2ヶ所）へ一斉送信
-    var mailTo = "ibadai.bj.dousou@gmail.com, oodate@salat.co.jp";
-    
-    MailApp.sendEmail({
-      to: mailTo,
-      subject: subject,
-      body: body
-    });
-    
-    // 4. フロントエンド（ブラウザ）に成功レスポンスを返却
-    return ContentService.createTextOutput(JSON.stringify({ status: "success", integrated: true }))
-                         .setMimeType(ContentService.MimeType.JSON);
-                         
-  } catch (error) {
-    return ContentService.createTextOutput(JSON.stringify({ status: "error", error: error.toString() }))
-                         .setMimeType(ContentService.MimeType.JSON);
-  }
-}`;
-
-  const copyGasCode = () => {
-    navigator.clipboard.writeText(gasCodeExample);
-    setShowCopied(true);
-    setTimeout(() => setShowCopied(false), 2000);
   };
 
   return (
@@ -665,95 +576,6 @@ ${formData.memo || 'なし'}
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* =========================================================================
-            ADMINISTRATOR CONFIGURATION BLOCK (GAS LINKING SETUP)
-            ========================================================================= */}
-        <div className="mt-8 border border-stone-200 rounded-2xl overflow-hidden bg-stone-50">
-          <button
-            type="button"
-            onClick={() => setIsAdminOpen(!isAdminOpen)}
-            className="w-full text-left px-5 py-4 flex items-center justify-between text-xs font-bold text-stone-600 hover:text-[#00204A] hover:bg-stone-100/50 transition-colors focus:outline-none"
-          >
-            <div className="flex items-center gap-2">
-              <Settings className="w-4 h-4 text-stone-500 animate-spin-slow" />
-              <span>⚙️ 事務局・システム管理者向け：自動転送GAS(Google Apps Script)の設定手順</span>
-            </div>
-            {isAdminOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-          </button>
-
-          <AnimatePresence>
-            {isAdminOpen && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.25 }}
-                className="border-t border-stone-200 overflow-hidden"
-              >
-                <div className="p-5 md:p-6 space-y-4 text-[12.5px] leading-relaxed text-stone-600 bg-white">
-                  <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2">
-                    <Info className="w-4 h-4 text-amber-700 flex-shrink-0 mt-0.5" />
-                    <div>
-                      <strong>ご案内：</strong> 本フォームは、Google Apps Script (GAS) 経由で、以下の2つのメールアドレス宛に自動送信できるよう設計されています：
-                      <div className="mt-1 font-mono font-bold text-[#00204A]">
-                        1. ibadai.bj.dousou@gmail.com<br />
-                        2. oodate@salat.co.jp
-                      </div>
-                    </div>
-                  </div>
-
-                  <h4 className="font-bold text-[#00204A] flex items-center gap-1.5 border-b border-stone-100 pb-1.5 mt-2">
-                    <Code className="w-4 h-4 text-[#CD9535]" />
-                    <span>GASへの配備・実装手順：</span>
-                  </h4>
-
-                  <ol className="list-decimal list-inside space-y-2 mt-1 pl-1">
-                    <li>Google ドライブにアクセスし、新規の <strong>Google スプレッドシート</strong> を作成します。</li>
-                    <li>メニューの「拡張機能」から <strong>「Apps Script」</strong> を開きます。</li>
-                    <li>エディタに配置されているデフォルト（既存）のコードをすべて削除し、以下の<strong>「GAS用ソースコード」</strong>を貼り付けます。</li>
-                    <li>エディタ上部の <strong>「デプロイ」 ＞ 「新しいデプロイ」</strong> を選択します。</li>
-                    <li>種類の選択で<strong>「ウェブアプリ」</strong>を指定し、以下のように権限設定を行い、デプロイボタンを押します：
-                      <ul className="list-disc list-inside pl-5 mt-1 space-y-1 text-stone-500 text-xs">
-                        <li>ウェブアプリを実行： <strong>「自分（ご自身のアカウント）」</strong></li>
-                        <li>アクセスできるユーザー： <strong>「全員（Anonymous）」</strong></li>
-                      </ul>
-                    </li>
-                    <li>発行された <strong>「ウェブアプリのURL」</strong> をコピーします。</li>
-                    <li>本システムの環境変数設定画面（または `.env`）にて、 <strong>`GAS_WEBAPP_URL`</strong> にそのURLをセットすることで、フォームから即座に自動転送されるようになります。</li>
-                  </ol>
-
-                  {/* Code box */}
-                  <div className="mt-4 relative">
-                    <div className="flex items-center justify-between px-4 py-2 bg-stone-900 text-stone-300 rounded-t-xl text-[10.5px] font-mono">
-                      <span>Google Apps Script - Code.gs</span>
-                      <button
-                        type="button"
-                        onClick={copyGasCode}
-                        className="flex items-center gap-1 hover:text-white bg-stone-800 hover:bg-stone-700 px-2.5 py-1 rounded transition-colors cursor-pointer"
-                      >
-                        {showCopied ? (
-                          <>
-                            <Check className="w-3 h-3 text-emerald-400" />
-                            <span className="text-emerald-400">コピーしました！</span>
-                          </>
-                        ) : (
-                          <>
-                            <Copy className="w-3 h-3" />
-                            <span>コードをコピー</span>
-                          </>
-                        )}
-                      </button>
-                    </div>
-                    <pre className="p-4 bg-stone-950 text-[#E6E1CF] rounded-b-xl overflow-x-auto text-[11px] font-mono max-h-[300px] leading-relaxed scrollbar-thin">
-                      {gasCodeExample}
-                    </pre>
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
       </div>
     </div>
   </div>
