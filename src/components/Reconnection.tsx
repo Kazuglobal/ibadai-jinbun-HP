@@ -123,10 +123,9 @@ export default function Reconnection() {
               className="relative w-[68%] aspect-square rounded-full overflow-hidden shadow-lg border-4 border-white z-10 group"
             >
               <img 
-                src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=800&auto=format&fit=crop" 
-                alt="Ibaraki University Campus Clock Tower" 
+                src="/reconnection-library.png" 
+                alt="茨城大学図書館" 
                 className="w-full h-full object-cover filter brightness-95 saturate-[0.95] group-hover:scale-105 transition-transform duration-700 ease-out"
-                referrerPolicy="no-referrer"
               />
             </motion.div>
 
@@ -139,10 +138,9 @@ export default function Reconnection() {
               className="absolute right-[-1%] top-[3%] w-[33%] aspect-square rounded-full overflow-hidden shadow-md border-[3.5px] border-white z-20"
             >
               <img 
-                src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=400&auto=format&fit=crop" 
-                alt="Alumni gathering discussion" 
+                src="/reconnection-humanities-building.png" 
+                alt="茨城大学人文社会科学部講義棟" 
                 className="w-full h-full object-cover filter brightness-95"
-                referrerPolicy="no-referrer"
               />
             </motion.div>
 
@@ -155,10 +153,9 @@ export default function Reconnection() {
               className="absolute right-[11%] bottom-[-2%] w-[33%] aspect-square rounded-full overflow-hidden shadow-md border-[3.5px] border-white z-20"
             >
               <img 
-                src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=400&auto=format&fit=crop" 
-                alt="Secondary Building facade" 
+                src="/reconnection-humanities-faculty.png" 
+                alt="茨城大学人文社会科学部校舎" 
                 className="w-full h-full object-cover filter brightness-[0.92] saturate-[0.88]"
-                referrerPolicy="no-referrer"
               />
             </motion.div>
 
