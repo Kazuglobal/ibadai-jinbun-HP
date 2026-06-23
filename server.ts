@@ -121,6 +121,65 @@ app.use("/api/stories/submit", express.json({ limit: "9mb" }));
 app.use(express.json({ limit: "256kb" }));
 app.use(express.urlencoded({ extended: false, limit: "32kb" }));
 
+function getPublicOrigin(req: Request) {
+  const configuredUrl = process.env.SITE_URL || process.env.APP_URL;
+  if (configuredUrl && /^https?:\/\//.test(configuredUrl) && configuredUrl !== "MY_APP_URL") {
+    return configuredUrl.replace(/\/$/, "");
+  }
+
+  const forwardedHost = req.headers["x-forwarded-host"];
+  const host = Array.isArray(forwardedHost) ? forwardedHost[0] : forwardedHost || req.headers.host || "localhost:3000";
+  const forwardedProto = req.headers["x-forwarded-proto"];
+  const protocol = Array.isArray(forwardedProto) ? forwardedProto[0] : forwardedProto || req.protocol || "https";
+  return `${protocol}://${host}`.replace(/\/$/, "");
+}
+
+app.get("/robots.txt", (req, res) => {
+  const origin = getPublicOrigin(req);
+  res.type("text/plain").send([
+    "User-agent: *",
+    "Allow: /",
+    "Disallow: /api/",
+    "Disallow: /admin/",
+    `Sitemap: ${origin}/sitemap.xml`,
+    "",
+  ].join("\n"));
+});
+
+app.get("/googlecde97c1db5a2382b.html", (_req, res) => {
+  res.type("text/html").send("google-site-verification: googlecde97c1db5a2382b.html");
+});
+
+app.get("/sitemap.xml", (req, res) => {
+  const origin = getPublicOrigin(req);
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+  const urls = [
+    { loc: "/", priority: "1.0", changefreq: "weekly" },
+    { loc: "/about", priority: "0.8", changefreq: "monthly" },
+    { loc: "/events", priority: "0.8", changefreq: "weekly" },
+    { loc: "/archive", priority: "0.8", changefreq: "monthly" },
+    { loc: "/contact", priority: "0.7", changefreq: "monthly" },
+    { loc: "/newsletter/43", priority: "0.7", changefreq: "monthly" },
+  ];
+
+  const body = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map((url) => `  <url>
+    <loc>${origin}${url.loc}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${url.changefreq}</changefreq>
+    <priority>${url.priority}</priority>
+  </url>`).join("\n")}
+</urlset>`;
+
+  res.type("application/xml").send(body);
+});
+
 interface ChatAnalyticsRecord {
   timestamp: string;
   month: string;

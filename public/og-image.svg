@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-label="茨城大学 文理・人文学部同窓会 公式サイト">
+  <rect width="1200" height="630" fill="#FAF9F5"/>
+  <rect x="72" y="72" width="1056" height="486" rx="18" fill="#00204A"/>
+  <path d="M152 154h896v14H152zM152 462h896v14H152z" fill="#CD9535"/>
+  <text x="152" y="270" fill="#FAF9F5" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="64" font-weight="800">茨城大学</text>
+  <text x="152" y="356" fill="#FAF9F5" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="64" font-weight="800">文理・人文学部同窓会</text>
+  <text x="154" y="420" fill="#E8DBC4" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="28" font-weight="600">卒業生・在学生・教職員をつなぐ公式同窓会サイト</text>
+</svg>
