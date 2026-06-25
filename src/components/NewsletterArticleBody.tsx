@@ -30,6 +30,22 @@ function groupPhotosByParagraph(bodyLength: number, photos: NewsletterArticlePho
   return groups;
 }
 
+function isQuotedLeadHeading(paragraph: string, index: number) {
+  const trimmed = paragraph.trim();
+  return index === 0 && trimmed.length <= 42 && trimmed.startsWith('「') && trimmed.endsWith('」');
+}
+
+function renderParagraph(paragraph: string) {
+  const lines = paragraph.split('\n');
+
+  return lines.map((line, lineIndex) => (
+    <React.Fragment key={lineIndex}>
+      {line}
+      {lineIndex < lines.length - 1 ? <br /> : null}
+    </React.Fragment>
+  ));
+}
+
 export default function NewsletterArticleBody({
   articleId,
   body,
@@ -45,17 +61,20 @@ export default function NewsletterArticleBody({
     >
       {body.map((paragraph, index) => {
         const paragraphPhotos = photosByParagraph.get(index) ?? [];
+        const quotedLeadHeading = isQuotedLeadHeading(paragraph, index);
 
         return (
           <React.Fragment key={`${articleId}-${index}`}>
             <p
               className={
-                index === 0
-                  ? 'first-letter:float-left first-letter:mr-3 first-letter:font-serif first-letter:text-[4.6em] first-letter:font-bold first-letter:leading-[0.84] first-letter:text-[#B57A24]'
+                quotedLeadHeading
+                  ? 'mx-auto max-w-2xl text-center font-serif text-[1.28em] font-bold leading-[1.7] tracking-[0.02em] text-[#14213D]'
+                  : index === 0
+                    ? 'first-letter:float-left first-letter:mr-3 first-letter:font-serif first-letter:text-[4.6em] first-letter:font-bold first-letter:leading-[0.84] first-letter:text-[#B57A24]'
                   : undefined
               }
             >
-              {paragraph}
+              {renderParagraph(paragraph)}
             </p>
 
             {paragraphPhotos.length > 0 && (

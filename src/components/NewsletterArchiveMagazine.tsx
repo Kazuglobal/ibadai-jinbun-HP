@@ -20,7 +20,7 @@ type NewsletterArchiveMagazineProps = {
   onIssueChange: (issueNumber: number) => void;
 };
 
-const archiveIssueNumbers = [43, 42, 41, 40, 39, 38, 37, 36, 35, 34];
+const archiveIssueNumbers = [43, 42, 41, 40, 39];
 const fontScales = [0.875, 1, 1.125, 1.25];
 
 function changeFontScale(current: number, direction: -1 | 1) {
@@ -239,7 +239,17 @@ export default function NewsletterArchiveMagazine({
                   <span className="overflow-hidden border border-[#E2D8C8] bg-[#FFFCF7] shadow-[0_8px_22px_rgba(20,33,61,0.07)] transition-transform group-hover:-translate-y-0.5">
                     <span className={`grid ${article.image ? 'md:grid-cols-2' : ''}`}>
                       {article.image && index % 2 === 0 && (
-                        <img src={article.image} alt={article.imageAlt ?? ''} className="h-44 w-full bg-[#F3EDE3] object-contain object-center sm:h-52 md:h-72" />
+                        <div className={`flex items-center justify-center bg-[#F3EDE3] ${article.imageVariant === 'portrait' ? 'p-3 sm:p-4' : ''}`}>
+                          <img
+                            src={article.image}
+                            alt={article.imageAlt ?? ''}
+                            className={
+                              article.imageVariant === 'portrait'
+                                ? 'h-44 w-auto max-w-[180px] object-contain object-center sm:h-52 sm:max-w-[220px] md:h-72 md:max-w-[260px]'
+                                : 'h-44 w-full object-contain object-center sm:h-52 md:h-72'
+                            }
+                          />
+                        </div>
                       )}
                       <span className="flex min-h-[170px] flex-col justify-center p-5 sm:p-7">
                         <span className="font-serif text-[23px] font-bold leading-[1.45] sm:text-3xl">{article.title}</span>
@@ -250,7 +260,17 @@ export default function NewsletterArchiveMagazine({
                         </span>
                       </span>
                       {article.image && index % 2 === 1 && (
-                        <img src={article.image} alt={article.imageAlt ?? ''} className="h-44 w-full bg-[#F3EDE3] object-contain object-center sm:h-52 md:h-72" />
+                        <div className={`flex items-center justify-center bg-[#F3EDE3] ${article.imageVariant === 'portrait' ? 'p-3 sm:p-4' : ''}`}>
+                          <img
+                            src={article.image}
+                            alt={article.imageAlt ?? ''}
+                            className={
+                              article.imageVariant === 'portrait'
+                                ? 'h-44 w-auto max-w-[180px] object-contain object-center sm:h-52 sm:max-w-[220px] md:h-72 md:max-w-[260px]'
+                                : 'h-44 w-full object-contain object-center sm:h-52 md:h-72'
+                            }
+                          />
+                        </div>
                       )}
                     </span>
                   </span>
