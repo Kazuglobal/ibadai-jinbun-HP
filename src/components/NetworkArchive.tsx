@@ -53,7 +53,7 @@ const COVERS_DATA: CoverData[] = [
     id: '40',
     numberText: '第40号',
     seasonText: '2023年 会報',
-    image: '/newsletters/40/image-01.webp',
+    image: '/newsletters/40/image-03.webp',
     title: '同窓会報 第40号',
     date: '2023年6月',
     webMagazineReady: true
@@ -65,50 +65,6 @@ const COVERS_DATA: CoverData[] = [
     image: '/newsletters/39/image-01.webp',
     title: '同窓会報 第39号',
     date: '2022年6月',
-    webMagazineReady: true
-  },
-  {
-    id: '38',
-    numberText: '第38号',
-    seasonText: '2021年 会報',
-    title: '同窓会報 第38号',
-    date: '2021年6月',
-    webMagazineReady: true
-  },
-  {
-    id: '37',
-    numberText: '第37号',
-    seasonText: '2020年 会報',
-    image: '/newsletters/37/image-01.webp',
-    title: '同窓会報 第37号',
-    date: '2020年6月',
-    webMagazineReady: true
-  },
-  {
-    id: '36',
-    numberText: '第36号',
-    seasonText: '2019年 会報',
-    image: '/newsletters/36/image-01.webp',
-    title: '同窓会報 第36号',
-    date: '2019年6月',
-    webMagazineReady: true
-  },
-  {
-    id: '35',
-    numberText: '第35号',
-    seasonText: '2018年 会報',
-    image: '/newsletters/35/image-01.webp',
-    title: '同窓会報 第35号',
-    date: '2018年6月',
-    webMagazineReady: true
-  },
-  {
-    id: '34',
-    numberText: '第34号',
-    seasonText: '2017年 会報',
-    image: '/newsletters/34/image-01.webp',
-    title: '同窓会報 第34号',
-    date: '2017年6月',
     webMagazineReady: true
   }
 ];
