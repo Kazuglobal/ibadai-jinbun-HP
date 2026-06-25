@@ -302,25 +302,6 @@ ${formData.memo || 'なし'}
               onSubmit={handleSubmit}
               className="bg-white border border-stone-200 rounded-2xl p-6 sm:p-8 md:p-10 shadow-sm space-y-6"
             >
-              {selectedTopic && (
-                <div className="bg-amber-50 border border-amber-300 text-stone-800 text-xs rounded-xl p-4 flex items-center justify-between gap-3 shadow-xs">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-[#CD9535] animate-pulse flex-shrink-0" />
-                    <span className="font-sans leading-relaxed">
-                      現在、こちらのイベント/ニュースを選択してお申し込み手続きを行っています：
-                      <strong className="block text-[#00204A] font-serif text-[13px] mt-0.5">「{selectedTopic}」</strong>
-                    </span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={onClearTopic}
-                    className="text-amber-800 hover:text-amber-950 font-bold px-2 py-1 text-[11px] underline cursor-pointer flex-shrink-0 bg-amber-100/50 rounded-lg hover:bg-amber-100 transition-colors"
-                  >
-                    解除
-                  </button>
-                </div>
-              )}
-
               <div className="border-b border-stone-100 pb-3 mb-4">
                 <span className="text-xs font-bold text-stone-400 tracking-wide">
                   ※は必須入力項目となります。
