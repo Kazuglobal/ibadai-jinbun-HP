@@ -20,6 +20,17 @@ const STORIES_GEMINI_MODEL = process.env.STORIES_GEMINI_MODEL || "gemini-2.5-fla
 const SLACK_STORIES_WEBHOOK_URL = process.env.SLACK_STORIES_WEBHOOK_URL || "";
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || "";
 const SLACK_STORIES_CHANNEL_ID = process.env.SLACK_STORIES_CHANNEL_ID || "";
+// Daily chat token/cost report destination. Falls back to the stories webhook/channel
+// when a dedicated usage destination is not configured.
+const SLACK_USAGE_WEBHOOK_URL =
+  process.env.SLACK_USAGE_WEBHOOK_URL || SLACK_STORIES_WEBHOOK_URL;
+const SLACK_USAGE_CHANNEL_ID =
+  process.env.SLACK_USAGE_CHANNEL_ID || SLACK_STORIES_CHANNEL_ID;
+// Shared secret used to authorize the daily usage-report cron endpoint.
+// Vercel Cron automatically sends `Authorization: Bearer <CRON_SECRET>`.
+const CRON_SECRET = process.env.CRON_SECRET || "";
+// Per-day usage counters auto-expire after ~40 days to keep Redis tidy.
+const DAILY_USAGE_TTL_SECONDS = 40 * 24 * 60 * 60;
 const DEFAULT_EVENT_REGISTRATION_WEBHOOK_URL =
   "https://script.google.com/macros/s/AKfycbyvCZ6a1ZKdwaJfmxgXz_N0GVWgyfyLovb3fhYfnhovbnBbeKZ9D4eA99yTnAcUmr7p/exec";
 const EVENT_REGISTRATION_WEBHOOK_URL =
@@ -211,6 +222,34 @@ function getCurrentMonth() {
   return `${year}-${month}`;
 }
 
+// Calendar day in Asia/Tokyo (YYYY-MM-DD), used for the daily usage report.
+function getJstDay(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value || "1970";
+  const month = parts.find((part) => part.type === "month")?.value || "01";
+  const day = parts.find((part) => part.type === "day")?.value || "01";
+  return `${year}-${month}-${day}`;
+}
+
+function getCurrentDay() {
+  return getJstDay();
+}
+
+// The most recently completed JST day (yesterday). The daily cron runs just after
+// JST midnight, so this is the full day being reported on.
+function getYesterdayDay() {
+  return getJstDay(new Date(Date.now() - 24 * 60 * 60 * 1000));
+}
+
+function isValidDay(value: string) {
+  return /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
 function estimateTokens(text: string) {
   return Math.max(1, Math.ceil(text.length / 2));
 }
@@ -305,7 +344,9 @@ function writeChatAnalytics(records: ChatAnalyticsRecord[]) {
 async function appendChatAnalytics(record: ChatAnalyticsRecord, reservedCostJpy = 0) {
   if (hasRedisStorage()) {
     const month = record.month;
+    const day = getJstDay(new Date(record.timestamp));
     const usagePrefix = redisKey("usage", month);
+    const dailyPrefix = redisKey("usage", day);
     const recentKey = redisKey("recent", month);
     const intentsKey = redisKey("intents", month);
     const costAdjustmentJpy = record.estimatedCostJpy - reservedCostJpy;
@@ -319,6 +360,23 @@ async function appendChatAnalytics(record: ChatAnalyticsRecord, reservedCostJpy 
       await redisCommand(["INCRBYFLOAT", `${usagePrefix}:costJpy`, costAdjustmentJpy]);
     }
     await redisCommand(["HINCRBY", intentsKey, record.intent, 1]);
+
+    // Per-day counters power the daily Slack report. Cost here is the actual
+    // estimated cost (daily keys are never used for budget reservation), and the
+    // keys auto-expire so old days don't accumulate in Redis.
+    await redisCommand(["INCR", `${dailyPrefix}:requests`]);
+    await redisCommand(["INCR", `${dailyPrefix}:${record.success ? "success" : "failed"}`]);
+    await redisCommand(["INCRBY", `${dailyPrefix}:inputTokens`, record.inputTokens]);
+    await redisCommand(["INCRBY", `${dailyPrefix}:outputTokens`, record.outputTokens]);
+    await redisCommand(["INCRBYFLOAT", `${dailyPrefix}:costUsd`, record.estimatedCostUsd]);
+    await redisCommand(["INCRBYFLOAT", `${dailyPrefix}:costJpy`, record.estimatedCostJpy]);
+    await redisCommand(["EXPIRE", `${dailyPrefix}:requests`, DAILY_USAGE_TTL_SECONDS]);
+    await redisCommand(["EXPIRE", `${dailyPrefix}:success`, DAILY_USAGE_TTL_SECONDS]);
+    await redisCommand(["EXPIRE", `${dailyPrefix}:failed`, DAILY_USAGE_TTL_SECONDS]);
+    await redisCommand(["EXPIRE", `${dailyPrefix}:inputTokens`, DAILY_USAGE_TTL_SECONDS]);
+    await redisCommand(["EXPIRE", `${dailyPrefix}:outputTokens`, DAILY_USAGE_TTL_SECONDS]);
+    await redisCommand(["EXPIRE", `${dailyPrefix}:costUsd`, DAILY_USAGE_TTL_SECONDS]);
+    await redisCommand(["EXPIRE", `${dailyPrefix}:costJpy`, DAILY_USAGE_TTL_SECONDS]);
 
     if (record.userMessage && CHAT_RECENT_MESSAGE_RETENTION_DAYS > 0) {
       await redisCommand([
@@ -405,6 +463,68 @@ async function getMonthlyUsage(month = getCurrentMonth()) {
     totalCostJpy,
     remainingBudgetJpy: Math.max(0, CHAT_MONTHLY_BUDGET_JPY - totalCostJpy),
     isBudgetExceeded: totalCostJpy >= CHAT_MONTHLY_BUDGET_JPY,
+  };
+}
+
+// Token/cost totals for a single JST calendar day (YYYY-MM-DD), used by the
+// daily Slack report. Unlike the monthly summary there is no budget concept.
+async function getDailyUsage(day = getCurrentDay()) {
+  if (hasRedisStorage()) {
+    const usagePrefix = redisKey("usage", day);
+    const [
+      totalRequests,
+      successfulRequests,
+      failedRequests,
+      totalInputTokens,
+      totalOutputTokens,
+      totalCostUsd,
+      totalCostJpy,
+    ] = await Promise.all([
+      redisCommand<string | null>(["GET", `${usagePrefix}:requests`]),
+      redisCommand<string | null>(["GET", `${usagePrefix}:success`]),
+      redisCommand<string | null>(["GET", `${usagePrefix}:failed`]),
+      redisCommand<string | null>(["GET", `${usagePrefix}:inputTokens`]),
+      redisCommand<string | null>(["GET", `${usagePrefix}:outputTokens`]),
+      redisCommand<string | null>(["GET", `${usagePrefix}:costUsd`]),
+      redisCommand<string | null>(["GET", `${usagePrefix}:costJpy`]),
+    ]);
+
+    const totalInput = Number(totalInputTokens || 0);
+    const totalOutput = Number(totalOutputTokens || 0);
+    return {
+      day,
+      model: GEMINI_CHAT_MODEL,
+      usdJpyRate: CHAT_USD_JPY_RATE,
+      storage: "redis",
+      totalRequests: Number(totalRequests || 0),
+      successfulRequests: Number(successfulRequests || 0),
+      failedRequests: Number(failedRequests || 0),
+      totalInputTokens: totalInput,
+      totalOutputTokens: totalOutput,
+      totalTokens: totalInput + totalOutput,
+      totalCostUsd: Number(totalCostUsd || 0),
+      totalCostJpy: Number(totalCostJpy || 0),
+    };
+  }
+
+  const records = readChatAnalytics().filter(
+    (record) => getJstDay(new Date(record.timestamp)) === day,
+  );
+  const totalInputTokens = records.reduce((sum, record) => sum + record.inputTokens, 0);
+  const totalOutputTokens = records.reduce((sum, record) => sum + record.outputTokens, 0);
+  return {
+    day,
+    model: GEMINI_CHAT_MODEL,
+    usdJpyRate: CHAT_USD_JPY_RATE,
+    storage: "local-json",
+    totalRequests: records.length,
+    successfulRequests: records.filter((record) => record.success).length,
+    failedRequests: records.filter((record) => !record.success).length,
+    totalInputTokens,
+    totalOutputTokens,
+    totalTokens: totalInputTokens + totalOutputTokens,
+    totalCostUsd: records.reduce((sum, record) => sum + record.estimatedCostUsd, 0),
+    totalCostJpy: records.reduce((sum, record) => sum + record.estimatedCostJpy, 0),
   };
 }
 
@@ -767,6 +887,62 @@ async function sendStoryApplicationToSlack(text: string, photos: StoryPhoto[]) {
   }
 
   return false;
+}
+
+// Posts the daily token/cost summary to Slack. Prefers the bot-token API when a
+// channel is configured, otherwise falls back to an incoming webhook. Returns
+// false (without throwing) when no Slack destination is configured.
+async function sendUsageReportToSlack(text: string) {
+  if (SLACK_BOT_TOKEN && SLACK_USAGE_CHANNEL_ID) {
+    await slackApi(
+      "chat.postMessage",
+      new URLSearchParams({
+        channel: SLACK_USAGE_CHANNEL_ID,
+        text,
+        unfurl_links: "false",
+        unfurl_media: "false",
+      }),
+    );
+    return true;
+  }
+
+  if (SLACK_USAGE_WEBHOOK_URL) {
+    const response = await fetch(SLACK_USAGE_WEBHOOK_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text }),
+    });
+    if (!response.ok) throw new Error(`Slack webhook failed: ${response.status}`);
+    return true;
+  }
+
+  return false;
+}
+
+function formatDailyUsageForSlack(
+  daily: Awaited<ReturnType<typeof getDailyUsage>>,
+  monthly: Awaited<ReturnType<typeof getMonthlyUsage>>,
+) {
+  const jpy = (value: number) => `¥${value.toLocaleString("ja-JP", { maximumFractionDigits: 2 })}`;
+  const usd = (value: number) => `$${value.toFixed(4)}`;
+  const num = (value: number) => value.toLocaleString("ja-JP");
+
+  return [
+    `:bar_chart: *AIチャット利用レポート（${daily.day}）*`,
+    `モデル: ${daily.model}`,
+    "",
+    `*当日の利用*`,
+    `• リクエスト数: ${num(daily.totalRequests)}件（成功 ${num(daily.successfulRequests)} / 失敗 ${num(daily.failedRequests)}）`,
+    `• トークン: ${num(daily.totalTokens)}（入力 ${num(daily.totalInputTokens)} / 出力 ${num(daily.totalOutputTokens)}）`,
+    `• コスト: ${jpy(daily.totalCostJpy)}（${usd(daily.totalCostUsd)}）`,
+    "",
+    `*今月の累計（${monthly.month}）*`,
+    `• トークン: ${num(monthly.totalInputTokens + monthly.totalOutputTokens)}（入力 ${num(monthly.totalInputTokens)} / 出力 ${num(monthly.totalOutputTokens)}）`,
+    `• コスト: ${jpy(monthly.totalCostJpy)} / 予算 ${jpy(monthly.budgetJpy)}（残り ${jpy(monthly.remainingBudgetJpy)}）`,
+    monthly.isBudgetExceeded ? ":warning: 今月の予算を超過しています。" : "",
+  ]
+    .filter((line) => line !== "")
+    .join("\n");
 }
 
 function formatStoryApplicationForSlack(payload: any) {
@@ -1270,6 +1446,45 @@ app.get("/api/chat/analytics", async (req, res) => {
   const month = typeof req.query.month === "string" ? req.query.month : getCurrentMonth();
   res.json(await buildChatAnalytics(month));
 });
+
+// Daily token/cost report → Slack. Triggered by Vercel Cron (which sends
+// `Authorization: Bearer <CRON_SECRET>`), or manually with the same bearer token.
+// Reports the previous JST day by default; override with `?date=YYYY-MM-DD`.
+async function handleDailyUsageReport(req: Request, res: express.Response) {
+  if (!CRON_SECRET) {
+    return res
+      .status(403)
+      .json({ error: "CRON_SECRET is not configured. Set it to enable the daily usage report." });
+  }
+
+  const authHeader = req.headers.authorization || "";
+  const bearer = authHeader.startsWith("Bearer ") ? authHeader.slice("Bearer ".length) : "";
+  const supplied = bearer || (typeof req.query.secret === "string" ? req.query.secret : "");
+  if (!timingSafeEqualStr(supplied, CRON_SECRET)) {
+    return res.status(401).json({ error: "Unauthorized" });
+  }
+
+  const requestedDay = typeof req.query.date === "string" ? req.query.date : "";
+  const day = isValidDay(requestedDay) ? requestedDay : getYesterdayDay();
+
+  try {
+    const daily = await getDailyUsage(day);
+    const monthly = await getMonthlyUsage(day.slice(0, 7));
+    const text = formatDailyUsageForSlack(daily, monthly);
+    const delivered = await sendUsageReportToSlack(text);
+
+    if (!delivered) {
+      console.info("Slack usage report destination is not configured. Preview:\n", text);
+    }
+    res.json({ ok: true, day, delivered, usage: daily });
+  } catch (error: any) {
+    console.error("Failed to send daily usage report:", error);
+    res.status(500).json({ error: "Failed to send daily usage report." });
+  }
+}
+
+app.get("/api/cron/daily-usage-report", handleDailyUsageReport);
+app.post("/api/cron/daily-usage-report", handleDailyUsageReport);
 
 app.post("/admin/chat-analytics/login", (req, res) => {
   const expectedToken = process.env.CHAT_ANALYTICS_TOKEN;

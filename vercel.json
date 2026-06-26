@@ -1,6 +1,9 @@
 {
   "buildCommand": "npm install && npm run build",
   "outputDirectory": "dist",
+  "crons": [
+    { "path": "/api/cron/daily-usage-report", "schedule": "5 15 * * *" }
+  ],
   "rewrites": [
     { "source": "/googlecde97c1db5a2382b.html", "destination": "/api/index" },
     { "source": "/robots.txt", "destination": "/api/index" },

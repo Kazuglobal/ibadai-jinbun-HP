@@ -33,3 +33,12 @@ View your app in AI Studio: https://ai.studio/apps/4a9b0331-bac2-4ffe-b422-6c25a
 - Chat analytics API: `GET /api/chat/analytics` with `Authorization: Bearer <CHAT_ANALYTICS_TOKEN>`
 - Admin dashboard: `GET /admin/chat-analytics`, then enter `CHAT_ANALYTICS_TOKEN` in the login form.
 - Set `CHAT_ANALYTICS_TOKEN` in production. Without it, analytics access stays blocked.
+
+## Daily Token/Cost Report to Slack
+
+- A Vercel Cron job posts a daily chat usage summary (tokens and estimated cost) to Slack.
+- Endpoint: `GET/POST /api/cron/daily-usage-report`, protected by `CRON_SECRET` (Vercel Cron sends `Authorization: Bearer <CRON_SECRET>`).
+- Schedule is defined in `vercel.json` as `5 15 * * *` (UTC) = 00:05 JST, reporting the previous full JST day.
+- Configure the Slack destination with `SLACK_USAGE_WEBHOOK_URL` (incoming webhook) or `SLACK_BOT_TOKEN` + `SLACK_USAGE_CHANNEL_ID`. If unset, it falls back to the STORIES Slack destination.
+- The report includes the day's request count, input/output tokens, and cost, plus the month-to-date total against the budget.
+- Manual run / backfill: call the endpoint with the bearer token and an optional `?date=YYYY-MM-DD` (defaults to yesterday in JST).
