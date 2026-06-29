@@ -16,6 +16,47 @@ import {
   Lock
 } from 'lucide-react';
 
+// --- 卒業年 ---
+// 文理学部の1期生が卒業した昭和28年（1953年）から当年まで選択可能にする。
+const eraLabel = (year: number): string => {
+  // 卒業は春（3月）想定で和暦を割り当てる。
+  if (year >= 2020) return `令和${year - 2018}年`;
+  if (year >= 1989) {
+    const n = year - 1988;
+    return `平成${n === 1 ? '元' : n}年`;
+  }
+  return `昭和${year - 1925}年`;
+};
+
+const GRAD_YEARS: { value: string; label: string }[] = Array.from(
+  { length: new Date().getFullYear() - 1953 + 1 },
+  (_, i) => {
+    const year = 1953 + i;
+    return { value: `${year}年`, label: `${year}年（${eraLabel(year)}）` };
+  }
+);
+
+// --- 学部・学科（大学院を含む） ---
+const DEPARTMENT_GROUPS: { group: string; options: string[] }[] = [
+  { group: '文理学部', options: ['政経学科', '文学科', '経済学科'] },
+  {
+    group: '人文学部',
+    options: [
+      '文学科',
+      '経済学科',
+      '社会科学科',
+      '人文学科',
+      'コミュニケーション学科',
+      '人文コミュニケーション学科',
+    ],
+  },
+  {
+    group: '人文社会科学部',
+    options: ['現代社会学科', '法律経済学科', '人間文化学科'],
+  },
+  { group: '大学院', options: ['人文科学研究科', '人文社会科学研究科'] },
+];
+
 export default function Update() {
   // --- FORM STATES ---
   const [name, setName] = useState('茨城 太郎');
@@ -305,14 +346,11 @@ export default function Update() {
                       onChange={(e) => setGradYear(e.target.value)}
                       className="w-full border border-stone-200 bg-white rounded-md py-1.5 pl-3 pr-8 text-[12.5px] text-[#00204A] font-medium outline-none appearance-none focus:border-[#108A93]"
                     >
-                      <option value="2015年">2015年</option>
-                      <option value="2016年">2016年</option>
-                      <option value="2017年">2017年</option>
-                      <option value="2018年">2018年</option>
-                      <option value="2019年">2019年</option>
-                      <option value="2020年">2020年</option>
-                      <option value="2021年">2021年</option>
-                      <option value="2022年">2022年</option>
+                      {GRAD_YEARS.map((y) => (
+                        <option key={y.value} value={y.value}>
+                          {y.label}
+                        </option>
+                      ))}
                     </select>
                     <ChevronDown className="w-3.5 h-3.5 text-stone-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
@@ -329,10 +367,15 @@ export default function Update() {
                       onChange={(e) => setDepartment(e.target.value)}
                       className="w-full border border-stone-200 bg-white rounded-md py-1.5 pl-3 pr-8 text-[12.5px] text-[#00204A] font-medium outline-none appearance-none focus:border-[#108A93]"
                     >
-                      <option value="人文学部 文学科">人文学部 文学科</option>
-                      <option value="人文学部 現代社会学科">人文学部 現代社会学科</option>
-                      <option value="人文学部 国際文化学科">人文学部 国際文化学科</option>
-                      <option value="人文学部 人文学科">人文学部 人文学科</option>
+                      {DEPARTMENT_GROUPS.map((g) => (
+                        <optgroup key={g.group} label={g.group}>
+                          {g.options.map((o) => (
+                            <option key={`${g.group} ${o}`} value={`${g.group} ${o}`}>
+                              {`${g.group} ${o}`}
+                            </option>
+                          ))}
+                        </optgroup>
+                      ))}
                     </select>
                     <ChevronDown className="w-3.5 h-3.5 text-stone-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
@@ -723,12 +766,11 @@ export default function Update() {
                             onChange={(e) => setGradYear(e.target.value)}
                             className="w-full border border-stone-200/80 bg-white rounded-lg py-2.5 pl-3.5 pr-10 text-sm text-[#00204A] font-medium outline-none appearance-none focus:border-[#108A93]"
                           >
-                            <option value="2015年">2015年</option>
-                            <option value="2016年">2016年</option>
-                            <option value="2017年">2017年</option>
-                            <option value="2018年">2018年</option>
-                            <option value="2019年">2019年</option>
-                            <option value="2020年">2020年</option>
+                            {GRAD_YEARS.map((y) => (
+                              <option key={y.value} value={y.value}>
+                                {y.label}
+                              </option>
+                            ))}
                           </select>
                           <ChevronDown className="w-4 h-4 text-stone-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                         </div>
@@ -743,9 +785,15 @@ export default function Update() {
                             onChange={(e) => setDepartment(e.target.value)}
                             className="w-full border border-stone-200/80 bg-white rounded-lg py-2.5 pl-3.5 pr-10 text-sm text-[#00204A] font-medium outline-none appearance-none focus:border-[#108A93]"
                           >
-                            <option value="人文学部 文学科">人文学部 文学科</option>
-                            <option value="人文学部 現代社会学科">人文学部 現代社会学科</option>
-                            <option value="人文学部 人文学科">人文学部 人文学科</option>
+                            {DEPARTMENT_GROUPS.map((g) => (
+                              <optgroup key={g.group} label={g.group}>
+                                {g.options.map((o) => (
+                                  <option key={`${g.group} ${o}`} value={`${g.group} ${o}`}>
+                                    {`${g.group} ${o}`}
+                                  </option>
+                                ))}
+                              </optgroup>
+                            ))}
                           </select>
                           <ChevronDown className="w-4 h-4 text-stone-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                         </div>
