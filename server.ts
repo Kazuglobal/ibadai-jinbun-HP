@@ -1248,7 +1248,23 @@ ${baseKnowledge}
       });
     }
     console.error("Chat error:", error);
-    res.status(500).json({ error: "予期しないエラーが発生しました。時間をおいて再度お試しください。" });
+    // Gemini intermittently returns 503/UNAVAILABLE ("high demand"). Surface a
+    // dedicated MODEL_OVERLOADED message so the UI can suggest retrying.
+    const rawMessage = typeof error?.message === "string" ? error.message : "";
+    const isOverloaded =
+      error?.status === 503 ||
+      error?.code === 503 ||
+      /503|UNAVAILABLE|overloaded|high demand/i.test(rawMessage);
+    if (isOverloaded) {
+      return res.status(503).json({
+        error: "ただいまAIチャットへのアクセスが集中しています。恐れ入りますが、少し時間をおいて再度お試しください。",
+        code: "MODEL_OVERLOADED",
+      });
+    }
+    res.status(500).json({
+      error: "予期しないエラーが発生しました。時間をおいて再度お試しください。",
+      code: "CHAT_ERROR",
+    });
   }
 });
 
