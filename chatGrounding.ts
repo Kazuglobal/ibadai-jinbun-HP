@@ -120,7 +120,17 @@ export function parseGroundedAnswer(
         ? parsed.answer.trim().slice(0, 1200)
         : "";
     const sourceIds = Array.isArray(parsed.sourceIds)
-      ? [...new Set(parsed.sourceIds.filter((id): id is string => typeof id === "string"))]
+      ? [
+          ...new Set(
+            parsed.sourceIds
+              .filter((id): id is string => typeof id === "string")
+              // The model is told to cite IDs written as `[id]`, so it sometimes
+              // returns the brackets too. Strip them (and surrounding space) before
+              // validating, otherwise a valid citation fails the allow-list check.
+              .map((id) => id.trim().replace(/^\[+|\]+$/g, "").trim())
+              .filter(Boolean),
+          ),
+        ]
       : [];
     const sourcesAreAllowed =
       sourceIds.length > 0 && sourceIds.every((id) => allowedSourceIds.has(id));
