@@ -52,6 +52,7 @@ function doPost(e) {
         `卒業年: ${details.gradYear || ""}`,
         `学部・学科: ${details.department || ""}`,
         `新住所: 〒${details.postalCode || ""} ${details.prefecture || ""}${details.cityAddress || ""} ${details.building || ""}`,
+        `メール配信希望: ${details.subscribeMail || ""}`,
       );
     } else {
       lines.push(
