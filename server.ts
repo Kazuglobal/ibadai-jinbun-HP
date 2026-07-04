@@ -20,11 +20,13 @@ const STORIES_GEMINI_MODEL = process.env.STORIES_GEMINI_MODEL || "gemini-2.5-fla
 const SLACK_STORIES_WEBHOOK_URL = process.env.SLACK_STORIES_WEBHOOK_URL || "";
 const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || "";
 const SLACK_STORIES_CHANNEL_ID = process.env.SLACK_STORIES_CHANNEL_ID || "";
-const DEFAULT_EVENT_REGISTRATION_WEBHOOK_URL =
+const DEFAULT_FORM_WEBHOOK_URL =
   "https://script.google.com/macros/s/AKfycbyvCZ6a1ZKdwaJfmxgXz_N0GVWgyfyLovb3fhYfnhovbnBbeKZ9D4eA99yTnAcUmr7p/exec";
-const EVENT_REGISTRATION_WEBHOOK_URL =
+// Single GAS web app receives every form type (event-registration / address-update /
+// contact), sends office e-mail, and appends to the spreadsheet. See google-apps-script/forms.gs.
+const FORM_WEBHOOK_URL =
   process.env.GAS_WEBAPP_URL ||
-  DEFAULT_EVENT_REGISTRATION_WEBHOOK_URL;
+  DEFAULT_FORM_WEBHOOK_URL;
 const FORM_RECIPIENTS = ["ibadai.bj.dousou@gmail.com", "oodate@salat.co.jp"];
 const CHAT_MONTHLY_BUDGET_JPY = getPositiveEnvNumber("CHAT_MONTHLY_BUDGET_JPY", 1000);
 const CHAT_USD_JPY_RATE = getPositiveEnvNumber("CHAT_USD_JPY_RATE", 160);
@@ -599,6 +601,7 @@ const storyInterviewRequests = new Map<string, { count: number; resetAt: number 
 const storySubmissionRequests = new Map<string, { count: number; resetAt: number }>();
 const chatRequests = new Map<string, { count: number; resetAt: number }>();
 const registerRequests = new Map<string, { count: number; resetAt: number }>();
+const addressUpdateRequests = new Map<string, { count: number; resetAt: number }>();
 
 function getSafeText(value: unknown, maxLength = 2000) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
@@ -672,6 +675,10 @@ function chatRateAllowed(ip: string) {
 
 function registerRateAllowed(ip: string) {
   return rateLimitAllowed(registerRequests, ip, 5, 60 * 60 * 1000);
+}
+
+function addressUpdateRateAllowed(ip: string) {
+  return rateLimitAllowed(addressUpdateRequests, ip, 5, 60 * 60 * 1000);
 }
 
 function timingSafeEqualStr(a: string, b: string) {
@@ -1383,6 +1390,32 @@ app.get("/admin/chat-analytics", (req, res) => {
 </html>`);
 });
 
+// Forward a form payload to the GAS web app. Throws when the webhook is missing,
+// unreachable, or reports an error, so callers can map failures to one place.
+async function forwardToFormWebhook(payload: Record<string, unknown>) {
+  if (!FORM_WEBHOOK_URL) {
+    const error: any = new Error("Form webhook is not configured");
+    error.code = "FORM_WEBHOOK_NOT_CONFIGURED";
+    throw error;
+  }
+
+  const response = await fetch(FORM_WEBHOOK_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error(`GAS WebApp returned status: ${response.status}`);
+  }
+
+  const resData: any = await response.json().catch(() => ({ status: "success" }));
+  if (resData.status === "error") {
+    throw new Error(resData.error || "GAS WebApp returned an error");
+  }
+  return resData;
+}
+
 // GAS Forwarding Webhook registration endpoint
 app.post("/api/register", async (req, res) => {
   try {
@@ -1419,33 +1452,7 @@ app.post("/api/register", async (req, res) => {
       subject: `【第18回総会 参加申込】 ${fullName} 様`,
     };
 
-    const gasWebAppUrl = EVENT_REGISTRATION_WEBHOOK_URL;
-
-    if (!gasWebAppUrl) {
-      return res.status(503).json({
-        error: "送信先が未設定です。事務局へ直接メールでお問い合わせください。",
-        code: "FORM_WEBHOOK_NOT_CONFIGURED",
-      });
-    }
-
-    console.log(`Forwarding registration to GAS WebApp URL: ${gasWebAppUrl}`);
-
-    const response = await fetch(gasWebAppUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    });
-
-    if (!response.ok) {
-      throw new Error(`GAS WebApp returned status: ${response.status}`);
-    }
-
-    const resData: any = await response.json().catch(() => ({ status: "success" }));
-    if (resData.status === "error") {
-      throw new Error(resData.error || "GAS WebApp returned an error");
-    }
+    const resData = await forwardToFormWebhook(payload);
 
     return res.json({
       status: "success",
@@ -1455,9 +1462,94 @@ app.post("/api/register", async (req, res) => {
     });
   } catch (error: any) {
     console.error("Registration endpoint error:", error);
+    if (error?.code === "FORM_WEBHOOK_NOT_CONFIGURED") {
+      return res.status(503).json({
+        error: "送信先が未設定です。事務局へ直接メールでお問い合わせください。",
+        code: "FORM_WEBHOOK_NOT_CONFIGURED",
+      });
+    }
     res.status(500).json({
       error: "登録リクエストの処理中にエラーが発生しました。時間をおいて再度お試しください。",
       code: "GAS_FORWARD_FAILED"
+    });
+  }
+});
+
+// Address / contact-info update form → GAS web app (formType: "address-update").
+// forms.gs reads fullName / email / phone at the top level and the new address
+// fields from `details` (see the address-update branch in google-apps-script/forms.gs).
+app.post("/api/address-update", async (req, res) => {
+  try {
+    if (!addressUpdateRateAllowed(req.ip || "unknown")) {
+      return res.status(429).json({
+        error: "短時間に多くの送信リクエストがありました。少し時間をおいて再度お試しください。",
+        code: "RATE_LIMITED",
+      });
+    }
+
+    const fullName = getSafeText(req.body?.fullName, 100);
+    const nameKana = getSafeText(req.body?.nameKana, 100);
+    const birthdate = getSafeText(req.body?.birthdate, 30);
+    const gradYear = getSafeText(req.body?.gradYear, 50);
+    const department = getSafeText(req.body?.department, 100);
+    const postalCode = getSafeText(req.body?.postalCode, 10);
+    const prefecture = getSafeText(req.body?.prefecture, 20);
+    const cityAddress = getSafeText(req.body?.cityAddress, 200);
+    const building = getSafeText(req.body?.building, 200);
+    const phone = getSafeText(req.body?.phone, 30);
+    const email = getSafeText(req.body?.email, 200);
+    const subscribeMail = req.body?.subscribeMail === true;
+
+    if (!fullName || !postalCode || !prefecture || !cityAddress) {
+      return res.status(400).json({ error: "氏名と新しいご住所（郵便番号・都道府県・市区町村番地）をご入力ください。" });
+    }
+    if (!phone && !email) {
+      return res.status(400).json({ error: "確認のご連絡のため、電話番号またはメールアドレスをご入力ください。" });
+    }
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return res.status(400).json({ error: "メールアドレスの形式をご確認ください。" });
+    }
+
+    const payload = {
+      formType: "address-update",
+      recipients: FORM_RECIPIENTS,
+      submittedAt: new Date().toISOString(),
+      fullName,
+      email,
+      phone,
+      subject: `【住所変更届】 ${fullName} 様`,
+      details: {
+        nameKana,
+        birthdate,
+        gradYear,
+        department,
+        postalCode,
+        prefecture,
+        cityAddress,
+        building,
+        subscribeMail: subscribeMail ? "希望する" : "希望しない",
+      },
+    };
+
+    const resData = await forwardToFormWebhook(payload);
+
+    return res.json({
+      status: "success",
+      message: "住所変更届を受け付けました。",
+      integrated: true,
+      data: resData,
+    });
+  } catch (error: any) {
+    console.error("Address update endpoint error:", error);
+    if (error?.code === "FORM_WEBHOOK_NOT_CONFIGURED") {
+      return res.status(503).json({
+        error: "送信先が未設定です。お手数ですが、事務局へ直接メールでお問い合わせください。",
+        code: "FORM_WEBHOOK_NOT_CONFIGURED",
+      });
+    }
+    res.status(500).json({
+      error: "住所変更届の送信中にエラーが発生しました。時間をおいて再度お試しください。",
+      code: "GAS_FORWARD_FAILED",
     });
   }
 });

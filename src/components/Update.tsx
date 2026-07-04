@@ -1,19 +1,16 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  Check, 
-  Calendar, 
-  ChevronDown, 
-  ChevronUp, 
-  Bell, 
+import {
+  User,
+  Mail,
+  Phone,
+  Check,
+  Calendar,
+  ChevronDown,
+  ChevronUp,
   ArrowRight,
-  FileText,
   BadgeCheck,
-  Building2,
-  Lock
+  AlertCircle
 } from 'lucide-react';
 
 // --- 卒業年 ---
@@ -35,6 +32,17 @@ const GRAD_YEARS: { value: string; label: string }[] = Array.from(
     return { value: `${year}年`, label: `${year}年（${eraLabel(year)}）` };
   }
 );
+
+// --- 都道府県 ---
+const PREFECTURES: string[] = [
+  '北海道', '青森県', '岩手県', '宮城県', '秋田県', '山形県', '福島県',
+  '茨城県', '栃木県', '群馬県', '埼玉県', '千葉県', '東京都', '神奈川県',
+  '新潟県', '富山県', '石川県', '福井県', '山梨県', '長野県', '岐阜県',
+  '静岡県', '愛知県', '三重県', '滋賀県', '京都府', '大阪府', '兵庫県',
+  '奈良県', '和歌山県', '鳥取県', '島根県', '岡山県', '広島県', '山口県',
+  '徳島県', '香川県', '愛媛県', '高知県', '福岡県', '佐賀県', '長崎県',
+  '熊本県', '大分県', '宮崎県', '鹿児島県', '沖縄県',
+];
 
 // --- 学部・学科（大学院を含む） ---
 const DEPARTMENT_GROUPS: { group: string; options: string[] }[] = [
@@ -59,19 +67,19 @@ const DEPARTMENT_GROUPS: { group: string; options: string[] }[] = [
 
 export default function Update() {
   // --- FORM STATES ---
-  const [name, setName] = useState('茨城 太郎');
-  const [nameKana, setNameKana] = useState('イバラキ タロウ');
-  const [birthdate, setBirthdate] = useState('1990/04/01');
-  const [gradYear, setGradYear] = useState('2015年');
-  const [department, setDepartment] = useState('人文学部 文学科');
+  const [name, setName] = useState('');
+  const [nameKana, setNameKana] = useState('');
+  const [birthdate, setBirthdate] = useState('');
+  const [gradYear, setGradYear] = useState('');
+  const [department, setDepartment] = useState('');
 
-  const [postalCode, setPostalCode] = useState('310-8512');
-  const [prefecture, setPrefecture] = useState('茨城県');
-  const [cityAddress, setCityAddress] = useState('水戸市文京1-5-30');
-  const [building, setBuilding] = useState('例) 茨城大学◯◯寮101');
+  const [postalCode, setPostalCode] = useState('');
+  const [prefecture, setPrefecture] = useState('');
+  const [cityAddress, setCityAddress] = useState('');
+  const [building, setBuilding] = useState('');
 
-  const [phone, setPhone] = useState('090-1234-5678');
-  const [email, setEmail] = useState('alumni@ibaraki.ac.jp');
+  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [subscribeMail, setSubscribeMail] = useState(true);
 
   // Accordion state (Mobile ONLY)
@@ -82,26 +90,95 @@ export default function Update() {
     setExpandedSection(expandedSection === index ? 0 : index);
   };
 
-  // Demo status simulation
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [submitError, setSubmitError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Scroll to the result banner after it has been rendered.
+  useEffect(() => {
+    if (!submitSuccess && !submitError) return;
+    document
+      .getElementById(submitSuccess ? 'update-success-banner' : 'update-error-banner')
+      ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, [submitSuccess, submitError]);
+
+  const validateForm = (): string => {
+    if (!name.trim()) return '氏名をご入力ください。';
+    if (!postalCode.trim() || !prefecture || !cityAddress.trim()) {
+      return '新しいご住所（郵便番号・都道府県・市区町村番地）をご入力ください。';
+    }
+    if (!phone.trim() && !email.trim()) {
+      return '確認のご連絡のため、電話番号またはメールアドレスをご入力ください。';
+    }
+    if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return 'メールアドレスの形式をご確認ください。';
+    }
+    return '';
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
+    const validationError = validateForm();
+    if (validationError) {
+      setSubmitError(validationError);
+      return;
+    }
+
+    setSubmitError('');
     setIsSubmitting(true);
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitSuccess(true);
-      // Automatically scroll to the success card
-      const el = document.getElementById('update-success-banner');
-      if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    try {
+      const response = await fetch('/api/address-update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: name.trim(),
+          nameKana: nameKana.trim(),
+          birthdate: birthdate.trim(),
+          gradYear,
+          department,
+          postalCode: postalCode.trim(),
+          prefecture,
+          cityAddress: cityAddress.trim(),
+          building: building.trim(),
+          phone: phone.trim(),
+          email: email.trim(),
+          subscribeMail,
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        setSubmitError(
+          typeof data?.error === 'string' && data.error
+            ? data.error
+            : '送信に失敗しました。時間をおいて再度お試しいただくか、事務局へ直接ご連絡ください。',
+        );
+        return;
       }
-    }, 1000);
+      setSubmitSuccess(true);
+    } catch {
+      setSubmitError('通信エラーが発生しました。時間をおいて再度お試しいただくか、事務局へ直接ご連絡ください。');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const resetForm = () => {
+    setName('');
+    setNameKana('');
+    setBirthdate('');
+    setGradYear('');
+    setDepartment('');
+    setPostalCode('');
+    setPrefecture('');
+    setCityAddress('');
+    setBuilding('');
+    setPhone('');
+    setEmail('');
+    setSubscribeMail(true);
     setSubmitSuccess(false);
+    setSubmitError('');
     setExpandedSection(1);
   };
 
@@ -303,6 +380,7 @@ export default function Update() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     className="w-full border border-stone-200 bg-white rounded-md py-1.5 px-3 text-[12.5px] text-[#00204A] font-medium outline-none focus:border-[#108A93]"
+                    placeholder="例) 茨城 太郎"
                   />
                 </div>
 
@@ -316,6 +394,7 @@ export default function Update() {
                     value={nameKana}
                     onChange={(e) => setNameKana(e.target.value)}
                     className="w-full border border-stone-200 bg-white rounded-md py-1.5 px-3 text-[12.5px] text-[#00204A] font-medium outline-none focus:border-[#108A93]"
+                    placeholder="例) イバラキ タロウ"
                   />
                 </div>
 
@@ -330,6 +409,7 @@ export default function Update() {
                       value={birthdate}
                       onChange={(e) => setBirthdate(e.target.value)}
                       className="w-full border border-stone-200 bg-white rounded-md py-1.5 pl-3 pr-8 text-[12.5px] text-[#00204A] font-medium outline-none focus:border-[#108A93]"
+                      placeholder="例) 1990/04/01"
                     />
                     <Calendar className="w-3.5 h-3.5 text-stone-400 absolute right-2.5 pointer-events-none" />
                   </div>
@@ -346,6 +426,7 @@ export default function Update() {
                       onChange={(e) => setGradYear(e.target.value)}
                       className="w-full border border-stone-200 bg-white rounded-md py-1.5 pl-3 pr-8 text-[12.5px] text-[#00204A] font-medium outline-none appearance-none focus:border-[#108A93]"
                     >
+                      <option value="">選択してください</option>
                       {GRAD_YEARS.map((y) => (
                         <option key={y.value} value={y.value}>
                           {y.label}
@@ -367,6 +448,7 @@ export default function Update() {
                       onChange={(e) => setDepartment(e.target.value)}
                       className="w-full border border-stone-200 bg-white rounded-md py-1.5 pl-3 pr-8 text-[12.5px] text-[#00204A] font-medium outline-none appearance-none focus:border-[#108A93]"
                     >
+                      <option value="">選択してください</option>
                       {DEPARTMENT_GROUPS.map((g) => (
                         <optgroup key={g.group} label={g.group}>
                           {g.options.map((o) => (
@@ -421,6 +503,7 @@ export default function Update() {
                     value={postalCode}
                     onChange={(e) => setPostalCode(e.target.value)}
                     className="w-full border border-stone-200 bg-white rounded-md py-1.5 px-3 text-[12.5px] text-[#00204A] font-medium outline-none focus:border-[#108A93]"
+                    placeholder="例) 310-8512"
                   />
                 </div>
 
@@ -435,11 +518,10 @@ export default function Update() {
                       onChange={(e) => setPrefecture(e.target.value)}
                       className="w-full border border-stone-200 bg-white rounded-md py-1.5 pl-3 pr-8 text-[12.5px] text-[#00204A] font-medium outline-none appearance-none focus:border-[#108A93]"
                     >
-                      <option value="茨城県">茨城県</option>
-                      <option value="東京都">東京都</option>
-                      <option value="千葉県">千葉県</option>
-                      <option value="埼玉県">埼玉県</option>
-                      <option value="神奈川県">神奈川県</option>
+                      <option value="">選択してください</option>
+                      {PREFECTURES.map((p) => (
+                        <option key={p} value={p}>{p}</option>
+                      ))}
                     </select>
                     <ChevronDown className="w-3.5 h-3.5 text-stone-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
@@ -455,6 +537,7 @@ export default function Update() {
                     value={cityAddress}
                     onChange={(e) => setCityAddress(e.target.value)}
                     className="w-full border border-stone-200 bg-white rounded-md py-1.5 px-3 text-[12.5px] text-[#00204A] font-medium outline-none focus:border-[#108A93]"
+                    placeholder="例) 水戸市文京1-5-30"
                   />
                 </div>
 
@@ -468,6 +551,7 @@ export default function Update() {
                     value={building}
                     onChange={(e) => setBuilding(e.target.value)}
                     className="w-full border border-stone-200 bg-white rounded-md py-1.5 px-3 text-[12.5px] text-[#00204A] font-medium outline-none focus:border-[#108A93]"
+                    placeholder="例) ◯◯マンション101"
                   />
                 </div>
               </div>
@@ -512,6 +596,7 @@ export default function Update() {
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     className="w-full border border-stone-200 bg-white rounded-md py-1.5 px-3 text-[12.5px] text-[#00204A] font-medium outline-none focus:border-[#108A93]"
+                    placeholder="例) 090-1234-5678"
                   />
                 </div>
 
@@ -525,6 +610,7 @@ export default function Update() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="w-full border border-stone-200 bg-white rounded-md py-1.5 px-3 text-[12.5px] text-[#00204A] font-medium outline-none focus:border-[#108A93]"
+                    placeholder="例) alumni@example.com"
                   />
                 </div>
 
@@ -766,6 +852,7 @@ export default function Update() {
                             onChange={(e) => setGradYear(e.target.value)}
                             className="w-full border border-stone-200/80 bg-white rounded-lg py-2.5 pl-3.5 pr-10 text-sm text-[#00204A] font-medium outline-none appearance-none focus:border-[#108A93]"
                           >
+                            <option value="">選択してください</option>
                             {GRAD_YEARS.map((y) => (
                               <option key={y.value} value={y.value}>
                                 {y.label}
@@ -785,6 +872,7 @@ export default function Update() {
                             onChange={(e) => setDepartment(e.target.value)}
                             className="w-full border border-stone-200/80 bg-white rounded-lg py-2.5 pl-3.5 pr-10 text-sm text-[#00204A] font-medium outline-none appearance-none focus:border-[#108A93]"
                           >
+                            <option value="">選択してください</option>
                             {DEPARTMENT_GROUPS.map((g) => (
                               <optgroup key={g.group} label={g.group}>
                                 {g.options.map((o) => (
@@ -871,9 +959,10 @@ export default function Update() {
                             onChange={(e) => setPrefecture(e.target.value)}
                             className="w-full border border-stone-200/80 bg-white rounded-lg py-2.5 pl-3.5 pr-10 text-sm text-[#00204A] font-medium outline-none appearance-none focus:border-[#108A93]"
                           >
-                            <option value="茨城県">茨城県</option>
-                            <option value="東京都">東京都</option>
-                            <option value="千葉県">千葉県</option>
+                            <option value="">選択してください</option>
+                            {PREFECTURES.map((p) => (
+                              <option key={p} value={p}>{p}</option>
+                            ))}
                           </select>
                           <ChevronDown className="w-4 h-4 text-stone-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                         </div>
@@ -1071,7 +1160,7 @@ export default function Update() {
                         </div>
                         <div className="grid grid-cols-12 gap-1 pb-1.5 border-b border-stone-200/50">
                           <span className="col-span-4 text-stone-400 font-bold">学部・学科:</span>
-                          <span className="col-span-8 text-[#00204A] font-semibold">{gradYear} {department}</span>
+                          <span className="col-span-8 text-[#00204A] font-semibold">{[gradYear, department].filter(Boolean).join(' ') || '未選択'}</span>
                         </div>
                         <div className="grid grid-cols-12 gap-1 pb-1.5 border-b border-stone-200/50">
                           <span className="col-span-4 text-stone-400 font-bold">郵便番号:</span>
@@ -1079,12 +1168,12 @@ export default function Update() {
                         </div>
                         <div className="grid grid-cols-12 gap-1 pb-1.5 border-b border-stone-200/50">
                           <span className="col-span-4 text-stone-400 font-bold">現住所:</span>
-                          <span className="col-span-8 text-[#00204A] font-semibold">{prefecture}{cityAddress} {building}</span>
+                          <span className="col-span-8 text-[#00204A] font-semibold">{`${prefecture}${cityAddress} ${building}`.trim() || '未入力'}</span>
                         </div>
                         <div className="grid grid-cols-12 gap-1">
                           <span className="col-span-4 text-stone-400 font-bold font-sans">連絡手段:</span>
                           <span className="col-span-8 text-[#00204A] font-semibold font-sans">
-                            {phone} / {email}
+                            {[phone, email].filter(Boolean).join(' / ') || '未入力'}
                           </span>
                         </div>
                       </div>
@@ -1124,6 +1213,34 @@ export default function Update() {
           </form>
 
         </div>
+
+        {/* =========================================================================
+            SUBMIT ERROR BANNER
+            ========================================================================= */}
+        <AnimatePresence>
+          {submitError && !submitSuccess && (
+            <motion.div
+              id="update-error-banner"
+              role="alert"
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="w-full bg-red-50/80 border border-red-200 rounded-2xl p-5 sm:p-6 text-left mb-12 flex items-start gap-4"
+            >
+              <div className="w-9 h-9 rounded-full bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0">
+                <AlertCircle className="w-5 h-5" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-red-700 font-serif font-bold text-sm sm:text-base mb-1 leading-normal">
+                  送信できませんでした
+                </h3>
+                <p className="text-[#00204A] text-xs sm:text-[13px] leading-relaxed tracking-wider">
+                  {submitError}
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* =========================================================================
             TRANSIENT SUCCESS COMPONENT (RESIZING POPPED CARD PRECISELY AS MOCKUP)
