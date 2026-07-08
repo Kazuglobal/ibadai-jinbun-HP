@@ -27,6 +27,13 @@ const DEFAULT_FORM_WEBHOOK_URL =
 const FORM_WEBHOOK_URL =
   process.env.GAS_WEBAPP_URL ||
   DEFAULT_FORM_WEBHOOK_URL;
+// GAS web app URLs cannot be kept secret once deployed (this default is itself public
+// in the repo), so the URL alone is not an access control. Set GAS_SHARED_SECRET here
+// and the matching "SHARED_SECRET" Script Property on the GAS side (forms.gs) to
+// require every request to present it — this is what actually blocks direct,
+// unauthenticated calls to the Web App URL that bypass this server's rate limiting
+// and validation.
+const FORM_WEBHOOK_SECRET = process.env.GAS_SHARED_SECRET || "";
 const FORM_RECIPIENTS = ["ibadai.bj.dousou@gmail.com", "oodate@salat.co.jp"];
 const CHAT_MONTHLY_BUDGET_JPY = getPositiveEnvNumber("CHAT_MONTHLY_BUDGET_JPY", 1000);
 const CHAT_USD_JPY_RATE = getPositiveEnvNumber("CHAT_USD_JPY_RATE", 160);
@@ -305,39 +312,54 @@ function writeChatAnalytics(records: ChatAnalyticsRecord[]) {
   }
 }
 
-async function appendChatAnalytics(record: ChatAnalyticsRecord, reservedCostJpy = 0) {
+// Adjusts the reserved (projected) budget cost to the actual cost. This must
+// succeed or throw independently of the best-effort logging in appendChatAnalytics
+// below, so callers can gate `budgetSettled` on it: the budget ledger has to stay
+// accurate (or the caller must release the reservation on failure), whereas losing a
+// Q&A log entry is not something the user-facing chat response should ever fail for.
+async function settleChatBudget(estimatedCostJpy: number, reservedCostJpy: number, month = getCurrentMonth()) {
+  if (!hasRedisStorage()) return;
+  const costAdjustmentJpy = estimatedCostJpy - reservedCostJpy;
+  if (costAdjustmentJpy === 0) return;
+  await redisCommand(["INCRBYFLOAT", `${redisKey("usage", month)}:costJpy`, costAdjustmentJpy]);
+}
+
+async function appendChatAnalytics(record: ChatAnalyticsRecord) {
   if (hasRedisStorage()) {
-    const month = record.month;
-    const usagePrefix = redisKey("usage", month);
-    const recentKey = redisKey("recent", month);
-    const intentsKey = redisKey("intents", month);
-    const costAdjustmentJpy = record.estimatedCostJpy - reservedCostJpy;
+    // Best-effort: a Redis hiccup here must never surface as a failed chat response
+    // (the budget ledger itself is settled separately via settleChatBudget, above,
+    // before this is called, so it isn't affected by a failure in this block).
+    try {
+      const month = record.month;
+      const usagePrefix = redisKey("usage", month);
+      const recentKey = redisKey("recent", month);
+      const intentsKey = redisKey("intents", month);
 
-    await redisCommand(["INCR", `${usagePrefix}:requests`]);
-    await redisCommand(["INCR", `${usagePrefix}:${record.success ? "success" : "failed"}`]);
-    await redisCommand(["INCRBY", `${usagePrefix}:inputTokens`, record.inputTokens]);
-    await redisCommand(["INCRBY", `${usagePrefix}:outputTokens`, record.outputTokens]);
-    await redisCommand(["INCRBYFLOAT", `${usagePrefix}:costUsd`, record.estimatedCostUsd]);
-    if (costAdjustmentJpy !== 0) {
-      await redisCommand(["INCRBYFLOAT", `${usagePrefix}:costJpy`, costAdjustmentJpy]);
-    }
-    await redisCommand(["HINCRBY", intentsKey, record.intent, 1]);
+      await redisCommand(["INCR", `${usagePrefix}:requests`]);
+      await redisCommand(["INCR", `${usagePrefix}:${record.success ? "success" : "failed"}`]);
+      await redisCommand(["INCRBY", `${usagePrefix}:inputTokens`, record.inputTokens]);
+      await redisCommand(["INCRBY", `${usagePrefix}:outputTokens`, record.outputTokens]);
+      await redisCommand(["INCRBYFLOAT", `${usagePrefix}:costUsd`, record.estimatedCostUsd]);
+      await redisCommand(["HINCRBY", intentsKey, record.intent, 1]);
 
-    if (record.userMessage && CHAT_RECENT_MESSAGE_RETENTION_DAYS > 0) {
-      await redisCommand([
-        "LPUSH",
-        recentKey,
-        JSON.stringify({
-          timestamp: record.timestamp,
-          intent: record.intent,
-          userMessage: record.userMessage,
-          assistantReply: record.assistantReply || "",
-          success: record.success,
-          estimatedCostJpy: record.estimatedCostJpy,
-        }),
-      ]);
-      await redisCommand(["LTRIM", recentKey, 0, CHAT_RECENT_MESSAGE_LIMIT - 1]);
-      await redisCommand(["EXPIRE", recentKey, CHAT_RECENT_MESSAGE_RETENTION_DAYS * 24 * 60 * 60]);
+      if (record.userMessage && CHAT_RECENT_MESSAGE_RETENTION_DAYS > 0) {
+        await redisCommand([
+          "LPUSH",
+          recentKey,
+          JSON.stringify({
+            timestamp: record.timestamp,
+            intent: record.intent,
+            userMessage: record.userMessage,
+            assistantReply: record.assistantReply || "",
+            success: record.success,
+            estimatedCostJpy: record.estimatedCostJpy,
+          }),
+        ]);
+        await redisCommand(["LTRIM", recentKey, 0, CHAT_RECENT_MESSAGE_LIMIT - 1]);
+        await redisCommand(["EXPIRE", recentKey, CHAT_RECENT_MESSAGE_RETENTION_DAYS * 24 * 60 * 60]);
+      }
+    } catch (error) {
+      console.error("Failed to persist chat analytics to Redis (non-fatal):", error);
     }
     return;
   }
@@ -508,9 +530,17 @@ function authorizeChatAnalytics(req: Request) {
     .map((part) => part.trim())
     .find((part) => part.startsWith("chat_admin_token="))
     ?.slice("chat_admin_token=".length) || "";
+  let decodedCookieToken = "";
+  try {
+    decodedCookieToken = decodeURIComponent(cookieToken);
+  } catch {
+    // Malformed cookie (e.g. a stray "%"): treat as no token supplied rather than
+    // letting decodeURIComponent's URIError crash the request with a 500.
+    decodedCookieToken = "";
+  }
   const suppliedToken = authHeader.startsWith("Bearer ")
     ? authHeader.slice("Bearer ".length)
-    : decodeURIComponent(cookieToken);
+    : decodedCookieToken;
 
   if (!timingSafeEqualStr(suppliedToken, token)) {
     return {
@@ -602,6 +632,7 @@ const storySubmissionRequests = new Map<string, { count: number; resetAt: number
 const chatRequests = new Map<string, { count: number; resetAt: number }>();
 const registerRequests = new Map<string, { count: number; resetAt: number }>();
 const addressUpdateRequests = new Map<string, { count: number; resetAt: number }>();
+const adminAuthRequests = new Map<string, { count: number; resetAt: number }>();
 
 function getSafeText(value: unknown, maxLength = 2000) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
@@ -644,7 +675,12 @@ function pruneRateLimitStore(store: Map<string, { count: number; resetAt: number
   }
 }
 
-function rateLimitAllowed(
+// In-memory fixed-window limiter. Only safe as a standalone rate limit on a single
+// long-lived process; on Vercel's serverless runtime, concurrent/cold-started
+// invocations each get their own empty Map, so this alone does not actually bound
+// request volume in production. Kept as the fallback for when Redis isn't
+// configured (e.g. local dev) and as a same-process safety net when Redis is.
+function rateLimitAllowedLocal(
   store: Map<string, { count: number; resetAt: number }>,
   ip: string,
   limit: number,
@@ -661,24 +697,55 @@ function rateLimitAllowed(
   return existing.count <= limit;
 }
 
+// Redis-backed fixed-window limiter shared across all serverless instances, with a
+// fallback to the in-memory limiter if Redis is unavailable or errors — a Redis
+// hiccup should degrade rate limiting, not take the endpoint down or (silently)
+// disable the limit entirely.
+async function rateLimitAllowed(
+  kind: string,
+  store: Map<string, { count: number; resetAt: number }>,
+  ip: string,
+  limit: number,
+  windowMs: number,
+): Promise<boolean> {
+  if (hasRedisStorage()) {
+    try {
+      const key = `ratelimit:${kind}:${ip}`;
+      const windowSeconds = Math.max(1, Math.ceil(windowMs / 1000));
+      const count = Number(await redisCommand<string>(["INCR", key]));
+      // NX: only (re)arms the TTL if the key doesn't already have one, so this is
+      // safe to call on every request without resetting an in-progress window.
+      await redisCommand(["EXPIRE", key, windowSeconds, "NX"]);
+      return count <= limit;
+    } catch (error) {
+      console.error(`Redis rate limit check failed for "${kind}" (falling back to in-memory):`, error);
+    }
+  }
+  return rateLimitAllowedLocal(store, ip, limit, windowMs);
+}
+
 function storyInterviewRateAllowed(ip: string) {
-  return rateLimitAllowed(storyInterviewRequests, ip, 20, 10 * 60 * 1000);
+  return rateLimitAllowed("story-interview", storyInterviewRequests, ip, 20, 10 * 60 * 1000);
 }
 
 function storySubmissionRateAllowed(ip: string) {
-  return rateLimitAllowed(storySubmissionRequests, ip, 3, 60 * 60 * 1000);
+  return rateLimitAllowed("story-submission", storySubmissionRequests, ip, 3, 60 * 60 * 1000);
 }
 
 function chatRateAllowed(ip: string) {
-  return rateLimitAllowed(chatRequests, ip, 20, 60 * 1000);
+  return rateLimitAllowed("chat", chatRequests, ip, 20, 60 * 1000);
 }
 
 function registerRateAllowed(ip: string) {
-  return rateLimitAllowed(registerRequests, ip, 5, 60 * 60 * 1000);
+  return rateLimitAllowed("register", registerRequests, ip, 5, 60 * 60 * 1000);
 }
 
 function addressUpdateRateAllowed(ip: string) {
-  return rateLimitAllowed(addressUpdateRequests, ip, 5, 60 * 60 * 1000);
+  return rateLimitAllowed("address-update", addressUpdateRequests, ip, 5, 60 * 60 * 1000);
+}
+
+function adminAuthRateAllowed(ip: string) {
+  return rateLimitAllowed("admin-auth", adminAuthRequests, ip, 10, 10 * 60 * 1000);
 }
 
 function timingSafeEqualStr(a: string, b: string) {
@@ -803,6 +870,9 @@ function formatStoryApplicationForSlack(payload: any) {
     `*所属・活動:* ${escapeSlackText(profile.affiliation)}`,
     `*分野:* ${escapeSlackText(profile.category)}`,
     `*写真:* ${photos.length}枚${SLACK_BOT_TOKEN && SLACK_STORIES_CHANNEL_ID ? "（別添）" : "（Webhook構成では本文のみ送信）"}`,
+    ...(payload.proofread === false
+      ? ["", "⚠️ *AI校正が利用できなかったため、回答者の原文のまま掲載申請されています。*"]
+      : []),
     "",
     "*インタビュー回答*",
     ...interview.flatMap((item, index) => [
@@ -825,6 +895,10 @@ function formatStoryApplicationForSlack(payload: any) {
   ].join("\n");
 }
 
+// Throws on any failure (Gemini error, malformed response, or the monthly AI budget
+// being exhausted). Proofreading is a quality-of-life pass over the applicant's own
+// words, not a required step, so the caller (/api/stories/submit) treats a thrown
+// error as "submit the original text instead" rather than failing the submission.
 async function proofreadStoryApplication(payload: any) {
   const interview: StoryInterviewItem[] = Array.isArray(payload.interview)
     ? payload.interview.slice(0, 5).map((item: any) => ({
@@ -833,14 +907,26 @@ async function proofreadStoryApplication(payload: any) {
       }))
     : [];
   const benefit = getSafeText(payload.benefit, 2000);
-  const result: any = await getGemini().models.generateContent({
-    model: STORIES_GEMINI_MODEL,
-    contents: JSON.stringify({
-      answers: interview.map((item) => item.answer),
-      benefit,
-    }),
-    config: {
-      systemInstruction: `あなたは同窓会広報誌の日本語校正者です。
+  const promptContents = JSON.stringify({
+    answers: interview.map((item) => item.answer),
+    benefit,
+  });
+
+  // Route this Gemini call through the same monthly budget ledger as /api/chat so
+  // STORIES traffic can't spend the Gemini budget invisibly to the chat cap.
+  const projectedInputTokens = estimateTokens(promptContents);
+  const budgetReservation = await reserveMonthlyBudget(calculateCost(projectedInputTokens, 3000).estimatedCostJpy);
+  if (!budgetReservation.allowed) {
+    throw new Error("STORIES proofreading budget exceeded");
+  }
+  const reservedCostJpy = budgetReservation.reservedCostJpy;
+
+  try {
+    const result: any = await getGemini().models.generateContent({
+      model: STORIES_GEMINI_MODEL,
+      contents: promptContents,
+      config: {
+        systemInstruction: `あなたは同窓会広報誌の日本語校正者です。
 入力されたインタビュー回答と同窓生特典を、掲載前の原稿として読みやすく校正してください。
 
 必ず守ること:
@@ -851,31 +937,44 @@ async function proofreadStoryApplication(payload: any) {
 - 各回答を別々に校正し、結合や要約をしない
 - 特典が空欄なら空欄のまま返す
 - JSON以外の説明を返さない`,
-      responseMimeType: "application/json",
-      maxOutputTokens: 3000,
-      temperature: 0.15,
-    },
-  });
-  const parsed = JSON.parse(getSafeText(result.text, 12000));
-  if (!Array.isArray(parsed.answers) || parsed.answers.length !== interview.length) {
-    throw new Error("Invalid proofreading response");
-  }
-  const proofreadInterview = interview.map((item, index) => ({
-    question: item.question,
-    answer: getSafeText(parsed.answers[index], 2000) || item.answer,
-  }));
+        responseMimeType: "application/json",
+        maxOutputTokens: 3000,
+        temperature: 0.15,
+      },
+    });
+    const parsed = JSON.parse(getSafeText(result.text, 12000));
+    if (!Array.isArray(parsed.answers) || parsed.answers.length !== interview.length) {
+      throw new Error("Invalid proofreading response");
+    }
+    const proofreadInterview = interview.map((item, index) => ({
+      question: item.question,
+      answer: getSafeText(parsed.answers[index], 2000) || item.answer,
+    }));
 
-  return {
-    ...payload,
-    originalInterview: interview,
-    interview: proofreadInterview,
-    benefit: benefit ? getSafeText(parsed.benefit, 2000) || benefit : "",
-  };
+    const inputTokens = result.usageMetadata?.promptTokenCount || projectedInputTokens;
+    const outputTokens = result.usageMetadata?.candidatesTokenCount || estimateTokens(getSafeText(result.text, 12000));
+    await settleChatBudget(calculateCost(inputTokens, outputTokens).estimatedCostJpy, reservedCostJpy);
+
+    return {
+      ...payload,
+      originalInterview: interview,
+      interview: proofreadInterview,
+      benefit: benefit ? getSafeText(parsed.benefit, 2000) || benefit : "",
+    };
+  } catch (error) {
+    await releaseMonthlyBudget(reservedCostJpy).catch((releaseError) => {
+      console.error("Failed to release STORIES proofreading budget reservation:", releaseError);
+    });
+    throw error;
+  }
 }
 
 app.post("/api/stories/interview", async (req, res) => {
+  let reservedCostJpy = 0;
+  let budgetSettled = false;
+
   try {
-    if (!storyInterviewRateAllowed(req.ip || "unknown")) {
+    if (!(await storyInterviewRateAllowed(req.ip || "unknown"))) {
       return res.status(429).json({ error: "短時間の利用回数が多いため、少し時間をおいてお試しください。" });
     }
 
@@ -918,6 +1017,19 @@ ${transcript}
 
 この方への次の質問を1問だけ作成してください。`;
 
+    // Route this Gemini call through the same monthly budget ledger as /api/chat.
+    // Rate limiting bounds request volume, but not cost directly — without this,
+    // STORIES traffic could spend the Gemini budget invisibly to the chat cap.
+    const projectedInputTokens = estimateTokens(prompt);
+    const budgetReservation = await reserveMonthlyBudget(calculateCost(projectedInputTokens, 160).estimatedCostJpy);
+    if (!budgetReservation.allowed) {
+      return res.status(429).json({
+        error: "AIの月間利用上限に達したため、インタビュー機能を一時停止しています。恐れ入りますが、同窓会事務局へ直接お問い合わせください。",
+        code: "BUDGET_EXCEEDED",
+      });
+    }
+    reservedCostJpy = budgetReservation.reservedCostJpy;
+
     const result: any = await getGemini().models.generateContent({
       model: STORIES_GEMINI_MODEL,
       contents: prompt,
@@ -955,15 +1067,29 @@ ${transcript}
     });
     const question = getSafeText(result.text, 200);
     if (!question) {
+      await releaseMonthlyBudget(reservedCostJpy).catch((releaseError) => {
+        console.error("Failed to release STORIES interview budget reservation:", releaseError);
+      });
       return res.status(502).json({
         error: "質問を生成できませんでした。もう一度お試しください。",
         code: "GEMINI_EMPTY_RESPONSE",
       });
     }
+
+    const inputTokens = result.usageMetadata?.promptTokenCount || projectedInputTokens;
+    const outputTokens = result.usageMetadata?.candidatesTokenCount || estimateTokens(question);
+    await settleChatBudget(calculateCost(inputTokens, outputTokens).estimatedCostJpy, reservedCostJpy);
+    budgetSettled = true;
+
     res.json({
       question,
     });
   } catch (error: any) {
+    if (reservedCostJpy > 0 && !budgetSettled) {
+      await releaseMonthlyBudget(reservedCostJpy).catch((releaseError) => {
+        console.error("Failed to release STORIES interview budget reservation:", releaseError);
+      });
+    }
     console.error("STORIES interview error:", error);
     const status = Number(error?.status);
     if (status === 401 || status === 403) {
@@ -987,7 +1113,7 @@ ${transcript}
 
 app.post("/api/stories/submit", async (req, res) => {
   try {
-    if (!storySubmissionRateAllowed(req.ip || "unknown")) {
+    if (!(await storySubmissionRateAllowed(req.ip || "unknown"))) {
       return res.status(429).json({ error: "申請回数が多いため、時間をおいてからお試しください。" });
     }
 
@@ -1015,13 +1141,36 @@ app.post("/api/stories/submit", async (req, res) => {
       return res.status(400).json({ error: "必須情報、インタビュー回答、掲載審査への同意を確認してください。" });
     }
 
-    for (const photo of photos) decodeStoryPhoto(photo);
-
-    if (!process.env.GEMINI_API_KEY) {
-      return res.status(503).json({ error: "現在、回答の文章を整える機能を利用できません。時間をおいてお試しください。" });
+    try {
+      for (const photo of photos) decodeStoryPhoto(photo);
+    } catch (photoError: any) {
+      // decodeStoryPhoto throws on an unsupported image type or an oversized file —
+      // that's a client input problem (400), not a server fault (500).
+      return res.status(400).json({
+        error: photoError?.message === "Photo exceeds 2MB"
+          ? "写真のファイルサイズが大きすぎます（1枚2MBまで）。"
+          : "写真の形式をご確認ください（JPEG・PNG・WEBPのみ対応しています）。",
+      });
     }
 
-    const proofreadPayload = await proofreadStoryApplication({ ...payload, interview });
+    // Proofreading is best-effort: a Gemini outage, malformed response, or an
+    // exhausted monthly AI budget should not block a member's submission — it just
+    // means the office reviews the applicant's own wording as typed (formatStoryApplicationForSlack
+    // flags this in the Slack message so reviewers know no AI polish was applied).
+    let proofreadPayload: any = { ...payload, interview };
+    let proofread = false;
+    if (process.env.GEMINI_API_KEY) {
+      try {
+        proofreadPayload = await proofreadStoryApplication({ ...payload, interview });
+        proofread = true;
+      } catch (proofreadError) {
+        console.error("STORIES proofreading failed, submitting original text:", proofreadError);
+        proofreadPayload = { ...payload, interview, proofread: false };
+      }
+    } else {
+      proofreadPayload = { ...payload, interview, proofread: false };
+    }
+
     const slackText = formatStoryApplicationForSlack(proofreadPayload);
     const integrated = await sendStoryApplicationToSlack(slackText, photos);
     if (!integrated && process.env.NODE_ENV === "production") {
@@ -1034,7 +1183,7 @@ app.post("/api/stories/submit", async (req, res) => {
     res.json({
       status: "success",
       integrated,
-      proofread: true,
+      proofread,
       message: "掲載審査の申請を受け付けました。",
     });
   } catch (error: any) {
@@ -1049,7 +1198,7 @@ app.post("/api/chat", async (req, res) => {
   let budgetSettled = false;
 
   try {
-    if (!chatRateAllowed(req.ip || "unknown")) {
+    if (!(await chatRateAllowed(req.ip || "unknown"))) {
       return res.status(429).json({
         error: "短時間に多くのリクエストが送信されました。少し時間をおいて再度お試しください。",
         code: "RATE_LIMITED",
@@ -1094,7 +1243,6 @@ app.post("/api/chat", async (req, res) => {
           inputTokens: 0,
           outputTokens: 0,
           estimatedCostJpy: 0,
-          monthly: await getMonthlyUsage(),
         },
       });
     }
@@ -1162,7 +1310,6 @@ ${baseKnowledge}
       return res.status(429).json({
         error: "今月のAIチャット利用上限（1,000円）に達したため、チャットを一時停止しています。恐れ入りますが、同窓会事務局へ直接お問い合わせください。",
         code: "BUDGET_EXCEEDED",
-        usage: budgetReservation.usage,
       });
     }
 
@@ -1223,6 +1370,13 @@ ${baseKnowledge}
     const outputTokens = result.usageMetadata?.candidatesTokenCount || estimateTokens(reply);
     const actualCost = calculateCost(inputTokens, outputTokens);
 
+    // Settle the budget ledger first and mark it settled immediately on success, so
+    // the catch block below only ever releases the reservation when it genuinely
+    // was never applied — a failure in the best-effort analytics logging that
+    // follows must not cause the reservation to be released a second time.
+    await settleChatBudget(actualCost.estimatedCostJpy, reservedCostJpy);
+    budgetSettled = true;
+
     await appendChatAnalytics({
       timestamp: new Date().toISOString(),
       month: getCurrentMonth(),
@@ -1235,8 +1389,7 @@ ${baseKnowledge}
       estimatedCostJpy: actualCost.estimatedCostJpy,
       intent: classifyIntent(message),
       success: true,
-    }, reservedCostJpy);
-    budgetSettled = true;
+    });
 
     res.json({
       reply,
@@ -1246,7 +1399,6 @@ ${baseKnowledge}
         inputTokens,
         outputTokens,
         estimatedCostJpy: actualCost.estimatedCostJpy,
-        monthly: await getMonthlyUsage(),
       },
     });
   } catch (error: any) {
@@ -1277,6 +1429,9 @@ ${baseKnowledge}
 });
 
 app.get("/api/chat/usage", async (req, res) => {
+  if (!(await adminAuthRateAllowed(req.ip || "unknown"))) {
+    return res.status(429).json({ error: "試行回数が多いため、少し時間をおいて再度お試しください。" });
+  }
   const auth = authorizeChatAnalytics(req);
   if (!auth.ok) {
     return res.status(auth.status).json({ error: auth.message });
@@ -1286,6 +1441,9 @@ app.get("/api/chat/usage", async (req, res) => {
 });
 
 app.get("/api/chat/analytics", async (req, res) => {
+  if (!(await adminAuthRateAllowed(req.ip || "unknown"))) {
+    return res.status(429).json({ error: "試行回数が多いため、少し時間をおいて再度お試しください。" });
+  }
   const auth = authorizeChatAnalytics(req);
   if (!auth.ok) {
     return res.status(auth.status).json({ error: auth.message });
@@ -1295,7 +1453,11 @@ app.get("/api/chat/analytics", async (req, res) => {
   res.json(await buildChatAnalytics(month));
 });
 
-app.post("/admin/chat-analytics/login", (req, res) => {
+app.post("/admin/chat-analytics/login", async (req, res) => {
+  if (!(await adminAuthRateAllowed(req.ip || "unknown"))) {
+    return res.status(429).type("html").send(adminLoginHtml("試行回数が多いため、少し時間をおいて再度お試しください。"));
+  }
+
   const expectedToken = process.env.CHAT_ANALYTICS_TOKEN;
   const submittedToken = typeof req.body.token === "string" ? req.body.token : "";
 
@@ -1311,7 +1473,10 @@ app.post("/admin/chat-analytics/login", (req, res) => {
   res.redirect(303, "/admin/chat-analytics");
 });
 
-app.get("/admin/chat-analytics", (req, res) => {
+app.get("/admin/chat-analytics", async (req, res) => {
+  if (!(await adminAuthRateAllowed(req.ip || "unknown"))) {
+    return res.status(429).type("html").send(adminLoginHtml("試行回数が多いため、少し時間をおいて再度お試しください。"));
+  }
   const auth = authorizeChatAnalytics(req);
   if (!auth.ok) {
     return res.status(auth.status).type("html").send(adminLoginHtml(auth.status === 403 ? "CHAT_ANALYTICS_TOKEN が未設定です。" : ""));
@@ -1402,7 +1567,9 @@ async function forwardToFormWebhook(payload: Record<string, unknown>) {
   const response = await fetch(FORM_WEBHOOK_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(
+      FORM_WEBHOOK_SECRET ? { ...payload, token: FORM_WEBHOOK_SECRET } : payload,
+    ),
   });
 
   if (!response.ok) {
@@ -1419,7 +1586,7 @@ async function forwardToFormWebhook(payload: Record<string, unknown>) {
 // GAS Forwarding Webhook registration endpoint
 app.post("/api/register", async (req, res) => {
   try {
-    if (!registerRateAllowed(req.ip || "unknown")) {
+    if (!(await registerRateAllowed(req.ip || "unknown"))) {
       return res.status(429).json({
         error: "短時間に多くの登録リクエストが送信されました。少し時間をおいて再度お試しください。",
         code: "RATE_LIMITED",
@@ -1480,7 +1647,7 @@ app.post("/api/register", async (req, res) => {
 // fields from `details` (see the address-update branch in google-apps-script/forms.gs).
 app.post("/api/address-update", async (req, res) => {
   try {
-    if (!addressUpdateRateAllowed(req.ip || "unknown")) {
+    if (!(await addressUpdateRateAllowed(req.ip || "unknown"))) {
       return res.status(429).json({
         error: "短時間に多くの送信リクエストがありました。少し時間をおいて再度お試しください。",
         code: "RATE_LIMITED",

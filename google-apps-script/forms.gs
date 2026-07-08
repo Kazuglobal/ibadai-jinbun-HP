@@ -19,6 +19,14 @@ function authorizeServices() {
 function doPost(e) {
   try {
     const payload = JSON.parse(e.postData.contents || "{}");
+
+    const authError = checkSharedSecret(payload);
+    if (authError) {
+      return ContentService.createTextOutput(
+        JSON.stringify({ status: "error", error: authError }),
+      ).setMimeType(ContentService.MimeType.JSON);
+    }
+
     const type =
       payload.formType === "address-update"
         ? "住所変更届"
@@ -82,6 +90,20 @@ function doPost(e) {
       JSON.stringify({ status: "error", error: String(error) }),
     ).setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+// This Web App's URL cannot be kept secret once deployed (any caller who has it can
+// invoke doPost directly, bypassing the server's rate limiting and validation), so it
+// is not itself an access control. Set a "SHARED_SECRET" Script Property (Project
+// Settings > Script Properties in the Apps Script editor) matching the server's
+// GAS_SHARED_SECRET env var to require every request to present it.
+// Left unset, this stays a no-op (matches the pre-existing, unauthenticated behavior)
+// so rollout can happen without a synchronized deploy; set it as soon as possible.
+function checkSharedSecret(payload) {
+  const expected = PropertiesService.getScriptProperties().getProperty("SHARED_SECRET");
+  if (!expected) return null;
+  if (payload.token !== expected) return "unauthorized";
+  return null;
 }
 
 function appendFormSubmissionSafely(payload, type) {
