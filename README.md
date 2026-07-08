@@ -28,7 +28,7 @@ View your app in AI Studio: https://ai.studio/apps/4a9b0331-bac2-4ffe-b422-6c25a
 - Browser-provided AI replies are not trusted or sent back to Gemini. Only the latest user question is used for explicit follow-ups such as 「その会場は？」.
 - Gemini replies use structured JSON with source IDs. Answers without an allowed source, or with unsupported dates, amounts, contact details, or role-holder names, are replaced with the office-contact fallback.
 - Common fixed questions such as membership fees, officers, office contact details, address updates, and newsletter access use deterministic zero-cost answers.
-- Analytics focus on category counts and usage totals. Recent question snippets are retained briefly via `CHAT_RECENT_MESSAGE_RETENTION_DAYS=7`.
+- Analytics focus on category counts and usage totals. Recent question/answer pairs are retained for `CHAT_RECENT_MESSAGE_RETENTION_DAYS` days (default 365) so multi-month usage trends stay comparable; lower it in the environment if a shorter retention window is preferred. The sanitizer redacts e-mail addresses, phone numbers, and postal codes before storage, but a user's own free-text question can still contain their name or address (e.g. "山田太郎です、水戸市の住所を変更したいです") — treat the admin dashboard and underlying Redis data as containing personal information, and restrict `CHAT_ANALYTICS_TOKEN` accordingly.
 - Usage summary API: `GET /api/chat/usage` with `Authorization: Bearer <CHAT_ANALYTICS_TOKEN>`
 - Chat analytics API: `GET /api/chat/analytics` with `Authorization: Bearer <CHAT_ANALYTICS_TOKEN>`
 - Admin dashboard: `GET /admin/chat-analytics`, then enter `CHAT_ANALYTICS_TOKEN` in the login form.

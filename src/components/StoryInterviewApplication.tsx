@@ -63,6 +63,14 @@ const categories = [
 const fieldClass =
   'w-full rounded-lg border border-stone-200 bg-[#FAF9F5] px-3 py-2.5 text-sm text-[#00204A] outline-none transition focus:border-[#CD9535] focus:ring-2 focus:ring-[#CD9535]/10';
 
+// Keep this in sync with the server-side check in server.ts (/api/stories/submit) so
+// an invalid address is caught here at step 0, not after all 5 interview questions.
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+// Keep this in sync with decodeStoryPhoto in server.ts, which only accepts these
+// three MIME types — anything else reaches the server fine but fails at final
+// submission (after the full interview is complete) with a confusing error.
+const ACCEPTED_PHOTO_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
 function fileToDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -91,7 +99,7 @@ export default function StoryInterviewApplication({ isOpen, onClose }: StoryInte
 
   const profileReady = Boolean(
     profile.name.trim() &&
-      profile.email.trim() &&
+      EMAIL_PATTERN.test(profile.email.trim()) &&
       profile.gradYear.trim() &&
       profile.major.trim() &&
       profile.affiliation.trim(),
@@ -159,7 +167,7 @@ export default function StoryInterviewApplication({ isOpen, onClose }: StoryInte
     const remaining = Math.max(0, 3 - photos.length);
     const selected = Array.from(files).slice(0, remaining);
 
-    if (selected.some((file) => !file.type.startsWith('image/') || file.size > 2 * 1024 * 1024)) {
+    if (selected.some((file) => !ACCEPTED_PHOTO_TYPES.includes(file.type) || file.size > 2 * 1024 * 1024)) {
       setError('写真はJPG・PNG・WEBP形式、1枚2MB以下で選択してください。');
       return;
     }
@@ -323,6 +331,9 @@ export default function StoryInterviewApplication({ isOpen, onClose }: StoryInte
                       </label>
                       <label className="text-xs font-bold text-[#00204A]">連絡用メールアドレス *
                         <input type="email" className={`${fieldClass} mt-1.5`} value={profile.email} onChange={(e) => setProfile({ ...profile, email: e.target.value })} placeholder="確認連絡にのみ使用します" />
+                        {profile.email.trim() && !EMAIL_PATTERN.test(profile.email.trim()) && (
+                          <span className="mt-1 block text-[10px] font-normal text-red-600">メールアドレスの形式をご確認ください。</span>
+                        )}
                       </label>
                       <label className="text-xs font-bold text-[#00204A]">卒業年 *
                         <input className={`${fieldClass} mt-1.5`} value={profile.gradYear} onChange={(e) => setProfile({ ...profile, gradYear: e.target.value })} placeholder="例：2005年卒" />
