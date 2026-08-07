@@ -107,6 +107,24 @@ E-mailはibadai.bj.dousou@gmail.comです。`,
 app.set("trust proxy", process.env.NODE_ENV === "production" ? 1 : false);
 app.disable("x-powered-by");
 
+// HTTPS (SSL/TLS) enforcement — defense in depth. Vercel terminates TLS and
+// redirects http→https at the edge, but self-hosted deployments behind other
+// proxies get the same guarantee from this middleware: plain-http page loads are
+// redirected, and plain-http form submissions (which would carry personal data
+// unencrypted) are refused outright instead of silently redirected.
+app.use((req, res, next) => {
+  if (process.env.NODE_ENV !== "production") return next();
+  // With trust proxy enabled, req.secure reflects X-Forwarded-Proto.
+  if (req.secure) return next();
+  if (req.method === "GET" || req.method === "HEAD") {
+    return res.redirect(308, `https://${req.headers.host || ""}${req.originalUrl}`);
+  }
+  return res.status(403).json({
+    error: "暗号化されていない通信（http）では送信できません。URLが https:// で始まる状態でご利用ください。",
+    code: "HTTPS_REQUIRED",
+  });
+});
+
 // Security headers applied to every response.
 // frame-ancestors/X-Frame-Options block clickjacking (esp. the admin page),
 // nosniff blocks MIME confusion, and the rest reduce information leakage.
@@ -636,6 +654,55 @@ const adminAuthRequests = new Map<string, { count: number; resetAt: number }>();
 
 function getSafeText(value: unknown, maxLength = 2000) {
   return typeof value === "string" ? value.trim().slice(0, maxLength) : "";
+}
+
+// For single-line fields that end up in notification e-mail subjects/bodies:
+// strip control characters (CR/LF included) so submitted values cannot inject
+// extra lines or headers into the mail composed by the GAS side.
+function getSafeLine(value: unknown, maxLength = 2000) {
+  return getSafeText(value, maxLength).replace(/[\u0000-\u001f\u007f]+/g, " ").trim();
+}
+
+const VALID_PREFECTURES = new Set([
+  "北海道", "青森県", "岩手県", "宮城県", "秋田県", "山形県", "福島県",
+  "茨城県", "栃木県", "群馬県", "埼玉県", "千葉県", "東京都", "神奈川県",
+  "新潟県", "富山県", "石川県", "福井県", "山梨県", "長野県", "岐阜県",
+  "静岡県", "愛知県", "三重県", "滋賀県", "京都府", "大阪府", "兵庫県",
+  "奈良県", "和歌山県", "鳥取県", "島根県", "岡山県", "広島県", "山口県",
+  "徳島県", "香川県", "愛媛県", "高知県", "福岡県", "佐賀県", "長崎県",
+  "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県",
+]);
+
+// Same-origin check for state-changing form posts (CSRF / cross-site abuse
+// mitigation). Browsers always attach an Origin header to cross-origin — and to
+// same-origin fetch() — POSTs, so a missing/foreign Origin (falling back to
+// Referer) means the request did not come from this site's own form. Only the
+// Host header and the configured SITE_URL/APP_URL are trusted as valid targets;
+// X-Forwarded-Host is deliberately ignored because clients can inject it.
+function isTrustedFormOrigin(req: Request) {
+  const rawSource = req.headers.origin || req.headers.referer;
+  const source = Array.isArray(rawSource) ? rawSource[0] : rawSource;
+  if (!source) return false;
+
+  let sourceHost = "";
+  try {
+    sourceHost = new URL(source).host;
+  } catch {
+    return false;
+  }
+  if (!sourceHost) return false;
+
+  const allowedHosts = new Set<string>();
+  if (req.headers.host) allowedHosts.add(req.headers.host);
+  const configuredUrl = process.env.SITE_URL || process.env.APP_URL;
+  if (configuredUrl && /^https?:\/\//.test(configuredUrl)) {
+    try {
+      allowedHosts.add(new URL(configuredUrl).host);
+    } catch {
+      // Ignore a malformed SITE_URL/APP_URL; the Host header check still applies.
+    }
+  }
+  return allowedHosts.has(sourceHost);
 }
 
 function getSafeHttpUrl(value: unknown) {
@@ -1654,24 +1721,51 @@ app.post("/api/address-update", async (req, res) => {
       });
     }
 
-    const fullName = getSafeText(req.body?.fullName, 100);
-    const nameKana = getSafeText(req.body?.nameKana, 100);
-    const birthdate = getSafeText(req.body?.birthdate, 30);
-    const gradYear = getSafeText(req.body?.gradYear, 50);
-    const department = getSafeText(req.body?.department, 100);
-    const postalCode = getSafeText(req.body?.postalCode, 10);
-    const prefecture = getSafeText(req.body?.prefecture, 20);
-    const cityAddress = getSafeText(req.body?.cityAddress, 200);
-    const building = getSafeText(req.body?.building, 200);
-    const phone = getSafeText(req.body?.phone, 30);
-    const email = getSafeText(req.body?.email, 200);
+    // Cross-site / direct-POST abuse guard: only accept submissions whose
+    // Origin (or Referer) matches this site. Enforced in production only so
+    // local curl-based testing keeps working.
+    if (process.env.NODE_ENV === "production" && !isTrustedFormOrigin(req)) {
+      return res.status(403).json({
+        error: "不正な送信元からのリクエストのため受け付けられませんでした。サイトの住所変更フォームからご送信ください。",
+        code: "FORBIDDEN_ORIGIN",
+      });
+    }
+
+    // Honeypot: the form contains an invisible "website" field that humans never
+    // see. If a bot filled it, answer success without forwarding anything so the
+    // bot learns nothing and the office inbox stays clean.
+    if (getSafeText(req.body?.website, 500)) {
+      return res.json({ status: "success", message: "住所変更届を受け付けました。", integrated: false });
+    }
+
+    const fullName = getSafeLine(req.body?.fullName, 100);
+    const nameKana = getSafeLine(req.body?.nameKana, 100);
+    const birthdate = getSafeLine(req.body?.birthdate, 30);
+    const gradYear = getSafeLine(req.body?.gradYear, 50);
+    const department = getSafeLine(req.body?.department, 100);
+    const postalCode = getSafeLine(req.body?.postalCode, 10);
+    const prefecture = getSafeLine(req.body?.prefecture, 20);
+    const cityAddress = getSafeLine(req.body?.cityAddress, 200);
+    const building = getSafeLine(req.body?.building, 200);
+    const phone = getSafeLine(req.body?.phone, 30);
+    const email = getSafeLine(req.body?.email, 200);
     const subscribeMail = req.body?.subscribeMail === true;
 
     if (!fullName || !postalCode || !prefecture || !cityAddress) {
       return res.status(400).json({ error: "氏名と新しいご住所（郵便番号・都道府県・市区町村番地）をご入力ください。" });
     }
+    if (!/^\d{3}-?\d{4}$/.test(postalCode)) {
+      return res.status(400).json({ error: "郵便番号は「310-8512」のような7桁の形式でご入力ください。" });
+    }
+    if (!VALID_PREFECTURES.has(prefecture)) {
+      return res.status(400).json({ error: "都道府県の選択内容をご確認ください。" });
+    }
     if (!phone && !email) {
       return res.status(400).json({ error: "確認のご連絡のため、電話番号またはメールアドレスをご入力ください。" });
+    }
+    const phoneDigits = phone.replace(/\D/g, "");
+    if (phone && (phoneDigits.length < 10 || phoneDigits.length > 13)) {
+      return res.status(400).json({ error: "電話番号の形式をご確認ください（例: 090-1234-5678）。" });
     }
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       return res.status(400).json({ error: "メールアドレスの形式をご確認ください。" });

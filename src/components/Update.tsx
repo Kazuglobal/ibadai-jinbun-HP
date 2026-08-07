@@ -10,7 +10,8 @@ import {
   ChevronUp,
   ArrowRight,
   BadgeCheck,
-  AlertCircle
+  AlertCircle,
+  Lock
 } from 'lucide-react';
 
 // --- 卒業年 ---
@@ -81,6 +82,9 @@ export default function Update() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [subscribeMail, setSubscribeMail] = useState(true);
+  // ボット対策のハニーポット。人間には見えないフィールドで、値が入っていたら
+  // サーバー側で送信を破棄する。
+  const [honeypot, setHoneypot] = useState('');
 
   // Accordion state (Mobile ONLY)
   const [expandedSection, setExpandedSection] = useState<number>(1); // default expand section 1
@@ -107,8 +111,15 @@ export default function Update() {
     if (!postalCode.trim() || !prefecture || !cityAddress.trim()) {
       return '新しいご住所（郵便番号・都道府県・市区町村番地）をご入力ください。';
     }
+    if (!/^\d{3}-?\d{4}$/.test(postalCode.trim())) {
+      return '郵便番号は「310-8512」のような7桁の形式でご入力ください。';
+    }
     if (!phone.trim() && !email.trim()) {
       return '確認のご連絡のため、電話番号またはメールアドレスをご入力ください。';
+    }
+    const phoneDigits = phone.replace(/\D/g, '');
+    if (phone.trim() && (phoneDigits.length < 10 || phoneDigits.length > 13)) {
+      return '電話番号の形式をご確認ください（例: 090-1234-5678）。';
     }
     if (email.trim() && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
       return 'メールアドレスの形式をご確認ください。';
@@ -119,6 +130,15 @@ export default function Update() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
+
+    // SSL/TLSで保護されていない接続（http）では個人情報を送信しない。
+    // 本番はHTTPS配信のため通常ここには入らない。ローカル開発だけ許可する。
+    const { protocol, hostname } = window.location;
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1';
+    if (protocol !== 'https:' && !isLocalhost) {
+      setSubmitError('通信が暗号化されていないため送信を中止しました。アドレスバーのURLが「https://」で始まる状態でご利用ください。');
+      return;
+    }
 
     const validationError = validateForm();
     if (validationError) {
@@ -145,6 +165,7 @@ export default function Update() {
           phone: phone.trim(),
           email: email.trim(),
           subscribeMail,
+          website: honeypot,
         }),
       });
       const data = await response.json().catch(() => ({}));
@@ -177,6 +198,7 @@ export default function Update() {
     setPhone('');
     setEmail('');
     setSubscribeMail(true);
+    setHoneypot('');
     setSubmitSuccess(false);
     setSubmitError('');
     setExpandedSection(1);
@@ -209,6 +231,9 @@ export default function Update() {
               </span>
               <span className="bg-[#E8F6F7] text-[#108A93] text-[11px] font-bold px-3 py-1.5 rounded-md border border-[#108A93]/30 flex items-center gap-1">
                 📱 スマホ・PC完全対応
+              </span>
+              <span className="bg-emerald-50 text-emerald-800 text-[11px] font-bold px-3 py-1.5 rounded-md border border-emerald-200/60 flex items-center gap-1">
+                <Lock className="w-3 h-3" /> SSL暗号化通信で保護
               </span>
             </div>
 
@@ -379,6 +404,8 @@ export default function Update() {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    autoComplete="name"
+                    maxLength={100}
                     className="w-full border border-stone-200 bg-white rounded-md py-1.5 px-3 text-[12.5px] text-[#00204A] font-medium outline-none focus:border-[#108A93]"
                     placeholder="例) 茨城 太郎"
                   />
@@ -502,6 +529,8 @@ export default function Update() {
                     type="text"
                     value={postalCode}
                     onChange={(e) => setPostalCode(e.target.value)}
+                    autoComplete="postal-code"
+                    maxLength={8}
                     className="w-full border border-stone-200 bg-white rounded-md py-1.5 px-3 text-[12.5px] text-[#00204A] font-medium outline-none focus:border-[#108A93]"
                     placeholder="例) 310-8512"
                   />
@@ -536,6 +565,8 @@ export default function Update() {
                     type="text"
                     value={cityAddress}
                     onChange={(e) => setCityAddress(e.target.value)}
+                    autoComplete="address-line1"
+                    maxLength={200}
                     className="w-full border border-stone-200 bg-white rounded-md py-1.5 px-3 text-[12.5px] text-[#00204A] font-medium outline-none focus:border-[#108A93]"
                     placeholder="例) 水戸市文京1-5-30"
                   />
@@ -550,6 +581,8 @@ export default function Update() {
                     type="text"
                     value={building}
                     onChange={(e) => setBuilding(e.target.value)}
+                    autoComplete="address-line2"
+                    maxLength={200}
                     className="w-full border border-stone-200 bg-white rounded-md py-1.5 px-3 text-[12.5px] text-[#00204A] font-medium outline-none focus:border-[#108A93]"
                     placeholder="例) ◯◯マンション101"
                   />
@@ -592,9 +625,11 @@ export default function Update() {
                     電話番号 (携帯)
                   </label>
                   <input
-                    type="text"
+                    type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
+                    autoComplete="tel"
+                    maxLength={30}
                     className="w-full border border-stone-200 bg-white rounded-md py-1.5 px-3 text-[12.5px] text-[#00204A] font-medium outline-none focus:border-[#108A93]"
                     placeholder="例) 090-1234-5678"
                   />
@@ -609,6 +644,8 @@ export default function Update() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
+                    maxLength={200}
                     className="w-full border border-stone-200 bg-white rounded-md py-1.5 px-3 text-[12.5px] text-[#00204A] font-medium outline-none focus:border-[#108A93]"
                     placeholder="例) alumni@example.com"
                   />
@@ -706,6 +743,11 @@ export default function Update() {
                 >
                   最初からやり直す
                 </button>
+
+                <p className="pt-1 text-[9.5px] text-stone-400 font-sans tracking-wide leading-snug flex items-start gap-1">
+                  <Lock className="w-3 h-3 text-[#108A93] flex-shrink-0 mt-[1px]" />
+                  <span>ご入力内容はSSL/TLS暗号化通信により保護されて送信されます。</span>
+                </p>
               </div>
             </div>
 
@@ -771,6 +813,22 @@ export default function Update() {
           {/* Form wrapper tag for active submits */}
           <form onSubmit={handleSubmit} className="space-y-4">
 
+            {/* ハニーポット（ボット対策）: 視覚・支援技術の双方から隠したダミー入力。
+                人間は入力できないため、値が入っていた送信はサーバー側で破棄される。 */}
+            <div aria-hidden="true" className="absolute -left-[9999px] top-auto w-px h-px overflow-hidden">
+              <label>
+                ウェブサイト（この欄には入力しないでください）
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                />
+              </label>
+            </div>
+
             {/* Accordion 1: 基本情報 */}
             <div className="bg-white rounded-2xl border border-stone-200/80 overflow-hidden shadow-sm">
               <button
@@ -811,6 +869,8 @@ export default function Update() {
                           type="text"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
+                          autoComplete="name"
+                          maxLength={100}
                           className="w-full border border-stone-200/80 bg-white rounded-lg py-2.5 px-3.5 text-sm text-[#00204A] font-medium outline-none focus:border-[#108A93]"
                           placeholder="茨城 太郎"
                         />
@@ -945,6 +1005,8 @@ export default function Update() {
                           type="text"
                           value={postalCode}
                           onChange={(e) => setPostalCode(e.target.value)}
+                          autoComplete="postal-code"
+                          maxLength={8}
                           className="w-full border border-stone-200/80 bg-white rounded-lg py-2.5 px-3.5 text-sm text-[#00204A] font-medium outline-none focus:border-[#108A93]"
                           placeholder="310-8512"
                         />
@@ -975,6 +1037,8 @@ export default function Update() {
                           type="text"
                           value={cityAddress}
                           onChange={(e) => setCityAddress(e.target.value)}
+                          autoComplete="address-line1"
+                          maxLength={200}
                           className="w-full border border-stone-200/80 bg-white rounded-lg py-2.5 px-3.5 text-sm text-[#00204A] font-medium outline-none focus:border-[#108A93]"
                           placeholder="水戸市文京1-5-30"
                         />
@@ -987,6 +1051,8 @@ export default function Update() {
                           type="text"
                           value={building}
                           onChange={(e) => setBuilding(e.target.value)}
+                          autoComplete="address-line2"
+                          maxLength={200}
                           className="w-full border border-stone-200/80 bg-white rounded-lg py-2.5 px-3.5 text-sm text-[#00204A] font-medium outline-none focus:border-[#108A93]"
                           placeholder="例) 茨城大学◯◯寮101"
                         />
@@ -1054,9 +1120,11 @@ export default function Update() {
                       <div className="flex flex-col gap-1.5">
                         <label className="text-xs font-sans font-bold text-stone-500">電話番号 (携帯)</label>
                         <input
-                          type="text"
+                          type="tel"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
+                          autoComplete="tel"
+                          maxLength={30}
                           className="w-full border border-stone-200/80 bg-white rounded-lg py-2.5 px-3.5 text-sm text-[#00204A] font-medium outline-none focus:border-[#108A93]"
                           placeholder="090-1234-5678"
                         />
@@ -1069,6 +1137,8 @@ export default function Update() {
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
+                          autoComplete="email"
+                          maxLength={200}
                           className="w-full border border-stone-200/80 bg-white rounded-lg py-2.5 px-3.5 text-sm text-[#00204A] font-medium outline-none focus:border-[#108A93]"
                           placeholder="alumni@ibaraki.ac.jp"
                         />
@@ -1177,6 +1247,12 @@ export default function Update() {
                           </span>
                         </div>
                       </div>
+
+                      {/* SSL secured submission notice */}
+                      <p className="text-[10px] text-stone-400 font-sans tracking-wide leading-snug flex items-start gap-1.5 mb-4">
+                        <Lock className="w-3.5 h-3.5 text-[#108A93] flex-shrink-0 mt-[1px]" />
+                        <span>ご入力内容はSSL/TLS暗号化通信により保護されて送信されます。</span>
+                      </p>
 
                       {/* Action back/submit buttons */}
                       <div className="flex justify-between items-center">
