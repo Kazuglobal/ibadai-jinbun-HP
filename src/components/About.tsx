@@ -29,8 +29,9 @@ export default function About({ onNavigate }: AboutProps) {
   const [isOfficersOpen, setIsOfficersOpen] = useState(false);
   const [isBylawsOpen, setIsBylawsOpen] = useState(false);
 
+  // 第18期役員名簿（令和8年）
   const boardMembers = [
-    { title: '名誉会長', name: '原口　弥生', year: '人文社会科学部長' },
+    { title: '名誉会長', name: '蓮井　誠一郎', year: '人文社会科学部長' },
     { title: '顧問', name: '土田　惣一', year: '文理・経済・１７' },
     { title: '会長', name: '大和田　一雄', year: '人文・経済・３' },
     { title: '副会長', name: '仲田　正夫', year: '文理・経済・１７' },
@@ -42,10 +43,12 @@ export default function About({ onNavigate }: AboutProps) {
     { title: '副会長', name: '飯村　泉太郎', year: '人文・社会・１４' },
     { title: '副会長', name: '石田　奈緒子', year: '人文・人文・１４' },
     { title: '副会長', name: '矢内　結香', year: '人文・人文・２０' },
-    { title: '会計監査', name: '藤田　絹代', year: '文理・経済・１３' },
+    { title: '会計監査', name: '幡谷　佐智子', year: '人文・人文・２０' },
     { title: '会計監査', name: '岡本　美咲', year: '人文・社会・４７' },
     { title: '幹事長（兼）', name: '鈴木　章史', year: '人文・経済・３' },
-    { title: '理事兼幹事', name: '木戸　之都子', year: '人文・文・１０' },
+    { title: '幹事', name: '木戸　之都子', year: '人文・文・１０' },
+    { title: '幹事', name: '鹿志村　やよい', year: '人文・人文・３９' },
+    { title: '幹事', name: '望月　ひとみ', year: '人文・人文・４１' },
   ];
 
   return (
@@ -460,7 +463,7 @@ export default function About({ onNavigate }: AboutProps) {
               </div>
 
               <p className="text-stone-600 text-xs md:text-sm mb-4 leading-relaxed font-sans">
-                文理・人文学部同窓会は、次の組織・役員により管理運営を行っています。
+                文理・人文学部同窓会は、次の組織・役員（第１８期）により管理運営を行っています。
               </p>
 
               {/* Members listings stack container with beautiful scrollable viewport */}
@@ -959,7 +962,7 @@ export default function About({ onNavigate }: AboutProps) {
               <div className="border-b border-stone-100 pb-3 mb-5 text-left">
                 <span className="text-[10px] font-bold text-[#CD9535] tracking-widest uppercase block mb-1">OFFICERS SUMMARY</span>
                 <h3 className="text-lg font-serif font-bold text-[#00204A] tracking-wider">
-                  ２０２５年度 役員会体制・活動方針
+                  第１８期 役員会体制・活動方針
                 </h3>
               </div>
 
