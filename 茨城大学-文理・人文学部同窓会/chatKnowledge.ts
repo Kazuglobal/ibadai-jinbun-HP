@@ -85,6 +85,15 @@ const latestIssueArticles = [
 // eligible for injection; below it, matches are treated as too generic.
 const MIN_TERM_IDF = 2.0;
 
+// Core domain terms that should trigger retrieval even if their corpus IDF is low,
+// because they reflect explicit user intent about alumni association topics.
+const CORE_DOMAIN_TERMS = new Set([
+  "総会", "懇親会", "講演", "講演会", "学長", "佐川", "佐川泰弘",
+  "日航", "ホテル日航つくば", "役員", "支部", "会報", "デジタル",
+  "名簿", "居場所", "てらこや", "ふらっと", "中塩", "木戸", "蓮井",
+  "文理", "人文学部", "人文社会科学部", "記念", "創立", "iop",
+]);
+
 // Generic words that can be statistically rare in this formal archive yet carry no
 // retrieval intent (e.g. a one-off 「今日」). Dropped so questions like
 // 「今日の天気は？」 don't latch onto an unrelated article.
@@ -119,9 +128,14 @@ function extractTerms(input: string): string[] {
     }
   }
   const semanticExpansions: Array<[RegExp, string[]]> = [
-    [/(開催日時|何時|いつ)/, ["日時", "受付"]],
-    [/(会場|どこ)/, ["場所"]],
-    [/(連絡先|問い合わせ)/, ["電話", "email"]],
+    [/(開催日時|何時|いつ|日程|期日|開催日|時間)/, ["日時", "受付", "午後"]],
+    [/(会場|どこ|場所|アクセス|住所)/, ["場所", "ホテル日航つくば"]],
+    [/(連絡先|問い合わせ|連絡)/, ["電話", "email", "事務局"]],
+    [/(懇親会|参加費|受講料|費用|会費|いくら)/, ["懇親会", "会費"]],
+    [/(講師|学長|講演|誰が話す|登壇)/, ["講演会", "佐川泰弘", "学長", "講師"]],
+    [/(締切|締め切り|期限|いつまで)/, ["締切", "期日"]],
+    [/(会長|名誉会長|役員|学部長)/, ["会長", "大和田", "蓮井", "学部長"]],
+    [/(デジタル|オンライン|スマホ|スマートフォン|ハガキ|葉書|qrコード)/, ["デジタル", "スマートフォン", "ハガキ", "qrコード"]],
   ];
   for (const [pattern, expansions] of semanticExpansions) {
     if (!pattern.test(normalizedInput)) continue;
@@ -151,8 +165,20 @@ function collectParagraphs(deck: string, body: string[]): string[] {
   return out;
 }
 
-function clip(text: string, maxChars = 230): string {
-  return text.length <= maxChars ? text : text.slice(0, maxChars).trimEnd() + "…";
+// Sentence-aware clipping: prefer breaking on sentence punctuation (。 / ．)
+// so numbers, names, and key facts are not cut in half.
+function clip(text: string, maxChars = 280): string {
+  if (text.length <= maxChars) return text;
+  const sliced = text.slice(0, maxChars);
+  const lastPunctuation = Math.max(
+    sliced.lastIndexOf("。"),
+    sliced.lastIndexOf("！"),
+    sliced.lastIndexOf("？"),
+  );
+  if (lastPunctuation > maxChars * 0.6) {
+    return sliced.slice(0, lastPunctuation + 1);
+  }
+  return sliced.trimEnd() + "…";
 }
 
 // Build the searchable index once and memoize it (data is static at runtime).
@@ -281,7 +307,8 @@ export function retrieveNewsletterEvidence(
     .filter((t) => t.idf > 0)
     .sort((a, b) => b.idf - a.idf);
 
-  const hasSpecificTerm = rankedTerms.some((t) => t.idf >= MIN_TERM_IDF);
+  const hasCoreDomainTerm = rankedTerms.some((t) => CORE_DOMAIN_TERMS.has(t.term));
+  const hasSpecificTerm = rankedTerms.some((t) => t.idf >= MIN_TERM_IDF) || hasCoreDomainTerm;
   // Inject only when the question names a known issue number or contains at least
   // one reasonably specific term that actually appears in the archive.
   if (!hasIssueNumberHint && !hasSpecificTerm) {
@@ -291,16 +318,23 @@ export function retrieveNewsletterEvidence(
   const scored = index.map((article) => {
     let score = 0;
     for (const { term, idf } of rankedTerms) {
-      if (article.text.includes(term)) score += idf;
+      if (article.text.includes(term)) {
+        score += idf;
+        if (CORE_DOMAIN_TERMS.has(term)) {
+          score += 2.0;
+        }
+      }
     }
     if (queryNumbers.has(String(article.issueNumber))) score += 12;
     if (queryNumbers.has(article.issueDate.slice(0, 4))) score += 5;
+    // Prefer the latest issue when inquiring about upcoming events or recent changes
+    if (article.issueNumber === 43 && hasCoreDomainTerm) score += 3;
     return { article, score };
   });
 
   scored.sort((a, b) => b.score - a.score);
 
-  const minScore = hasIssueNumberHint ? 1 : MIN_TERM_IDF;
+  const minScore = hasIssueNumberHint || hasCoreDomainTerm ? 1 : MIN_TERM_IDF;
   const selected = scored
     .filter((s) => s.score >= minScore)
     .slice(0, maxArticles);

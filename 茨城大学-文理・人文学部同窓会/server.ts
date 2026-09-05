@@ -43,6 +43,24 @@ const CHAT_ANALYTICS_FILE = process.env.VERCEL
 
 const CHAT_BASE_SOURCES = [
   {
+    id: "official-meeting-18",
+    label: "同窓会公式情報：第18回総会・懇親会",
+    text: `第18回総会・講演会・懇親会の開催についてご案内します。
+開催期日：令和8年（2026年）7月18日（土）午後1時30分～3時30分（受付は午後1時より）。
+開催場所：ホテル日航つくば（つくば市吾妻1-1364-1、TXつくば駅下車5分、電話 029-852-1112）。
+内容：総会（決算・事業報告、予算・事業計画等）、講演会（講師：茨城大学学長 佐川泰弘氏）、懇親会。
+懇親会費：5,000円（5千円）。総会・講演会のみ参加の場合は無料です。
+お申し込み締め切り：令和8年7月7日（火）。
+申込方法：サイトの参加申込フォーム、または事務局への電子メール（ibadai.bj.dousou@gmail.com）にて受付中です。`,
+  },
+  {
+    id: "official-certificates",
+    label: "同窓会公式情報：各種証明書の発行窓口",
+    text: `卒業証明書、成績証明書、単位修得証明書等の各種証明書は、同窓会事務局では発行業務を行っておりません。
+証明書の発行申請は、茨城大学教育推進課または人文社会科学部学務グループ窓口へ直接ご請求ください。
+申請方法・郵送請求等の詳細は茨城大学公式ウェブサイトの各種証明書発行案内をご確認ください。`,
+  },
+  {
     id: "official-overview",
     label: "同窓会公式情報：概要・役員",
     text: `正式名称は茨城大学 文理・人文学部同窓会です。
@@ -60,11 +78,12 @@ const CHAT_BASE_SOURCES = [
   },
   {
     id: "official-membership",
-    label: "同窓会公式情報：会費・入退会",
+    label: "同窓会公式情報：会費・入退会・物故連絡",
     text: `令和2年度入学生から、入学手続きの一つとして入会を案内し、終身会費10,000円を入学時の学納金納付の際に納入いただいています。
 入学時に未加入の方も随時加入できます。事務局へお問い合わせください。
 終身会員制のため、特に退会を望む場合以外は手続き不要です。退会希望の場合は事務局へ連絡してください。
-会員が亡くなられた場合は、会員氏名、亡くなられた日、卒業学科名等、卒業年度を事務局へお知らせください。`,
+会員が亡くなられた場合は、会員氏名、亡くなられた日、卒業学科名等、卒業年度を事務局へお知らせください。
+同窓会へのご寄付・ご支援・カンパのお問い合わせは同窓会事務局にて承っております。`,
   },
   {
     id: "official-activities",
@@ -74,6 +93,13 @@ const CHAT_BASE_SOURCES = [
 学生懸賞論文の共催、地域連携論への講師派遣・財政支援、就職・キャリア支援を行っています。
 地域支部は在京同窓会（水交会、会長 仲田正夫）と県南同窓会（会長 村上主税）があります。
 職域支部には茨苑会（常陽銀行）、県信茨大同窓会（茨城県信用組合）、水戸市役所茨大会などがあります。`,
+  },
+  {
+    id: "official-newsletter-43",
+    label: "同窓会公式情報：最新会報第43号",
+    text: `最新の会報は第43号（令和8年6月発行、2026.06）です。
+第43号からデジタル化（Webマガジン化）へ移行し、会員にはハガキでQRコードを送付してスマートフォン等で手軽に閲覧できるようになりました（一部紙媒体送付あり）。
+木戸之都子氏の巻頭エッセイ「茨城大学 半世紀の想い出」、蓮井誠一郎人文社会科学部長の「同窓会の皆様へ」、中塩紗矢香さんのiOP活動報告、第18回総会案内などが掲載されています。`,
   },
   {
     id: "official-office",
@@ -94,6 +120,65 @@ E-mailはibadai.bj.dousou@gmail.comです。`,
 app.set("trust proxy", process.env.NODE_ENV === "production" ? 1 : false);
 app.use(express.json({ limit: "9mb" }));
 app.use(express.urlencoded({ extended: false }));
+
+function getPublicOrigin(req: Request) {
+  const configuredUrl = process.env.SITE_URL || process.env.APP_URL;
+  if (configuredUrl && /^https?:\/\//.test(configuredUrl) && configuredUrl !== "MY_APP_URL") {
+    return configuredUrl.replace(/\/$/, "");
+  }
+
+  const forwardedHost = req.headers["x-forwarded-host"];
+  const host = Array.isArray(forwardedHost) ? forwardedHost[0] : forwardedHost || req.headers.host || "localhost:3000";
+  const forwardedProto = req.headers["x-forwarded-proto"];
+  const protocol = Array.isArray(forwardedProto) ? forwardedProto[0] : forwardedProto || req.protocol || "https";
+  return `${protocol}://${host}`.replace(/\/$/, "");
+}
+
+app.get("/robots.txt", (req, res) => {
+  const origin = getPublicOrigin(req);
+  res.type("text/plain").send([
+    "User-agent: *",
+    "Allow: /",
+    "Disallow: /api/",
+    "Disallow: /admin/",
+    `Sitemap: ${origin}/sitemap.xml`,
+    "",
+  ].join("\n"));
+});
+
+app.get("/googlecde97c1db5a2382b.html", (_req, res) => {
+  res.type("text/html").send("google-site-verification: googlecde97c1db5a2382b.html");
+});
+
+app.get("/sitemap.xml", (req, res) => {
+  const origin = getPublicOrigin(req);
+  const today = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Tokyo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+  const urls = [
+    { loc: "/", priority: "1.0", changefreq: "weekly" },
+    { loc: "/about", priority: "0.8", changefreq: "monthly" },
+    { loc: "/events", priority: "0.8", changefreq: "weekly" },
+    { loc: "/archive", priority: "0.8", changefreq: "monthly" },
+    { loc: "/contact", priority: "0.7", changefreq: "monthly" },
+    { loc: "/newsletter/43", priority: "0.7", changefreq: "monthly" },
+  ];
+
+  const body = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls.map((url) => `  <url>
+    <loc>${origin}${url.loc}</loc>
+    <lastmod>${today}</lastmod>
+    <changefreq>${url.changefreq}</changefreq>
+    <priority>${url.priority}</priority>
+  </url>`).join("\n")}
+</urlset>`;
+
+  res.type("application/xml").send(body);
+});
 
 interface ChatAnalyticsRecord {
   timestamp: string;
@@ -1009,12 +1094,37 @@ ${baseKnowledge}
 【回答ルール（厳守）】
 1. 確定情報と会報抜粋だけを根拠にしてください。学習済み知識、推測、ユーザーが提示した未確認情報を事実として採用してはいけません。
 2. 日付、金額、人名、肩書、電話番号、メールアドレス、URL、会場などは根拠本文と完全に一致する場合だけ回答してください。
-3. 根拠が不足する場合は supported を false にし、事実を補完しないでください。
-4. supported が true の場合、利用した角括弧内の根拠IDを sourceIds に必ず列挙してください。
-5. 同窓会・大学に無関係な質問は supported を false にしてください。
-6. 現在の質問に直接必要な事実だけを答え、関連するだけの別の出来事や数字を付け足さないでください。
+3. 根拠が不足する、または確認できない内容が含まれる場合は、推測で埋めず supported を false にしてください。
+4. supported が true の場合、利用した角括弧内の根拠ID（例: "official-meeting-18"）を sourceIds に必ず列挙してください。
+5. 同窓会・大学に無関係な質問や未確認の未来情報、事実無根の質問には応じず、supported を false にしてください。
+6. 現在の質問に直接必要な事実だけを答え、無関係な別件の情報を付け足さないでください。
 7. 回答は温かく丁寧な敬語で、簡潔かつ実用的にしてください。
-8. JSON以外の文字を返してはいけません。`;
+8. 必ず指定のJSONスキーマに従って出力してください。
+
+【模範回答の例（Few-shot）】
+質問例1: 第18回総会の開催日、会場、懇親会費を教えてください。
+出力例1:
+{
+  "answer": "第18回総会は令和8年7月18日（土）にホテル日航つくばで開催されます。懇親会費はお一人様5,000円です（総会・講演会のみ参加の場合は無料）。",
+  "supported": true,
+  "sourceIds": ["official-meeting-18"]
+}
+
+質問例2: 卒業証明書の発行をお願いできますか？
+出力例2:
+{
+  "answer": "卒業証明書や成績証明書等の各種証明書は、同窓会事務局では発行業務を行っておりません。茨城大学教育推進課または人文社会科学部学務グループ窓口へ直接ご請求ください。",
+  "supported": true,
+  "sourceIds": ["official-certificates"]
+}
+
+質問例3: 2027年の総会日程を教えてください。
+出力例3:
+{
+  "answer": "申し訳ありません。2027年の総会日程は現在の公式情報から確認できておりません。恐れ入りますが、同窓会事務局へお問い合わせください。",
+  "supported": false,
+  "sourceIds": []
+}`;
 
     const augmentedSystemInstruction = newsletterEvidence.context
       ? `${systemInstruction}\n\n${newsletterEvidence.context}`
@@ -1352,7 +1462,7 @@ app.post("/api/register", async (req, res) => {
 
     return res.json({
       status: "success",
-      message: "Google Apps Script(GAS)経由でメール転送が正常に処理されました。",
+      message: "第１８回総会へのお申込みを受け付けました。",
       integrated: true,
       data: resData
     });
