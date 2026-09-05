@@ -12,12 +12,50 @@ export function getDeterministicChatAnswer(
 ): GroundedAnswer | null {
   const normalized = message.trim();
 
+  // If asking about event participation / party fees, let the grounding & RAG layer handle it
+  // to avoid confusing party fees with lifetime membership fees.
   if (/参加費|懇親会費|受講料/.test(normalized)) return null;
 
   if (/会費|終身会費|入会金/.test(normalized)) {
     return {
       answer:
         "同窓会の会費は終身会費10,000円です。令和2年度入学生から、入学時の学納金納付の際に納入いただいています。入学時に未加入だった方も随時加入できますので、事務局へお問い合わせください。",
+      supported: true,
+      sourceIds: ["official-membership"],
+    };
+  }
+
+  if (/証明書|卒業証明|成績証明|在籍証明/.test(normalized)) {
+    return {
+      answer:
+        "卒業証明書や成績証明書等の各種証明書は、同窓会では発行できません。茨城大学の教務窓口（教育推進課または人文社会科学部学務グループ）へ直接ご申請ください。詳細は茨城大学公式ウェブサイトの各種証明書発行案内をご確認ください。",
+      supported: true,
+      sourceIds: ["official-certificates"],
+    };
+  }
+
+  if (/亡くなら|ご逝去|逝去|訃報|物故/.test(normalized)) {
+    return {
+      answer:
+        "会員が亡くなられた場合は、会員氏名、亡くなられた日、卒業学科名、卒業年度（回生）を同窓会事務局（電話 029-228-8546／E-mail ibadai.bj.dousou@gmail.com）までお知らせください。",
+      supported: true,
+      sourceIds: ["official-membership"],
+    };
+  }
+
+  if (/退会/.test(normalized)) {
+    return {
+      answer:
+        "当同窓会は終身会員制のため、特に退会を希望される場合以外はお手続きは不要です。退会をご希望の場合は事務局へ直接ご連絡ください。",
+      supported: true,
+      sourceIds: ["official-membership"],
+    };
+  }
+
+  if (/寄付|寄附|賛助|カンパ/.test(normalized)) {
+    return {
+      answer:
+        "同窓会へのご寄付・ご支援については、使途や手続きのご案内をいたしますので、同窓会事務局（電話 029-228-8546／E-mail ibadai.bj.dousou@gmail.com）へ直接お問い合わせください。",
       supported: true,
       sourceIds: ["official-membership"],
     };
@@ -168,9 +206,12 @@ function normalizeComparable(input: string): string {
     .replace(/[０-９]/g, (character) =>
       String.fromCharCode(character.charCodeAt(0) - 0xfee0),
     )
+    .replace(/(\d)[,，](\d)/g, "$1$2")
     .replace(/[，、]/g, ",")
     .replace(/[／]/g, "/")
     .replace(/[‐‑‒–—―ー]/g, "-")
+    .replace(/5千円|五千円/g, "5000円")
+    .replace(/1万円|一万円/g, "10000円")
     .replace(/\s+/g, "")
     .toLowerCase();
 }
@@ -186,10 +227,10 @@ function extractFactualTokens(answer: string): string[] {
   ];
   const normalized = normalizeComparable(answer);
   const roleHolderPattern =
-    /(?:会長|名誉会長|講師|学部長|担当者)(?:は|:)?([一-龯々]{2,}(?:\s*[一-龯々]{1,})?)(?=です|氏|さん|様|\(|。|、|$)/g;
+    /(?:会長|名誉会長|講師|学長|学部長|担当者|幹事長|副会長|顧問|筆者|執筆者)(?:は|:|：|の)?([一-龯々]{2,}(?:\s*[一-龯々]{1,})?)(?=です|氏|さん|様|\(|。|、|（|が|$)/g;
   const roleHolders = Array.from(
     answer.replace(/：/g, ":").matchAll(roleHolderPattern),
-    (match) => match[1],
+    (match) => match[1].trim(),
   );
 
   return [
